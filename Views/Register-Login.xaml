@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SigmaChess.Views.Register_Login"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="ExamplePage">
+    <VerticalStackLayout>
+        <Label
+            Text="Register Page"
+            />
+        <Label
+            HorizontalOptions="Center"
+            Text="{Binding ErrorMessage}"
+            VerticalOptions="Center" />
+        <Entry
+            HorizontalOptions="Center"
+            Placeholder="Enter text here"
+            Text="{Binding UserInput}"
+            VerticalOptions="Center" />
+        <Button
+            Command="{Binding ResetCommand}"
+            Text="Reset Field"
+            VerticalOptions="Center"
+            WidthRequest="100" />
+        <Button
+            Command="{Binding GotoAnotherPageCommand}"
+            Text="Goto Another Page"
+            VerticalOptions="Center"
+            WidthRequest="100" />
+
+
+    </VerticalStackLayout>
+</ContentPage>
