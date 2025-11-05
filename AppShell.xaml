@@ -6,15 +6,15 @@
     xmlns:local="clr-namespace:SigmaChess.Views"
     Shell.FlyoutBehavior="Disabled"
     Title="SigmaChess">
-
+    
     <FlyoutItem Title="ראשי" Icon="dotnet_bot.png">
         <ShellContent
-            Title="עמוד הדוגמא שלנו"
+            Title="RegisterPage"
             ContentTemplate="{DataTemplate local:Register_Login}"    
             Route="Register_Login" />
 
         <ShellContent
-            Title="עמוד נוסף"
+            Title="LoginPage"
             ContentTemplate="{DataTemplate local:Login_Register}"
             Route="Login_Register" />
     </FlyoutItem>

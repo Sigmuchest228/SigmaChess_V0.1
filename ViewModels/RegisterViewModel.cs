@@ -58,7 +58,7 @@ namespace SigmaChess.ViewModels
             // Defining the Command for a non async Function
             ResetCommand = new Command(ResetField);
             // Defining the Command for an async Function
-            GotoAnotherPageCommand = new Command(async () => await GotoAnotherPage());
+            GotoAnotherPageCommand = new Command(async () => await GotoLoginPage());
         }
         #endregion
 
@@ -66,10 +66,10 @@ namespace SigmaChess.ViewModels
         private void ResetField()
         {
             UserInput = "";
-            ErrorMessage = "";
+            ErrorMessage = "";  
         }
 
-        private async Task GotoAnotherPage()
+        private async Task GotoLoginPage()
         {
             await Shell.Current.GoToAsync("//Login_Register");
         }
