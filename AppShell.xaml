@@ -4,10 +4,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:SigmaChess.Views"
-    Shell.FlyoutBehavior="Disabled"
+    FlyoutBehavior="Disabled"
     Title="SigmaChess">
     
-    <FlyoutItem Title="ראשי" Icon="dotnet_bot.png">
+    <FlyoutItem Title="Register" Icon="dotnet_bot.png">
         <ShellContent
             Title="RegisterPage"
             ContentTemplate="{DataTemplate local:Register_Login}"    

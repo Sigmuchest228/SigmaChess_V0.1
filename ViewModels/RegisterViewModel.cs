@@ -10,7 +10,7 @@ namespace SigmaChess.ViewModels
     internal class RegisterViewModel : ViewModelBase
     {
         #region get and set
-        // get and set for MessageForEldan
+
         private string errorMessage;
         public string ErrorMessage
         {
@@ -25,15 +25,14 @@ namespace SigmaChess.ViewModels
             }
         }
 
-        // get and set for UserInput
-        public string userInput;
+        private string userInput;
         public string UserInput
         {
             get { return userInput; }
             set
             {
                 userInput = value;
-                if (userInput != null && userInput.Length > 5)
+                if (!string.IsNullOrEmpty(userInput) && userInput.Length > 5)
                 {
                     ErrorMessage = "The field has more than 5 characters";
                 }
@@ -41,6 +40,64 @@ namespace SigmaChess.ViewModels
                 {
                     ErrorMessage = "The field has 5 or fewer characters";
                 }
+                OnPropertyChanged();
+            }
+        }
+
+        private string emailInput;
+        public string EmailInput
+        {
+            get { return emailInput; }
+            set
+            {
+                emailInput = value;
+
+                if (!string.IsNullOrEmpty(emailInput) &&
+                    (!emailInput.Contains("@") || !emailInput.Contains(".")))
+                {
+                    ErrorMessage = "Invalid email";
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
+
+                OnPropertyChanged();
+            }
+        }
+
+        private string passwordInput;
+        public string PasswordInput
+        {
+            get { return passwordInput; }
+            set
+            {
+                passwordInput = value;
+
+                if (!string.IsNullOrEmpty(passwordInput))
+                {
+                    if (passwordInput.Length < 8)
+                    {
+                        ErrorMessage = "Password must be at least 8 characters";
+                    }
+                    else if (!passwordInput.Any(char.IsUpper))
+                    {
+                        ErrorMessage = "Password must contain at least one uppercase letter";
+                    }
+                    else if (!passwordInput.Any(ch => !char.IsLetterOrDigit(ch)))
+                    {
+                        ErrorMessage = "Password must contain at least one special character";
+                    }
+                    else
+                    {
+                        ErrorMessage = string.Empty; // passed all checks!
+                    }
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
+
                 OnPropertyChanged();
             }
         }
@@ -66,7 +123,9 @@ namespace SigmaChess.ViewModels
         private void ResetField()
         {
             UserInput = "";
-            ErrorMessage = "";  
+            ErrorMessage = "";
+            EmailInput = "";
+            PasswordInput = "";
         }
 
         private async Task GotoLoginPage()

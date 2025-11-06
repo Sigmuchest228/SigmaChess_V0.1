@@ -24,7 +24,7 @@
             <HorizontalStackLayout Spacing="10">
                 <Entry
                     Placeholder="Username"
-                    Text="{Binding RegisterName}"
+                    Text="{Binding UserInput}"
                     WidthRequest="250"
                     VerticalOptions="Center" />
                 <Button
@@ -38,7 +38,7 @@
             <HorizontalStackLayout Spacing="10">
                 <Entry
                     Placeholder="Email"
-                    Text="{Binding Email}"
+                    Text="{Binding EmailInput}"
                     Keyboard="Email"
                     WidthRequest="250"
                     VerticalOptions="Center" />
@@ -53,7 +53,7 @@
             <HorizontalStackLayout Spacing="10">
                 <Entry
                     Placeholder="Password"
-                    Text="{Binding Password}"
+                    Text="{Binding PasswordInput}"
                     IsPassword="True"
                     WidthRequest="250"
                     VerticalOptions="Center" />
@@ -68,7 +68,7 @@
             <HorizontalStackLayout Spacing="10">
                 <Entry
                     Placeholder="Submit password"
-                    Text="{Binding ConfirmPassword}"
+                    Text="{Binding PassSubmit}"
                     IsPassword="True"
                     WidthRequest="250"
                     VerticalOptions="Center" />
