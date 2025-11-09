@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -101,6 +102,27 @@ namespace SigmaChess.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        private string passConfirmInput;
+        public string PassConfirmInput
+        {
+            get { return passConfirmInput; }
+            set
+            {
+                if (!string.IsNullOrEmpty(passwordInput))
+                {
+
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
+
+                OnPropertyChanged();
+
+            }
+        }
+
         #endregion
 
         #region Commands
