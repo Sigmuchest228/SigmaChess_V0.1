@@ -28,10 +28,22 @@
                     WidthRequest="250"
                     VerticalOptions="Center" />
                 <Button
-                    Text="&#xE5CD;"
                     Command="{Binding ResetCommand}"
-                    WidthRequest="100"
-                    VerticalOptions="Center" />
+                    Text="✖"
+                    BackgroundColor="#bfbfbf"
+                    FontSize="10"
+                    WidthRequest="40"
+                    VerticalOptions="Center" 
+                >
+                    <Button.ImageSource>
+                        <FontImageSource
+            Glyph="&#xE14C;"
+                        FontFamily="MaterialIcons"
+                        Size="24"
+                        Color="Gray">
+                        </FontImageSource>
+                    </Button.ImageSource>
+                </Button>
             </HorizontalStackLayout>
 
             <!-- Поле: Email -->
@@ -43,10 +55,22 @@
                     WidthRequest="250"
                     VerticalOptions="Center" />
                 <Button
-                    Text="&#xE5CD;"
                     Command="{Binding ResetCommand}"
-                    WidthRequest="100"
-                    VerticalOptions="Center" />
+                    Text="✖"
+                    BackgroundColor="#bfbfbf"
+                    FontSize="10"
+                    WidthRequest="40"
+                    VerticalOptions="Center" 
+                >
+                    <Button.ImageSource>
+                        <FontImageSource
+            Glyph="&#xE14C;"
+                        FontFamily="MaterialIcons"
+                        Size="24"
+                        Color="Gray">
+                        </FontImageSource>
+                    </Button.ImageSource>
+                </Button>
             </HorizontalStackLayout>
 
             <!-- Поле: Пароль -->
@@ -85,10 +109,22 @@
                     WidthRequest="250"
                     VerticalOptions="Center" />
                 <Button
-                    Text="&#xE5CD;"
                     Command="{Binding ResetCommand}"
-                    WidthRequest="100"
-                    VerticalOptions="Center" />
+                    Text="✖"
+                    BackgroundColor="#bfbfbf"
+                    FontSize="10"
+                    WidthRequest="40"
+                    VerticalOptions="Center" 
+                >
+                    <Button.ImageSource>
+                        <FontImageSource
+            Glyph="&#xE14C;"
+                        FontFamily="MaterialIcons"
+                        Size="24"
+                        Color="Gray">
+                        </FontImageSource>
+                    </Button.ImageSource>
+                </Button>
             </HorizontalStackLayout>
 
             <!-- Основные кнопки -->
