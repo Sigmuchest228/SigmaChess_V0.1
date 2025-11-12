@@ -33,13 +33,13 @@ namespace SigmaChess.ViewModels
             set
             {
                 userInput = value;
-                if (!string.IsNullOrEmpty(userInput) && userInput.Length > 5)
+                if (!string.IsNullOrEmpty(userInput) && 5 > userInput.Length)
                 {
-                    ErrorMessage = "The field has more than 5 characters";
+                    ErrorMessage = "The field has less than 5 characters";
                 }
                 else
                 {
-                    ErrorMessage = "The field has 5 or fewer characters";
+                    ErrorMessage = string.Empty;
                 }
                 OnPropertyChanged();
             }
@@ -109,9 +109,12 @@ namespace SigmaChess.ViewModels
             get { return passConfirmInput; }
             set
             {
-                if (!string.IsNullOrEmpty(passwordInput))
+                if (!string.IsNullOrEmpty(passConfirmInput))
                 {
-
+                    if (passConfirmInput != passwordInput)
+                    {
+                        ErrorMessage = "Passwords doesn't match";
+                    }
                 }
                 else
                 {
