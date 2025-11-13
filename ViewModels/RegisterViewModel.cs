@@ -109,9 +109,10 @@ namespace SigmaChess.ViewModels
             get { return passConfirmInput; }
             set
             {
+                passConfirmInput = value;
                 if (!string.IsNullOrEmpty(passConfirmInput))
                 {
-                    if (passConfirmInput != passwordInput)
+                    if (passwordInput != passConfirmInput)
                     {
                         ErrorMessage = "Passwords doesn't match";
                     }
@@ -129,33 +130,26 @@ namespace SigmaChess.ViewModels
         #endregion
 
         #region Commands
-        public ICommand ResetCommand { get; set; }
         public ICommand GotoAnotherPageCommand { get; set; }
         #endregion
 
         # region constructor
         public RegisterViewModel()
         {
-
-            // Defining the Command for a non async Function
-            ResetCommand = new Command(ResetField);
             // Defining the Command for an async Function
             GotoAnotherPageCommand = new Command(async () => await GotoLoginPage());
         }
         #endregion
 
         #region  Methods
-        private void ResetField()
-        {
-            UserInput = "";
-            ErrorMessage = "";
-            EmailInput = "";
-            PasswordInput = "";
-        }
-
         private async Task GotoLoginPage()
         {
-            await Shell.Current.GoToAsync("//Login_Register");
+            string tempError;
+            if(!string.IsNullOrEmpty(errorMessage))
+            {
+                tempError = "Registration failed";
+            }
+                await Shell.Current.GoToAsync("//Login_Register");
         }
         #endregion
 

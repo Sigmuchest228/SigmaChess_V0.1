@@ -17,5 +17,9 @@
             Title="LoginPage"
             ContentTemplate="{DataTemplate local:Login_Register}"
             Route="Login_Register" />
+        <ShellContent
+            Title="Friends list"
+            ContentTemplate="{DataTemplate local:ListPage}"
+            Route="ListPage" />
     </FlyoutItem>
 </Shell>

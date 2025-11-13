@@ -11,7 +11,6 @@ namespace SigmaChess.Models
         public string Id { get; set; }
         public string? Name { get; set; }
         public string? Elo { get; set; }
-
         public DateTime RegisterDate { get; set; }
     }
 }

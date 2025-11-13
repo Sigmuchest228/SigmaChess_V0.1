@@ -15,117 +15,47 @@
 
             <!-- Ошибка / сообщение -->
             <Label
+                Text="{Binding tempError}"
+                TextColor="Red"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+            <Label
                 Text="{Binding ErrorMessage}"
                 TextColor="Red"
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
 
             <!-- Поле: Регистрация -->
-            <HorizontalStackLayout Spacing="10">
-                <Entry
-                    Placeholder="Username"
-                    Text="{Binding UserInput}"
-                    WidthRequest="250"
-                    VerticalOptions="Center" />
-                <Button
-                    Command="{Binding ResetCommand}"
-                    Text="✖"
-                    BackgroundColor="#bfbfbf"
-                    FontSize="10"
-                    WidthRequest="40"
-                    VerticalOptions="Center" 
-                >
-                    <Button.ImageSource>
-                        <FontImageSource
-            Glyph="&#xE14C;"
-                        FontFamily="MaterialIcons"
-                        Size="24"
-                        Color="Gray">
-                        </FontImageSource>
-                    </Button.ImageSource>
-                </Button>
-            </HorizontalStackLayout>
+            <Entry
+                Placeholder="Username"
+                Text="{Binding UserInput}"
+                WidthRequest="250"
+                VerticalOptions="Center" />
 
             <!-- Поле: Email -->
-            <HorizontalStackLayout Spacing="10">
-                <Entry
-                    Placeholder="Email"
-                    Text="{Binding EmailInput}"
-                    Keyboard="Email"
-                    WidthRequest="250"
-                    VerticalOptions="Center" />
-                <Button
-                    Command="{Binding ResetCommand}"
-                    Text="✖"
-                    BackgroundColor="#bfbfbf"
-                    FontSize="10"
-                    WidthRequest="40"
-                    VerticalOptions="Center" 
-                >
-                    <Button.ImageSource>
-                        <FontImageSource
-            Glyph="&#xE14C;"
-                        FontFamily="MaterialIcons"
-                        Size="24"
-                        Color="Gray">
-                        </FontImageSource>
-                    </Button.ImageSource>
-                </Button>
-            </HorizontalStackLayout>
+            <Entry
+                Placeholder="Email"
+                Text="{Binding EmailInput}"
+                Keyboard="Email"
+                WidthRequest="250"
+                VerticalOptions="Center" />
 
             <!-- Поле: Пароль -->
-            <HorizontalStackLayout Spacing="10">
-                <Entry
-                    Placeholder="Password"
-                    Text="{Binding PasswordInput}"
-                    IsPassword="True"
-                    WidthRequest="250"
-                    VerticalOptions="Center" />
-                <Button
-                    Command="{Binding ResetCommand}"
-                    Text="✖"
-                    BackgroundColor="#bfbfbf"
-                    FontSize="10"
-                    WidthRequest="40"
-                    VerticalOptions="Center" 
-                >
-                    <Button.ImageSource>
-                        <FontImageSource
-            Glyph="&#xE14C;"
-                        FontFamily="MaterialIcons"
-                        Size="24"
-                        Color="Gray">
-                    </FontImageSource>
-                </Button.ImageSource>
-                </Button>
-            </HorizontalStackLayout>
+            <Entry
+                Placeholder="Password"
+                Text="{Binding PasswordInput}"
+                IsPassword="True"
+                WidthRequest="250"
+                VerticalOptions="Center" />
 
             <!-- Поле: Подтверждение пароля -->
-            <HorizontalStackLayout Spacing="10">
-                <Entry
-                    Placeholder="Submit password"
-                    Text="{Binding PassConfirmInput}"
-                    IsPassword="True"
-                    WidthRequest="250"
-                    VerticalOptions="Center" />
-                <Button
-                    Command="{Binding ResetCommand}"
-                    Text="✖"
-                    BackgroundColor="#bfbfbf"
-                    FontSize="10"
-                    WidthRequest="40"
-                    VerticalOptions="Center" 
-                >
-                    <Button.ImageSource>
-                        <FontImageSource
-            Glyph="&#xE14C;"
-                        FontFamily="MaterialIcons"
-                        Size="24"
-                        Color="Gray">
-                        </FontImageSource>
-                    </Button.ImageSource>
-                </Button>
-            </HorizontalStackLayout>
+            <Entry
+                Placeholder="Submit password"
+                Text="{Binding PassConfirmInput}"
+                IsPassword="True"
+                WidthRequest="250"
+                VerticalOptions="Center" />
 
             <!-- Основные кнопки -->
             <HorizontalStackLayout
@@ -134,7 +64,7 @@
                 Margin="0,20,0,0">
                 <Button
                     Text="Register"
-                    Command="{Binding RegisterCommand}"
+                    Command="{Binding GotoAnotherPageCommand}"
                     WidthRequest="160" />
             </HorizontalStackLayout>
 
