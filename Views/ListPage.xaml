@@ -10,6 +10,6 @@
             Text="List page"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-        <CollectionView ItemsSource="{Binding }">
+        <CollectionView ItemsSource="{Binding }"/>
     </VerticalStackLayout>
 </ContentPage>
