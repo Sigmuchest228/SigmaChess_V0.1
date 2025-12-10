@@ -23,6 +23,7 @@ namespace SigmaChess.ViewModels
                 }
             }
         }
+
         #endregion
     }
 }
