@@ -24,6 +24,7 @@ namespace SigmaChess.Servises
             return instance;
         }
         #endregion
+
         public List<User> users = new List<User>();
         private void CreateFakeData()
         {
@@ -58,13 +59,13 @@ namespace SigmaChess.Servises
         {
             return users;
         }
-        public void RemoveUser(User user)
+        public void RemoveUser(User usr)
         {
-            users.Remove(user);
+            users.Remove(usr);
         }
-        public void AddUser(User user)
+        public void AddUser(User usr)
         {
-            users.Add(user);
+            users.Add(usr);
         }
 
 

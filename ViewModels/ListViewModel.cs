@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace SigmaChess.ViewModels
 {
@@ -12,9 +14,9 @@ namespace SigmaChess.ViewModels
     {
         #region get set
         
-        private List<User> users;
+        private ObservableCollection<User> users;
 
-        public List<User> Users
+        public ObservableCollection<User> Users
         {
             get { return users; }
             set { users = value;
@@ -22,11 +24,30 @@ namespace SigmaChess.ViewModels
             }
         }
 
+        #endregion
+
+        #region commands
+        public ICommand DeleteItemCommand { get; set; }
+        #endregion
+
+        #region Consturctor
         public ListViewModel()
         {
-            Users = LocalDataService.GetInstance().GetUsers();
+            Users = new ObservableCollection<User>(LocalDataService.GetInstance().GetUsers());
+            DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
         }
+        #endregion
 
+        #region functions
+        public void DeleteItem(object obgUser)
+        {
+            User userToDelete = (User)obgUser;
+
+            Users.Remove((User)obgUser); // Remove the iem from the ObservableCollection on THIS PAGE only
+            OnPropertyChanged();
+            // We must also update the servie
+            LocalDataService.GetInstance().RemoveUser(userToDelete); // Currently this is a sync function , we will change it to async later
+        }
         #endregion
     }
 }

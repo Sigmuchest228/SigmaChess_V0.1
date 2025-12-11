@@ -12,5 +12,10 @@ namespace SigmaChess.Models
         public string? UserName { get; set; }
         public int Elo { get; set; }
         public DateTime RegisterDate { get; set; }
+        //public string RegistrationDate(DateTime RegisterDate)
+        //{
+        //    string registrationDate = $"{DateTime}.{}";
+        //    return registrationDate;
+        //}
     }
 }
