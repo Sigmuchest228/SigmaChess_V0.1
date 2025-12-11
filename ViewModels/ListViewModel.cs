@@ -8,20 +8,23 @@ using System.Text;
 
 namespace SigmaChess.ViewModels
 {
-    internal class ListViewModel
+    internal class ListViewModel : ViewModelBase
     {
         #region get set
-        private string friendN;
-        public string FriendN
+        
+        private List<User> users;
+
+        public List<User> Users
         {
-            get { return friendN; }
-            set
-            {
-                if (null!=value)
-                {
-                friendN = value;
-                }
+            get { return users; }
+            set { users = value;
+                OnPropertyChanged();
             }
+        }
+
+        public ListViewModel()
+        {
+            Users = LocalDataService.GetInstance().GetUsers();
         }
 
         #endregion

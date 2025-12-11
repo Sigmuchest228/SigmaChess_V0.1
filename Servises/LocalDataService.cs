@@ -24,47 +24,47 @@ namespace SigmaChess.Servises
             return instance;
         }
         #endregion
-        public List<Friend> friends = new List<Friend>();
+        public List<User> users = new List<User>();
         private void CreateFakeData()
         {
-            Friend friend1 = new Friend()
+            User user1 = new User()
             {
-                Id = "1",
-                Name = "Sergay",
-                Elo = "452",
+                Id = 1,
+                UserName = "Sergay",
+                Elo = 452,
                 RegisterDate = DateTime.Now.AddMinutes(-5)
             };
-            Friend friend2 = new Friend()
+            User user2 = new User()
             {
-                Id = "2",
-                Name = "Artyom",
-                Elo = "1208",
+                Id = 2,
+                UserName = "Artyom",
+                Elo = 1208,
                 RegisterDate = DateTime.Now.AddMinutes(-30)
             };
-            Friend friend3 = new Friend()
+            User user3 = new User()
             {
-                Id = "42",
-                Name = "Carlson Magnusen",
-                Elo = "3642",
+                Id = 42,
+                UserName = "Carlson Magnusen",
+                Elo = 1042,
                 RegisterDate = DateTime.Now.AddMinutes(-42)
             };
 
-            friends.Add(friend1);
-            friends.Add(friend2);
-            friends.Add(friend3);
+            users.Add(user1);
+            users.Add(user2);
+            users.Add(user3);
         }
 
-        public List<Friend> GetMessages()
+        public List<User> GetUsers()
         {
-            return friends;
+            return users;
         }
-        public void RemoveMessage(Friend friend)
+        public void RemoveUser(User user)
         {
-            friends.Remove(friend);
+            users.Remove(user);
         }
-        public void AddMessage(Friend friend)
+        public void AddUser(User user)
         {
-            friends.Add(friend);
+            users.Add(user);
         }
 
 

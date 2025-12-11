@@ -8,8 +8,40 @@
     <VerticalStackLayout>
         <Label 
             Text="List page"
+            FontSize="Caption"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
-        <CollectionView ItemsSource="{Binding }"/>
+        <CollectionView ItemsSource="{Binding Users}">
+
+            <CollectionView.EmptyView>
+                <Label HorizontalTextAlignment="Center"
+                       Text="YOU HAVE NO FRIENDS! 😂🤣"
+                       TextColor="Red"
+                       FontSize="Medium"
+                />
+            </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:User">
+                        <Border StrokeThickness="1">
+                            <StackLayout Padding="10" BackgroundColor="LightGray">
+                            <Label FontAttributes="Bold" Text="{Binding UserName}" />
+
+                            <Button
+                                BackgroundColor="Red"
+                                Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:ListViewModel}, Mode=FindAncestorBindingContext}}"
+                                CommandParameter="{Binding .}"
+                                HorizontalOptions="Start"
+                                Text="Remove"
+                                TextColor="White"
+                                WidthRequest="200"
+                                />
+                                
+                            </StackLayout>
+                        </Border>
+                        
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
 </ContentPage>

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SigmaChess.Models
 {
-    class Friend
+    internal class User
     {
-        public string Id { get; set; }
-        public string? Name { get; set; }
-        public string? Elo { get; set; }
+        public int Id { get; set; }
+        public string? UserName { get; set; }
+        public int Elo { get; set; }
         public DateTime RegisterDate { get; set; }
     }
 }
