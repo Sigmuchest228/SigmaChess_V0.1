@@ -55,7 +55,7 @@ namespace SigmaChess.Servises
             users.Add(user3);
         }
 
-        public List<User> GetUsers()
+        public async Task<List<User>> GetUsers()
         {
             return users;
         }

@@ -33,12 +33,16 @@ namespace SigmaChess.ViewModels
         #region Consturctor
         public ListViewModel()
         {
-            Users = new ObservableCollection<User>(LocalDataService.GetInstance().GetUsers());
+            InitAsyncMethods();
             DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
         }
         #endregion
 
         #region functions
+        public async Task InitAsyncMethods()
+        {
+            Users = new ObservableCollection<User>(await LocalDataService.GetInstance().GetUsers());
+        }
         public void DeleteItem(object obgUser)
         {
             User userToDelete = (User)obgUser;
