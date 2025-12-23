@@ -37,7 +37,7 @@
                                 Text="Remove"
                                 TextColor="White"
                                 WidthRequest="200"
-                                />
+                                />s
                                 
                             </StackLayout>
                         </Border>
