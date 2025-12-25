@@ -64,9 +64,18 @@
                 Margin="0,20,0,0">
                 <Button
                     Text="Register"
-                    Command="{Binding GotoAnotherPageCommand}"
+                    Command="{Binding }"
                     WidthRequest="160" />
             </HorizontalStackLayout>
+
+            <HorizontalStackLayout>
+                <Button
+                Text="Already have an account?"
+                Command="{Binding GoToLoginCommand}"
+                HorizontalOptions="Center"
+                BackgroundColor="Transparent"
+                TextColor="Blue" />
+                </HorizontalStackLayout>
 
         </VerticalStackLayout>
     </Grid>

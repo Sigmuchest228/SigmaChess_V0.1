@@ -32,7 +32,7 @@ namespace SigmaChess.Servises
         {
             var config = new FirebaseAuthConfig()
             {
-                ApiKey = "AIzaSyDLgBH5NwO6_aIuW5sZHnSrip78bOih2fk",
+                ApiKey = "AIzaSyCl1Ix-ZEcM4JLBjFew5XsS1LTQIpg8j7U",
                 AuthDomain = "sigmachess-75f04.firebaseapp.com", //כתובת התחברות
                 Providers = new FirebaseAuthProvider[] //רשימת אפשריות להתחבר
               {
@@ -43,7 +43,7 @@ namespace SigmaChess.Servises
             auth = new FirebaseAuthClient(config); //ההתחברות
 
             client =
-              new FirebaseClient(@"https://sigmachess-75f04-default-rtdb.europe-west1.firebasedatabase.app/", //כתובת מסד הנתונים
+              new FirebaseClient(@"https://sigmachess-75f04-default-rtdb.europe-west1.firebasedatabase.app", //כתובת מסד הנתונים
               new FirebaseOptions
               {
                   AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)// מזהה ההתחברות של המשתמש עם השרת, הנתון נשמר במכשיר

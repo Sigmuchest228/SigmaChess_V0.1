@@ -8,9 +8,9 @@ using System.Windows.Input;
 
 namespace SigmaChess.ViewModels
 {
-    internal class RegisterViewModel : ViewModelBase
+    internal class LoginViewModel : ViewModelBase
     {
-        #region get and set
+        #region get&set
 
         private string errorMessage;
         public string ErrorMessage
@@ -41,28 +41,6 @@ namespace SigmaChess.ViewModels
                 {
                     ErrorMessage = string.Empty;
                 }
-                OnPropertyChanged();
-            }
-        }
-
-        private string emailInput;
-        public string EmailInput
-        {
-            get { return emailInput; }
-            set
-            {
-                emailInput = value;
-
-                if (!string.IsNullOrEmpty(emailInput) &&
-                    (!emailInput.Contains("@") || !emailInput.Contains(".")))
-                {
-                    ErrorMessage = "Invalid email";
-                }
-                else
-                {
-                    ErrorMessage = string.Empty;
-                }
-
                 OnPropertyChanged();
             }
         }
@@ -103,56 +81,31 @@ namespace SigmaChess.ViewModels
             }
         }
 
-        private string passConfirmInput;
-        public string PassConfirmInput
-        {
-            get { return passConfirmInput; }
-            set
-            {
-                passConfirmInput = value;
-                if (!string.IsNullOrEmpty(passConfirmInput))
-                {
-                    if (passwordInput != passConfirmInput)
-                    {
-                        ErrorMessage = "Passwords doesn't match";
-                    }
-                }
-                else
-                {
-                    ErrorMessage = string.Empty;
-                }
-
-                OnPropertyChanged();
-
-            }
-        }
-
         #endregion
 
         #region Commands
-        public ICommand GoToLoginCommand { get; set; }
+        public ICommand GoToRegisterCommand { get; set; }
         #endregion
 
-        # region constructor
-        public RegisterViewModel()
+        #region constructor
+        public LoginViewModel()
         {
             // Defining the Command for an async Function
-            GoToLoginCommand = new Command(async () => await GotoLoginPage());
+            GoToRegisterCommand = new Command(async () => await GotoRegisterPage());
         }
         #endregion
 
         #region Methods
-        private async Task GotoLoginPage()
+        private async Task GotoRegisterPage()
         {
             string tempError;
-            if(!string.IsNullOrEmpty(errorMessage))
+            if (!string.IsNullOrEmpty(errorMessage))
             {
-                tempError = "Registration failed";
+                tempError = "Login failed";
             }
-                await Shell.Current.GoToAsync("//Login_Register");
+            await Shell.Current.GoToAsync("//Register_Login");
         }
         #endregion
 
     }
 }
-

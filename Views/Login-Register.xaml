@@ -3,10 +3,57 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SigmaChess.Views.Login_Register"
              Title="Login page">
-    <VerticalStackLayout>
-        <Label 
-            Text="Login Page"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+    <Grid>
+        <!-- Центрируем всё содержимое -->
+        <VerticalStackLayout
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Padding="20"
+            Spacing="15">
+
+            <!-- Сообщение об ошибке -->
+            <Label
+                Text="{Binding ErrorMessage}"
+                TextColor="Red"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+            <!-- Username / Email -->
+            <Entry
+                Placeholder="Username or Email"
+                Text="{Binding UserInput}"
+                WidthRequest="250"
+                VerticalOptions="Center" />
+
+            <!-- Пароль -->
+            <Entry
+                Placeholder="Password"
+                Text="{Binding PasswordInput}"
+                IsPassword="True"
+                WidthRequest="250"
+                VerticalOptions="Center" />
+
+            <!-- Кнопки -->
+            <HorizontalStackLayout
+                Spacing="20"
+                HorizontalOptions="Center"
+                Margin="0,20,0,0">
+
+                <Button
+                    Text="Login"
+                    Command="{Binding LoginCommand}"
+                    WidthRequest="160" />
+
+            </HorizontalStackLayout>
+
+            <!-- Переход на регистрацию -->
+            <Button
+                Text="Create account"
+                Command="{Binding GoToRegisterCommand}"
+                HorizontalOptions="Center"
+                BackgroundColor="Transparent"
+                TextColor="Blue" />
+
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>
