@@ -14,17 +14,19 @@ using Firebase.Database.Query;
 using FirebaseUser = Firebase.Auth.User;
 using User = SigmaChess.Models.User;
 
+
 namespace SigmaChess.Servises
 {
-    class LocalDataService
+    class AppService
     {
-        static FirebaseAuthClient? auth;
-        static FirebaseClient? client;
-        static public AuthCredential? loginAuthUser;
+        FirebaseAuthClient? auth;
+        FirebaseClient? client;
+        public AuthCredential? loginAuthUser;
+        private string loggedInUserID;
 
         #region instance
-        private static LocalDataService instance;
-        public LocalDataService()
+        private static AppService instance;
+        public AppService()
         {
             //CreateFakeData();
         }
@@ -50,11 +52,75 @@ namespace SigmaChess.Servises
               });
         }
 
-        public static LocalDataService GetInstance()
+        public async Task<bool> TryRegister(string userNameString, string passwordString)
+        {
+            try
+            {
+                var respond = await auth.CreateUserWithEmailAndPasswordAsync(userNameString, passwordString);
+                // User is signed up and logged in
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> TryLogin(string userNameString, string passwordString)
+        {
+            if (userNameString == null || passwordString == null)
+            {
+                return false;
+            }
+            try
+            {
+                var authUser = await auth.SignInWithEmailAndPasswordAsync(userNameString, passwordString);
+                loginAuthUser = authUser.AuthCredential;
+                loggedInUserID = auth.User.Uid;
+
+
+                // Authentication successful 
+                // We keep the token or Credential in loginAuthUser, so we can erase it later in logout
+                // You can access the authenticated user's details via authUser.User
+                // you should create a new user or person
+                // Person person = new Person(){Email=authUser.User.info.Email, ...
+                // Don't put the password in the Person :)
+
+                // ((App)Application.Current).SetAuthenticatedShell();
+
+                return true;
+            }
+
+
+
+
+            catch (FirebaseAuthException ex)
+            {
+                // Authentication failed
+                return false;
+            }
+        }
+
+        public bool Logout()
+        {
+            try
+            {
+                auth.SignOut();
+                loginAuthUser = null;
+                loggedInUserID = null;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static AppService GetInstance()
         {
             if (instance == null)
             {
-                instance = new LocalDataService();
+                instance = new AppService();
                 instance.InitAuth();
             }
             return instance;

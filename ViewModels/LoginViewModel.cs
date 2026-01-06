@@ -5,6 +5,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using SigmaChess.Servises;
 
 namespace SigmaChess.ViewModels
 {
@@ -26,21 +27,25 @@ namespace SigmaChess.ViewModels
             }
         }
 
-        private string userInput;
-        public string UserInput
+
+        private string emailInput;
+        public string EmailInput
         {
-            get { return userInput; }
+            get { return emailInput; }
             set
             {
-                userInput = value;
-                if (!string.IsNullOrEmpty(userInput) && 5 > userInput.Length)
+                emailInput = value;
+
+                if (!string.IsNullOrEmpty(emailInput) &&
+                    (!emailInput.Contains("@") || !emailInput.Contains(".")))
                 {
-                    ErrorMessage = "The field has less than 5 characters";
+                    ErrorMessage = "Invalid email";
                 }
                 else
                 {
                     ErrorMessage = string.Empty;
                 }
+
                 OnPropertyChanged();
             }
         }
@@ -84,18 +89,31 @@ namespace SigmaChess.ViewModels
         #endregion
 
         #region Commands
+        public ICommand LoginCommand { get; set;}
         public ICommand GoToRegisterCommand { get; set; }
-        #endregion
+        #endregion  
 
         #region constructor
         public LoginViewModel()
         {
+            LoginCommand = new Command(async () => await Login());
             // Defining the Command for an async Function
             GoToRegisterCommand = new Command(async () => await GotoRegisterPage());
+            PasswordInput = "123456";
+            EmailInput = "s@i.gma.com";
         }
         #endregion
 
         #region Methods
+        private async Task Login()//
+        {
+            bool successed = await AppService.GetInstance().TryLogin(emailInput, passwordInput);
+            if (successed)
+            {
+                await Shell.Current.GoToAsync("//ListPage");
+                // This will also navigate to the 1st page int the AuthenticatedShell 
+            }
+        }
         private async Task GotoRegisterPage()
         {
             string tempError;

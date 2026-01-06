@@ -41,7 +41,7 @@ namespace SigmaChess.ViewModels
         #region functions
         public async Task InitAsyncMethods()
         {
-            Users = new ObservableCollection<User>(await LocalDataService.GetInstance().GetUsers());
+            Users = new ObservableCollection<User>(await AppService.GetInstance().GetUsers());
         }
         public void DeleteItem(object obgUser)
         {
@@ -50,7 +50,7 @@ namespace SigmaChess.ViewModels
             Users.Remove((User)obgUser); // Remove the iem from the ObservableCollection on THIS PAGE only
             OnPropertyChanged();
             // We must also update the servie
-            LocalDataService.GetInstance().RemoveUser(userToDelete); // Currently this is a sync function , we will change it to async later
+            AppService.GetInstance().RemoveUser(userToDelete); // Currently this is a sync function , we will change it to async later
         }
         #endregion
     }

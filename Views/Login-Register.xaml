@@ -21,7 +21,7 @@
             <!-- Username / Email -->
             <Entry
                 Placeholder="Username or Email"
-                Text="{Binding UserInput}"
+                Text="{Binding EmailInput}"
                 WidthRequest="250"
                 VerticalOptions="Center" />
 
