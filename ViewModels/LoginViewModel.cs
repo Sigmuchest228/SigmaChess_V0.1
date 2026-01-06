@@ -12,7 +12,7 @@ namespace SigmaChess.ViewModels
     internal class LoginViewModel : ViewModelBase
     {
         #region get&set
-
+        
         private string errorMessage;
         public string ErrorMessage
         {
