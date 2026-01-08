@@ -8,9 +8,10 @@ namespace SigmaChess.Models
 {
     internal class User
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string? UserName { get; set; }
         public int Elo { get; set; }
         public DateTime RegisterDate { get; set; }
+        public List<ChessGame> UserChessGames { get; set; }
     }
 }
