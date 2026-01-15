@@ -27,7 +27,6 @@
                             <StackLayout Padding="10" BackgroundColor="LightGray">
                             <Label FontAttributes="Bold" Text="{Binding UserName}"/>
                             <Label Text="{Binding Elo}"/>
-                            <Label Text="{Binding RegisterDate}"/>
 
                             <Button
                                 BackgroundColor="Red"
