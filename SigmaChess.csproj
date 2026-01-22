@@ -57,6 +57,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="AppShells\**" />
+	  <Compile Remove="AppShells\**" />
+	  <EmbeddedResource Remove="AppShells\**" />
+	  <MauiCss Remove="AppShells\**" />
+	  <MauiXaml Remove="AppShells\**" />
+	  <None Remove="AppShells\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.1" />
 		<PackageReference Include="FirebaseAuthentication.net" Version="4.1.0" />
 		<PackageReference Include="FirebaseDatabase.net" Version="5.0.0" />
 		<PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
@@ -75,10 +85,6 @@
 	  <MauiXaml Update="Views\Register-Login.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="AppShells\" />
 	</ItemGroup>
 
 </Project>

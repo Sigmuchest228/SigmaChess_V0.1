@@ -128,34 +128,34 @@ namespace SigmaChess.Servises
         #endregion
 
         public List<User> users = new List<User>();
-        private void CreateFakeData()
-        {
-            User user1 = new User()
-            {
-                Id = 1,
-                UserName = "Sergay",
-                Elo = 452,
-                RegisterDate = DateTime.Now.AddMinutes(-5)
-            };
-            User user2 = new User()
-            {
-                Id = 2,
-                UserName = "Artyom",
-                Elo = 1208,
-                RegisterDate = DateTime.Now.AddMinutes(-30)
-            };
-            User user3 = new User()
-            {
-                Id = 42,
-                UserName = "Carlson Magnusen",
-                Elo = 1042,
-                RegisterDate = DateTime.Now.AddMinutes(-42)
-            };
+        //private void CreateFakeData()
+        //{
+        //    User user1 = new User()
+        //    {
+        //        Id = 1,
+        //        UserName = "Sergay",
+        //        Elo = 452,
+        //        RegisterDate = DateTime.Now.AddMinutes(-5)
+        //    };
+        //    User user2 = new User()
+        //    {
+        //        Id = 2,
+        //        UserName = "Artyom",
+        //        Elo = 1208,
+        //        RegisterDate = DateTime.Now.AddMinutes(-30)
+        //    };
+        //    User user3 = new User()
+        //    {
+        //        Id = 42,
+        //        UserName = "Carlson Magnusen",
+        //        Elo = 1042,
+        //        RegisterDate = DateTime.Now.AddMinutes(-42)
+        //    };
 
-            users.Add(user1);
-            users.Add(user2);
-            users.Add(user3);
-        }
+        //    users.Add(user1);
+        //    users.Add(user2);
+        //    users.Add(user3);
+        //}
 
         public async Task<List<User>> GetUsers()
         {
