@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SigmaChess.Views.Game"
+             Title="Game">
+    <Grid RowDefinitions="Auto,*,Auto"
+          Padding="12">
+
+        <!-- Верхняя панель игроков -->
+        <Grid ColumnDefinitions="*,*"
+              Row="0">
+
+            <Frame Padding="10" Margin="5" BorderColor="Gray">
+                <VerticalStackLayout>
+                    <Label Text="{Binding WhitePlayer.UserName}"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
+                    <Label Text="{Binding WhitePlayer.Elo, StringFormat='ELO: {0}'}"
+                           FontSize="14"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Grid.Column="1"
+                   Padding="10"
+                   Margin="5"
+                   BorderColor="Gray">
+                <VerticalStackLayout HorizontalOptions="End">
+                    <Label Text="{Binding BlackPlayer.UserName}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="End"/>
+                    <Label Text="{Binding BlackPlayer.Elo, StringFormat='ELO: {0}'}"
+                           FontSize="14"
+                           HorizontalTextAlignment="End"/>
+                </VerticalStackLayout>
+            </Frame>
+
+        </Grid>
+
+        <!-- Шахматная доска -->
+        <Grid x:Name="BoardGrid"
+              Row="1"
+              HorizontalOptions="Center"
+              VerticalOptions="Center"
+              WidthRequest="320"
+              HeightRequest="320"/>
+
+        <!-- Нижняя панель -->
+        <Grid Row="2"
+              ColumnDefinitions="*,*">
+
+            <Frame Padding="10" Margin="5">
+                <Label Text="Move list"/>
+            </Frame>
+
+            <Frame Grid.Column="1"
+                   Padding="10"
+                   Margin="5"
+                   HorizontalOptions="End">
+                <Label Text="Timer"/>
+            </Frame>
+
+        </Grid>
+
+    </Grid>
+</ContentPage>
