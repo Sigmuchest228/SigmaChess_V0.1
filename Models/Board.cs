@@ -35,17 +35,17 @@ namespace SigmaChess.Models
         private void SetupPieces()
         {
             // Пешки
-            for (int c = 0; c < 8; c++)
-            {
-                Place(new Pawn(true), 6, c);
-                Place(new Pawn(false), 1, c);
-            }
+            //for (int c = 0; c < 8; c++)
+            //{
+            //    Place(new Pawn(true), 6, c);
+            //    Place(new Pawn(false), 1, c);
+            //}
 
             // Ладьи
-            Place(new Rook(true), 7, 0);
-            Place(new Rook(true), 7, 7);
-            Place(new Rook(false), 0, 0);
-            Place(new Rook(false), 0, 7);
+            //Place(new Rook(true), 7, 0);
+            //Place(new Rook(true), 7, 7);
+            //Place(new Rook(false), 0, 0);
+            //Place(new Rook(false), 0, 7);
 
             // Коней, слонов, ферзя, короля добавим позже
         }

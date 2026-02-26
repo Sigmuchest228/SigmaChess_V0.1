@@ -20,6 +20,10 @@
         <ShellContent
             Title="Friends list"
             ContentTemplate="{DataTemplate local:ListPage}"
-            Route="ListPage" />
+            Route="ListPage"/>
+        <ShellContent
+    Title="Game"
+    ContentTemplate="{DataTemplate local:Game}"
+    Route="Game"/>
     </FlyoutItem>
 </Shell>

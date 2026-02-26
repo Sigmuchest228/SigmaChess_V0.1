@@ -1,66 +1,23 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SigmaChess.Views.Game"
-             Title="Game">
-    <Grid RowDefinitions="Auto,*,Auto"
-          Padding="12">
+             x:Class="SigmaChess.Views.Game">
 
-        <!-- Верхняя панель игроков -->
-        <Grid ColumnDefinitions="*,*"
-              Row="0">
+    <Grid RowDefinitions="Auto,*,Auto">
 
-            <Frame Padding="10" Margin="5" BorderColor="Gray">
-                <VerticalStackLayout>
-                    <Label Text="{Binding WhitePlayer.UserName}"
-                           FontSize="18"
-                           FontAttributes="Bold"/>
-                    <Label Text="{Binding WhitePlayer.Elo, StringFormat='ELO: {0}'}"
-                           FontSize="14"/>
-                </VerticalStackLayout>
-            </Frame>
+        <Label Text="Game"
+           Grid.Row="0"
+           HorizontalOptions="Center"/>
 
-            <Frame Grid.Column="1"
-                   Padding="10"
-                   Margin="5"
-                   BorderColor="Gray">
-                <VerticalStackLayout HorizontalOptions="End">
-                    <Label Text="{Binding BlackPlayer.UserName}"
-                           FontSize="18"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="End"/>
-                    <Label Text="{Binding BlackPlayer.Elo, StringFormat='ELO: {0}'}"
-                           FontSize="14"
-                           HorizontalTextAlignment="End"/>
-                </VerticalStackLayout>
-            </Frame>
-
-        </Grid>
-
-        <!-- Шахматная доска -->
         <Grid x:Name="BoardGrid"
-              Row="1"
-              HorizontalOptions="Center"
-              VerticalOptions="Center"
-              WidthRequest="320"
-              HeightRequest="320"/>
+          Grid.Row="1"
+          WidthRequest="360"
+          HeightRequest="360"
+          HorizontalOptions="Center"
+          VerticalOptions="Center"/>
 
-        <!-- Нижняя панель -->
-        <Grid Row="2"
-              ColumnDefinitions="*,*">
-
-            <Frame Padding="10" Margin="5">
-                <Label Text="Move list"/>
-            </Frame>
-
-            <Frame Grid.Column="1"
-                   Padding="10"
-                   Margin="5"
-                   HorizontalOptions="End">
-                <Label Text="Timer"/>
-            </Frame>
-
-        </Grid>
+        <Label Text="Bottom"
+           Grid.Row="2"
+           HorizontalOptions="Center"/>
 
     </Grid>
 </ContentPage>
