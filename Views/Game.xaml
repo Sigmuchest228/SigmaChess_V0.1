@@ -1,23 +1,33 @@
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SigmaChess.Views.Game">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid WidthRequest="360"
+      HeightRequest="360"
+      HorizontalOptions="Center"
+      VerticalOptions="Center">
+        <Border BackgroundColor="{Binding Color}" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <Label Text="Game"
-           Grid.Row="0"
-           HorizontalOptions="Center"/>
-
-        <Grid x:Name="BoardGrid"
-          Grid.Row="1"
-          WidthRequest="360"
-          HeightRequest="360"
-          HorizontalOptions="Center"
-          VerticalOptions="Center"/>
-
-        <Label Text="Bottom"
-           Grid.Row="2"
-           HorizontalOptions="Center"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
     </Grid>
 </ContentPage>

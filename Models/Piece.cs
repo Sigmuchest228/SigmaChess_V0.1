@@ -10,19 +10,19 @@ namespace SigmaChess.Models
     {
         public bool IsWhite { get; }
 
-        public Cell Cell { get; private set; }
+        public BoardCell Cell { get; private set; }
 
         protected Piece(bool isWhite)
         {
             IsWhite = isWhite;
         }
 
-        public void SetCell(Cell cell)
+        public void SetCell(BoardCell cell)
         {
             Cell = cell;
         }
 
-        public abstract List<Cell> GetLegalMoves(Board board);
+        public abstract List<BoardCell> GetLegalMoves(Board board);
 
         public virtual char Symbol => '?';
     }
