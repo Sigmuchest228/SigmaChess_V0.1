@@ -2,32 +2,88 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SigmaChess.Views.Game">
 
-    <Grid WidthRequest="360"
-      HeightRequest="360"
-      HorizontalOptions="Center"
-      VerticalOptions="Center">
-        <Border BackgroundColor="{Binding Color}" />
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Grid RowDefinitions="*,*,*,*,*,*,*,*" ColumnDefinitions="*,*,*,*,*,*,*,*" WidthRequest="500" HeightRequest="500">
+
+        <!-- Row 0 -->
+        <Button BackgroundColor="White" Grid.Column="0" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy00"/>
+        <Button BackgroundColor="Gray"  Grid.Column="1" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy10"/>
+        <Button BackgroundColor="White" Grid.Column="2" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy20"/>
+        <Button BackgroundColor="Gray"  Grid.Column="3" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy30"/>
+        <Button BackgroundColor="White" Grid.Column="4" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy40"/>
+        <Button BackgroundColor="Gray"  Grid.Column="5" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy50"/>
+        <Button BackgroundColor="White" Grid.Column="6" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy60"/>
+        <Button BackgroundColor="Gray"  Grid.Column="7" Grid.Row="0" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy70"/>
+
+        <!-- Row 1 -->
+        <Button BackgroundColor="Gray"  Grid.Column="0" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy01"/>
+        <Button BackgroundColor="White" Grid.Column="1" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy11"/>
+        <Button BackgroundColor="Gray"  Grid.Column="2" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy21"/>
+        <Button BackgroundColor="White" Grid.Column="3" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy31"/>
+        <Button BackgroundColor="Gray"  Grid.Column="4" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy41"/>
+        <Button BackgroundColor="White" Grid.Column="5" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy51"/>
+        <Button BackgroundColor="Gray"  Grid.Column="6" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy61"/>
+        <Button BackgroundColor="White" Grid.Column="7" Grid.Row="1" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy71"/>
+
+        <!-- Row 2 -->
+        <Button BackgroundColor="White" Grid.Column="0" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy02"/>
+        <Button BackgroundColor="Gray"  Grid.Column="1" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy12"/>
+        <Button BackgroundColor="White" Grid.Column="2" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy22"/>
+        <Button BackgroundColor="Gray"  Grid.Column="3" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy32"/>
+        <Button BackgroundColor="White" Grid.Column="4" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy42"/>
+        <Button BackgroundColor="Gray"  Grid.Column="5" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy52"/>
+        <Button BackgroundColor="White" Grid.Column="6" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy62"/>
+        <Button BackgroundColor="Gray"  Grid.Column="7" Grid.Row="2" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy72"/>
+
+        <!-- Row 3 -->
+        <Button BackgroundColor="Gray"  Grid.Column="0" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy03"/>
+        <Button BackgroundColor="White" Grid.Column="1" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy13"/>
+        <Button BackgroundColor="Gray"  Grid.Column="2" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy23"/>
+        <Button BackgroundColor="White" Grid.Column="3" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy33"/>
+        <Button BackgroundColor="Gray"  Grid.Column="4" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy43"/>
+        <Button BackgroundColor="White" Grid.Column="5" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy53"/>
+        <Button BackgroundColor="Gray"  Grid.Column="6" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy63"/>
+        <Button BackgroundColor="White" Grid.Column="7" Grid.Row="3" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy73"/>
+
+        <!-- Row 4 -->
+        <Button BackgroundColor="White" Grid.Column="0" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy04"/>
+        <Button BackgroundColor="Gray"  Grid.Column="1" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy14"/>
+        <Button BackgroundColor="White" Grid.Column="2" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy24"/>
+        <Button BackgroundColor="Gray"  Grid.Column="3" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy34"/>
+        <Button BackgroundColor="White" Grid.Column="4" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy44"/>
+        <Button BackgroundColor="Gray"  Grid.Column="5" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy54"/>
+        <Button BackgroundColor="White" Grid.Column="6" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy64"/>
+        <Button BackgroundColor="Gray"  Grid.Column="7" Grid.Row="4" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy74"/>
+
+        <!-- Row 5 -->
+        <Button BackgroundColor="Gray"  Grid.Column="0" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy05"/>
+        <Button BackgroundColor="White" Grid.Column="1" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy15"/>
+        <Button BackgroundColor="Gray"  Grid.Column="2" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy25"/>
+        <Button BackgroundColor="White" Grid.Column="3" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy35"/>
+        <Button BackgroundColor="Gray"  Grid.Column="4" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy45"/>
+        <Button BackgroundColor="White" Grid.Column="5" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy55"/>
+        <Button BackgroundColor="Gray"  Grid.Column="6" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy65"/>
+        <Button BackgroundColor="White" Grid.Column="7" Grid.Row="5" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy75"/>
+
+        <!-- Row 6 -->
+        <Button BackgroundColor="White" Grid.Column="0" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy06"/>
+        <Button BackgroundColor="Gray"  Grid.Column="1" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy16"/>
+        <Button BackgroundColor="White" Grid.Column="2" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy26"/>
+        <Button BackgroundColor="Gray"  Grid.Column="3" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy36"/>
+        <Button BackgroundColor="White" Grid.Column="4" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy46"/>
+        <Button BackgroundColor="Gray"  Grid.Column="5" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy56"/>
+        <Button BackgroundColor="White" Grid.Column="6" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy66"/>
+        <Button BackgroundColor="Gray"  Grid.Column="7" Grid.Row="6" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy76"/>
+
+        <!-- Row 7 -->
+        <Button BackgroundColor="Gray"  Grid.Column="0" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy07"/>
+        <Button BackgroundColor="White" Grid.Column="1" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy17"/>
+        <Button BackgroundColor="Gray"  Grid.Column="2" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy27"/>
+        <Button BackgroundColor="White" Grid.Column="3" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy37"/>
+        <Button BackgroundColor="Gray"  Grid.Column="4" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy47"/>
+        <Button BackgroundColor="White" Grid.Column="5" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy57"/>
+        <Button BackgroundColor="Gray"  Grid.Column="6" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy67"/>
+        <Button BackgroundColor="White" Grid.Column="7" Grid.Row="7" Style="{StaticResource ChessButtonSquare}" Clicked="Button_Square_Clicked" x:Name="xy77"/>
 
     </Grid>
 </ContentPage>

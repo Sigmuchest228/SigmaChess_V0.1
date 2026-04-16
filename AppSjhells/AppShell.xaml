@@ -9,6 +9,10 @@
     
     <FlyoutItem Title="Register" Icon="dotnet_bot.png">
         <ShellContent
+Title="Game"
+ContentTemplate="{DataTemplate local:Game}"
+Route="Game"/>
+        <ShellContent
             Title="RegisterPage"
             ContentTemplate="{DataTemplate local:Register_Login}"    
             Route="Register_Login" />
@@ -18,12 +22,13 @@
             ContentTemplate="{DataTemplate local:Login_Register}"
             Route="Login_Register" />
         <ShellContent
+            Title="Main page"
+            ContentTemplate="{DataTemplate local:Main}"
+            Route="Main"/>
+        <ShellContent
             Title="Friends list"
             ContentTemplate="{DataTemplate local:ListPage}"
             Route="ListPage"/>
-        <ShellContent
-    Title="Game"
-    ContentTemplate="{DataTemplate local:Game}"
-    Route="Game"/>
+       
     </FlyoutItem>
 </Shell>
