@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 
 namespace SigmaChess.Models
 {
-    public class User
+    class User
     {
-            public Guid Id { get; set; } = Guid.NewGuid();
-
-            public string UserName { get; set; } = "";
-
-            public int Elo { get; set; } = 1200;
-
-            public DateTime RegisterDate { get; set; } = DateTime.Now;
-        
+        public string? Email { get; set; }
+        public string? Id { get; set; }
+        public string? FullName { get; set; }
     }
 }
