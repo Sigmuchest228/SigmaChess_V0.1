@@ -1,41 +1,93 @@
 using System.Collections.ObjectModel;
+using Microsoft.Maui.Devices;
 using SigmaChess.Engine;
 
 namespace SigmaChess.ViewModels;
 
 public class GameViewModel : ViewModelBase
 {
-    private readonly Game _game = new();
-    private readonly MoveGenerator _moveGenerator = new();
-    private Position? _selectedPosition;
-    private List<Move> _possibleMoves = [];
+    private readonly GameController _controller = new();
+    private double _boardExtent = 320;
+    private string _gameStatusText = string.Empty;
+    private const double RankStrip = 28;
+    private const double FileStrip = 28;
+    private const double RankBoardSpacing = 4;
 
     public ObservableCollection<BoardCellViewModel> Cells { get; } = [];
 
     public Command<BoardCellViewModel> CellTappedCommand { get; }
 
-    public string CurrentTurnText => _game.CurrentTurn == PieceColor.White ? "Ход: Белые" : "Ход: Черные";
+    public string CurrentTurnText =>
+        _controller.GetCurrentTurn() == PieceColor.White ? "Ход: Белые" : "Ход: Черные";
+
+    public string GameStatusText => _gameStatusText;
+
+    public double BoardExtent
+    {
+        get => _boardExtent;
+        private set
+        {
+            if (Math.Abs(_boardExtent - value) < 0.5)
+            {
+                return;
+            }
+
+            _boardExtent = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(BoardGridWidth));
+            OnPropertyChanged(nameof(BoardGridHeight));
+            OnPropertyChanged(nameof(PieceFontSize));
+            OnPropertyChanged(nameof(CoordFontSize));
+        }
+    }
+
+    public double BoardGridWidth => BoardExtent + RankStrip + RankBoardSpacing;
+
+    public double BoardGridHeight => BoardExtent + FileStrip;
+
+    public double PieceFontSize => Math.Clamp(BoardExtent / 8.0 * 0.62, 14, 44);
+
+    public double CoordFontSize => Math.Clamp(BoardExtent * 0.045, 10, 15);
 
     public GameViewModel()
     {
         CellTappedCommand = new Command<BoardCellViewModel>(OnCellTapped);
+        DeviceDisplay.MainDisplayInfoChanged += OnDisplayInfoChanged;
+        UpdateBoardExtent();
         InitializeBoard();
+    }
+
+    private void OnDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
+    {
+        UpdateBoardExtent();
+    }
+
+    private void UpdateBoardExtent()
+    {
+        var info = DeviceDisplay.Current.MainDisplayInfo;
+        var density = info.Density <= 0 ? 1 : info.Density;
+        var w = info.Width / density;
+        var h = info.Height / density;
+        var reserved = 220;
+        var side = Math.Min(w - 24, h - reserved);
+        BoardExtent = Math.Clamp(side, 260, 640);
     }
 
     public void InitializeBoard()
     {
-        Cells.Clear();
+        _controller.InitializeGame();
+        RebuildCellCollection();
+        ApplyVisualStateFromController();
+    }
 
+    private void RebuildCellCollection()
+    {
+        Cells.Clear();
         for (var row = 0; row < 8; row++)
         {
             for (var col = 0; col < 8; col++)
             {
-                var cell = new BoardCellViewModel(row, col)
-                {
-                    Piece = _game.Board.GetPiece(new Position(row, col))
-                };
-
-                Cells.Add(cell);
+                Cells.Add(new BoardCellViewModel(row, col));
             }
         }
     }
@@ -47,81 +99,57 @@ public class GameViewModel : ViewModelBase
             return;
         }
 
-        if (TryMakeMoveTo(cell))
-        {
-            RefreshBoardState();
-            return;
-        }
-
-        var tappedPiece = cell.Piece;
-        if (tappedPiece is not null && tappedPiece.Color == _game.CurrentTurn)
-        {
-            _selectedPosition = new Position(cell.Row, cell.Col);
-            _possibleMoves = _moveGenerator.GetPossibleMoves(_game.Board, _selectedPosition);
-            HighlightPossibleMoves();
-            return;
-        }
-
-        ClearSelectionAndHighlights();
+        _controller.HandleCellClick(cell.Row, cell.Col);
+        ApplyVisualStateFromController();
     }
 
-    public void HighlightPossibleMoves()
+    private void ApplyVisualStateFromController()
     {
-        foreach (var boardCell in Cells)
+        var board = _controller.GetBoard();
+        var selected = _controller.GetSelectedSquare();
+        var highlightTargets = new HashSet<(int R, int C)>(
+            _controller.GetHighlightedSquares().Select(h => (h.Row, h.Col)));
+        var turn = _controller.GetCurrentTurn();
+
+        foreach (var cell in Cells)
         {
-            boardCell.IsSelected = _selectedPosition is not null &&
-                                   boardCell.Row == _selectedPosition.Row &&
-                                   boardCell.Col == _selectedPosition.Col;
+            cell.Piece = board.GetPiece(new Position(cell.Row, cell.Col));
 
-            boardCell.IsHighlighted = _possibleMoves.Any(move =>
-                move.To.Row == boardCell.Row &&
-                move.To.Col == boardCell.Col);
-        }
-    }
+            cell.IsSelected = selected is not null &&
+                              selected.Row == cell.Row &&
+                              selected.Col == cell.Col;
 
-    private bool TryMakeMoveTo(BoardCellViewModel targetCell)
-    {
-        if (_selectedPosition is null)
-        {
-            return false;
-        }
+            if (!highlightTargets.Contains((cell.Row, cell.Col)))
+            {
+                cell.MoveTarget = MoveTargetHighlight.None;
+                continue;
+            }
 
-        var isHighlightedTarget = _possibleMoves.Any(move =>
-            move.To.Row == targetCell.Row &&
-            move.To.Col == targetCell.Col);
-
-        if (!isHighlightedTarget)
-        {
-            return false;
+            var target = board.GetPiece(new Position(cell.Row, cell.Col));
+            var isCapture = target is not null && target.Color != turn;
+            cell.MoveTarget = isCapture ? MoveTargetHighlight.Capture : MoveTargetHighlight.ToEmpty;
         }
 
-        var move = new Move(_selectedPosition, new Position(targetCell.Row, targetCell.Col));
-        return _game.MakeMove(move);
-    }
-
-    private void RefreshBoardState()
-    {
-        foreach (var boardCell in Cells)
-        {
-            boardCell.Piece = _game.Board.GetPiece(new Position(boardCell.Row, boardCell.Col));
-            boardCell.IsHighlighted = false;
-            boardCell.IsSelected = false;
-        }
-
-        _selectedPosition = null;
-        _possibleMoves = [];
         OnPropertyChanged(nameof(CurrentTurnText));
+        RefreshStatusText();
     }
 
-    private void ClearSelectionAndHighlights()
+    private void RefreshStatusText()
     {
-        _selectedPosition = null;
-        _possibleMoves = [];
+        var result = _controller.GetGameResult();
+        var turn = _controller.GetCurrentTurn();
 
-        foreach (var boardCell in Cells)
+        _gameStatusText = result switch
         {
-            boardCell.IsHighlighted = false;
-            boardCell.IsSelected = false;
-        }
+            GameResult.Ongoing => string.Empty,
+            GameResult.Check => "Шах",
+            GameResult.Stalemate => "Пат",
+            GameResult.Checkmate => turn == PieceColor.White
+                ? "Мат: победа чёрных"
+                : "Мат: победа белых",
+            _ => string.Empty
+        };
+
+        OnPropertyChanged(nameof(GameStatusText));
     }
 }
