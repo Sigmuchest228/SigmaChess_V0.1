@@ -1,14 +1,17 @@
 using System.Collections.ObjectModel;
 using Microsoft.Maui.Devices;
 using SigmaChess.Engine;
+using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
 public class GameViewModel : ViewModelBase
 {
-    private readonly GameController _controller = new();
+    private readonly global::SigmaChess.Engine.GameController _controller;
+    private readonly BoardLayoutService _layoutService;
     private double _boardExtent = 320;
     private string _gameStatusText = string.Empty;
+    private string _gameResultText = string.Empty;
     private const double RankStrip = 28;
     private const double FileStrip = 28;
     private const double RankBoardSpacing = 4;
@@ -18,9 +21,11 @@ public class GameViewModel : ViewModelBase
     public Command<BoardCellViewModel> CellTappedCommand { get; }
 
     public string CurrentTurnText =>
-        _controller.GetCurrentTurn() == PieceColor.White ? "Ход: Белые" : "Ход: Черные";
+        _controller.GetCurrentTurn() == PieceColor.White ? "Ход: Белые" : "Ход: Чёрные";
 
     public string GameStatusText => _gameStatusText;
+
+    public string GameResultText => _gameResultText;
 
     public double BoardExtent
     {
@@ -49,8 +54,10 @@ public class GameViewModel : ViewModelBase
 
     public double CoordFontSize => Math.Clamp(BoardExtent * 0.045, 10, 15);
 
-    public GameViewModel()
+    public GameViewModel(global::SigmaChess.Engine.GameController controller, BoardLayoutService layoutService)
     {
+        _controller = controller;
+        _layoutService = layoutService;
         CellTappedCommand = new Command<BoardCellViewModel>(OnCellTapped);
         DeviceDisplay.MainDisplayInfoChanged += OnDisplayInfoChanged;
         UpdateBoardExtent();
@@ -64,24 +71,31 @@ public class GameViewModel : ViewModelBase
 
     private void UpdateBoardExtent()
     {
-        var info = DeviceDisplay.Current.MainDisplayInfo;
-        var density = info.Density <= 0 ? 1 : info.Density;
-        var w = info.Width / density;
-        var h = info.Height / density;
-        var reserved = 220;
-        var side = Math.Min(w - 24, h - reserved);
-        BoardExtent = Math.Clamp(side, 260, 640);
+        BoardExtent = _layoutService.CalculateBoardExtent(DeviceDisplay.Current.MainDisplayInfo);
     }
 
+    /// <summary>Создаёт 64 клетки один раз и запускает новую партию.</summary>
     public void InitializeBoard()
     {
         _controller.InitializeGame();
-        RebuildCellCollection();
-        ApplyVisualStateFromController();
+        EnsureCellsCreated();
+        RefreshBoard();
     }
 
-    private void RebuildCellCollection()
+    /// <summary>
+    /// Создаёт ровно 64 клетки в порядке «строка за строкой» (row-major),
+    /// чтобы они корректно раскладывались в <see cref="GridItemsLayout"/> (Orientation=Vertical, Span=8).
+    /// </summary>
+    private void EnsureCellsCreated()
     {
+        var orderOk = Cells.Count == 64 &&
+                      Cells[0].Row == 0 && Cells[0].Col == 0 &&
+                      Cells[1].Row == 0 && Cells[1].Col == 1;
+        if (orderOk)
+        {
+            return;
+        }
+
         Cells.Clear();
         for (var row = 0; row < 8; row++)
         {
@@ -100,14 +114,15 @@ public class GameViewModel : ViewModelBase
         }
 
         _controller.HandleCellClick(cell.Row, cell.Col);
-        ApplyVisualStateFromController();
+        RefreshBoard();
     }
 
-    private void ApplyVisualStateFromController()
+    /// <summary>Синхронизирует коллекцию клеток с <see cref="GameController"/> (доска, выбор, подсветка, текст).</summary>
+    public void RefreshBoard()
     {
         var board = _controller.GetBoard();
         var selected = _controller.GetSelectedSquare();
-        var highlightTargets = new HashSet<(int R, int C)>(
+        var highlightSet = new HashSet<(int R, int C)>(
             _controller.GetHighlightedSquares().Select(h => (h.Row, h.Col)));
         var turn = _controller.GetCurrentTurn();
 
@@ -119,37 +134,46 @@ public class GameViewModel : ViewModelBase
                               selected.Row == cell.Row &&
                               selected.Col == cell.Col;
 
-            if (!highlightTargets.Contains((cell.Row, cell.Col)))
+            var isMoveTarget = highlightSet.Contains((cell.Row, cell.Col));
+            cell.IsHighlighted = isMoveTarget;
+
+            if (!isMoveTarget)
             {
                 cell.MoveTarget = MoveTargetHighlight.None;
                 continue;
             }
 
-            var target = board.GetPiece(new Position(cell.Row, cell.Col));
-            var isCapture = target is not null && target.Color != turn;
+            var targetPiece = board.GetPiece(new Position(cell.Row, cell.Col));
+            var isCapture = targetPiece is not null && targetPiece.Color != turn;
             cell.MoveTarget = isCapture ? MoveTargetHighlight.Capture : MoveTargetHighlight.ToEmpty;
         }
 
         OnPropertyChanged(nameof(CurrentTurnText));
-        RefreshStatusText();
+        RefreshStatusLabels();
     }
 
-    private void RefreshStatusText()
+    private void RefreshStatusLabels()
     {
         var result = _controller.GetGameResult();
         var turn = _controller.GetCurrentTurn();
+
+        _gameResultText = result switch
+        {
+            GameResult.Checkmate => turn == PieceColor.White ? "Black wins" : "White wins",
+            GameResult.Stalemate => "Draw",
+            _ => string.Empty
+        };
 
         _gameStatusText = result switch
         {
             GameResult.Ongoing => string.Empty,
             GameResult.Check => "Шах",
-            GameResult.Stalemate => "Пат",
-            GameResult.Checkmate => turn == PieceColor.White
-                ? "Мат: победа чёрных"
-                : "Мат: победа белых",
+            GameResult.Checkmate => string.Empty,
+            GameResult.Stalemate => string.Empty,
             _ => string.Empty
         };
 
         OnPropertyChanged(nameof(GameStatusText));
+        OnPropertyChanged(nameof(GameResultText));
     }
 }

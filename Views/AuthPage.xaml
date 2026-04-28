@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.AuthPage"
+             x:DataType="viewModels:AuthViewModel"
+             Title="{Binding PageTitle}">
+    <ScrollView>
+        <VerticalStackLayout Padding="24"
+                             Spacing="14"
+                             HorizontalOptions="Center"
+                             MaximumWidthRequest="420">
+            <Label Text="{Binding PageTitle}"
+                   FontAttributes="Bold"
+                   FontSize="24"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="Red"
+                   MinimumHeightRequest="22"
+                   HorizontalTextAlignment="Center" />
+
+            <Entry Placeholder="Email"
+                   Keyboard="Email"
+                   Text="{Binding Email}" />
+
+            <Entry Placeholder="Password"
+                   IsPassword="True"
+                   Text="{Binding Password}" />
+
+            <Entry Placeholder="Confirm password"
+                   IsPassword="True"
+                   Text="{Binding ConfirmPassword}"
+                   IsVisible="{Binding IsRegisterMode}" />
+
+            <Button Text="Login"
+                    Command="{Binding LoginCommand}"
+                    IsVisible="{Binding IsLoginMode}" />
+
+            <Button Text="Create Account"
+                    Command="{Binding RegisterCommand}"
+                    IsVisible="{Binding IsRegisterMode}" />
+
+            <Button Text="Need an account?"
+                    Command="{Binding ShowRegisterModeCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#1565C0"
+                    IsVisible="{Binding IsLoginMode}" />
+
+            <Button Text="Already have an account?"
+                    Command="{Binding ShowLoginModeCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#1565C0"
+                    IsVisible="{Binding IsRegisterMode}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

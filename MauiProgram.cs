@@ -1,5 +1,9 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using SigmaChess.Engine;
+using SigmaChess.Services;
+using SigmaChess.ViewModels;
+using SigmaChess.Views;
 
 namespace SigmaChess
 {
@@ -21,6 +25,16 @@ namespace SigmaChess
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
+            builder.Services.AddSingleton<AppService>();
+            builder.Services.AddSingleton<BoardLayoutService>();
+            builder.Services.AddTransient<global::SigmaChess.Engine.GameController>();
+
+            builder.Services.AddTransient<AuthViewModel>();
+            builder.Services.AddTransient<GameViewModel>();
+
+            builder.Services.AddTransient<AuthPage>();
+            builder.Services.AddTransient<GamePage>();
+            builder.Services.AddSingleton<AppShell>();
 
             return builder.Build();
         }

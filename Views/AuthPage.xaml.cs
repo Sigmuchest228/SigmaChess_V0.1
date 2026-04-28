@@ -2,9 +2,9 @@ using SigmaChess.ViewModels;
 
 namespace SigmaChess.Views;
 
-public partial class GamePage : ContentPage
+public partial class AuthPage : ContentPage
 {
-    public GamePage(GameViewModel viewModel)
+    public AuthPage(AuthViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;

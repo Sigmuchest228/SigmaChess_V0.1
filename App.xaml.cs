@@ -1,16 +1,19 @@
-﻿using SigmaChess.Views;
-namespace SigmaChess
+﻿namespace SigmaChess
 {
     public partial class App : Application
     {
-        public App()
+        private readonly AppShell _appShell;
+
+        public App(AppShell appShell)
         {
+            _appShell = appShell;
             InitializeComponent();
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell() { FlowDirection = FlowDirection.LeftToRight });
+            _appShell.FlowDirection = FlowDirection.LeftToRight;
+            return new Window(_appShell);
         }
     }
 }

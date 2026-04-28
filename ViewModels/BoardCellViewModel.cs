@@ -15,6 +15,7 @@ public class BoardCellViewModel : ViewModelBase
     private Piece? _piece;
     private MoveTargetHighlight _moveTarget;
     private bool _isSelected;
+    private bool _isHighlighted;
 
     public int Row { get; }
 
@@ -65,11 +66,28 @@ public class BoardCellViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Клетка — цель одного из текущих легальных ходов (подсветка хода).</summary>
+    public bool IsHighlighted
+    {
+        get => _isHighlighted;
+        set
+        {
+            if (_isHighlighted == value)
+            {
+                return;
+            }
+
+            _isHighlighted = value;
+            OnPropertyChanged();
+            RefreshSquareBackground();
+        }
+    }
+
     public bool IsWhiteSquare => (Row + Col) % 2 == 0;
 
     public string PieceSymbol => GetPieceSymbol(Piece);
 
-    public Color SquareBackground { get; private set; }
+    public Color SquareBackground { get; private set; } = Colors.Transparent;
 
     public BoardCellViewModel(int row, int col)
     {
@@ -100,7 +118,7 @@ public class BoardCellViewModel : ViewModelBase
         {
             next = isLight ? CaptureOnLight : CaptureOnDark;
         }
-        else if (_moveTarget == MoveTargetHighlight.ToEmpty)
+        else if (_moveTarget == MoveTargetHighlight.ToEmpty || _isHighlighted)
         {
             next = isLight ? MoveOnLight : MoveOnDark;
         }

@@ -39,42 +39,6 @@
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
-	  <WarningLevel>0</WarningLevel>
-	  <Deterministic>True</Deterministic>
-	  <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
-	  <WarningLevel>0</WarningLevel>
-	  <Deterministic>True</Deterministic>
-	  <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-	  <WarningLevel>0</WarningLevel>
-	  <Deterministic>True</Deterministic>
-	  <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-	  <WarningLevel>0</WarningLevel>
-	  <Deterministic>True</Deterministic>
-	  <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
-	  <Deterministic>True</Deterministic>
-	  <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-	  <WarningLevel>0</WarningLevel>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
-	  <Deterministic>True</Deterministic>
-	  <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-	  <WarningLevel>0</WarningLevel>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
@@ -94,15 +58,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <AndroidResource Remove="AppShells\**" />
-	  <Compile Remove="AppShells\**" />
-	  <EmbeddedResource Remove="AppShells\**" />
-	  <MauiCss Remove="AppShells\**" />
-	  <MauiXaml Remove="AppShells\**" />
-	  <None Remove="AppShells\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.1" />
 		<PackageReference Include="FirebaseAuthentication.net" Version="4.1.0" />
 		<PackageReference Include="FirebaseDatabase.net" Version="5.0.0" />
@@ -110,18 +65,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <MauiXaml Update="Views\ListPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Login-Register.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Register-Login.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	</ItemGroup>
 
 </Project>

@@ -27,6 +27,14 @@
                    TextColor="#B71C1C"
                    MinimumHeightRequest="22" />
 
+            <Label Text="{Binding GameResultText}"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"
+                   TextColor="#1565C0"
+                   MinimumHeightRequest="26" />
+
             <!-- Доска 8×8 + координаты; квадрат задаётся BoardExtent из VM (экран). -->
             <Grid WidthRequest="{Binding BoardGridWidth}"
                   HeightRequest="{Binding BoardGridHeight}"
@@ -54,49 +62,58 @@
                     <Label Grid.Row="7" Text="1" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
                 </Grid>
 
-                <!-- Поле 8×8: BindableLayout + привязка Row/Col к модели (порядок данных построчный). -->
+                <!-- Квадратное поле 8×8: фиксированный квадрат + Vertical Span 8 (порядок ItemsSource — по колонкам). -->
                 <Grid Grid.Row="0"
                       Grid.Column="1"
-                      RowDefinitions="*,*,*,*,*,*,*,*"
-                      ColumnDefinitions="*,*,*,*,*,*,*,*"
                       WidthRequest="{Binding BoardExtent}"
                       HeightRequest="{Binding BoardExtent}"
-                      RowSpacing="0"
-                      ColumnSpacing="0"
-                      HorizontalOptions="Start"
+                      MinimumWidthRequest="{Binding BoardExtent}"
+                      MinimumHeightRequest="{Binding BoardExtent}"
+                      HorizontalOptions="Center"
                       VerticalOptions="Start"
-                      BindableLayout.ItemsSource="{Binding Cells}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="viewModels:BoardCellViewModel">
-                            <Border Grid.Row="{Binding Row}"
-                                    Grid.Column="{Binding Col}"
-                                    BackgroundColor="{Binding SquareBackground}"
-                                    Stroke="Transparent"
-                                    StrokeThickness="0"
-                                    Padding="0"
-                                    Margin="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CellTappedCommand}"
-                                        CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
-                                        <Setter Property="Stroke" Value="Transparent" />
-                                        <Setter Property="StrokeThickness" Value="0" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="Stroke" Value="#E65100" />
-                                        <Setter Property="StrokeThickness" Value="3" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="{Binding PieceSymbol}"
-                                       FontSize="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.PieceFontSize}"
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center" />
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+                      RowDefinitions="*"
+                      ColumnDefinitions="*">
+                    <CollectionView Grid.Row="0"
+                                    Grid.Column="0"
+                                    ItemsSource="{Binding Cells}"
+                                    SelectionMode="None"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Fill">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:BoardCellViewModel">
+                                <Border BackgroundColor="{Binding SquareBackground}"
+                                        Stroke="Transparent"
+                                        StrokeThickness="0"
+                                        Padding="0"
+                                        Margin="0"
+                                        HorizontalOptions="Fill"
+                                        VerticalOptions="Fill">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CellTappedCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
+                                            <Setter Property="Stroke" Value="Transparent" />
+                                            <Setter Property="StrokeThickness" Value="0" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Stroke" Value="#E65100" />
+                                            <Setter Property="StrokeThickness" Value="3" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding PieceSymbol}"
+                                           FontSize="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.PieceFontSize}"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </Grid>
 
                 <!-- Файлы a…h снизу -->
