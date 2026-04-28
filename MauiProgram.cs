@@ -30,9 +30,16 @@ namespace SigmaChess
             builder.Services.AddTransient<global::SigmaChess.Engine.GameController>();
 
             builder.Services.AddTransient<AuthViewModel>();
+            builder.Services.AddTransient<MainPageViewModel>();
             builder.Services.AddTransient<GameViewModel>();
 
             builder.Services.AddTransient<AuthPage>();
+            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<PuzzlesPage>();
+            builder.Services.AddTransient<FriendsPage>();
+            builder.Services.AddTransient<WatchPage>();
+            builder.Services.AddTransient<LearnPage>();
+            builder.Services.AddTransient<MenuPage>();
             builder.Services.AddTransient<GamePage>();
             builder.Services.AddSingleton<AppShell>();
 

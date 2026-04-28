@@ -8,8 +8,8 @@
     Title="SigmaChess">
 
     <ShellContent
-        Route="AuthPage"
-        ContentTemplate="{DataTemplate views:AuthPage}" />
+        Route="MainPage"
+        ContentTemplate="{DataTemplate views:MainPage}" />
 
     <ShellContent
         Route="GamePage"

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.MainPage"
+             x:DataType="viewModels:MainPageViewModel"
+             Title="Home">
+    <Grid Padding="10"
+          RowDefinitions="Auto,*,Auto"
+          RowSpacing="10">
+        <Border Grid.Row="0"
+                Stroke="#222"
+                StrokeThickness="1"
+                BackgroundColor="#E6E6E6"
+                Padding="8"
+                StrokeShape="RoundRectangle 10">
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="8">
+                <Button Grid.Column="0"
+                        Text="Log In"
+                        Command="{Binding OpenLoginCommand}"
+                        FontSize="12"
+                        Padding="10,4" />
+                <Label Grid.Column="1"
+                       Text="SIGMA CHE$$"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center"
+                       FontAttributes="Bold"
+                       FontSize="18" />
+                <Button Grid.Column="2"
+                        Text="Sign In"
+                        Command="{Binding OpenSignupCommand}"
+                        FontSize="12"
+                        Padding="10,4" />
+            </Grid>
+        </Border>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="10">
+                <Button Text="Play with bots"
+                        Command="{Binding OpenBotsCommand}"
+                        HorizontalOptions="Fill" />
+
+                <Button Text="Solve puzzles"
+                        Command="{Binding OpenPuzzlesCommand}"
+                        HorizontalOptions="Fill" />
+
+                <Button Text="Add friends"
+                        Command="{Binding OpenFriendsCommand}"
+                        HorizontalOptions="Fill" />
+
+                <Button Text="Watch"
+                        Command="{Binding OpenWatchCommand}"
+                        HorizontalOptions="Fill" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Border Grid.Row="2"
+                Stroke="#222"
+                StrokeThickness="1"
+                BackgroundColor="#E6E6E6"
+                Padding="4"
+                StrokeShape="RoundRectangle 10">
+            <Grid ColumnDefinitions="*,*,*,*,*"
+                  ColumnSpacing="4">
+                <Button Grid.Column="0"
+                        Text="Home"
+                        Command="{Binding OpenHomeCommand}"
+                        FontSize="12" />
+                <Button Grid.Column="1"
+                        Text="Puzzles"
+                        Command="{Binding OpenPuzzlesCommand}"
+                        FontSize="12" />
+                <Button Grid.Column="2"
+                        Text="Learn"
+                        Command="{Binding OpenLearnCommand}"
+                        FontSize="12" />
+                <Button Grid.Column="3"
+                        Text="Watch"
+                        Command="{Binding OpenWatchCommand}"
+                        FontSize="12" />
+                <Button Grid.Column="4"
+                        Text="Menu"
+                        Command="{Binding OpenMenuCommand}"
+                        FontSize="12" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

@@ -3,7 +3,7 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-public class AuthViewModel : ViewModelBase
+public class AuthViewModel : ViewModelBase, IQueryAttributable
 {
     private readonly AppService _appService;
     private bool _isRegisterMode;
@@ -102,7 +102,7 @@ public class AuthViewModel : ViewModelBase
         ErrorMessage = success ? string.Empty : "Login failed";
         if (success)
         {
-            await Shell.Current.GoToAsync("//GamePage");
+            await Shell.Current.GoToAsync("//MainPage");
         }
     }
 
@@ -146,5 +146,16 @@ public class AuthViewModel : ViewModelBase
 
         ErrorMessage = string.Empty;
         return true;
+    }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (!query.TryGetValue("mode", out var modeObj))
+        {
+            return;
+        }
+
+        var mode = modeObj?.ToString();
+        IsRegisterMode = string.Equals(mode, "register", StringComparison.OrdinalIgnoreCase);
     }
 }
