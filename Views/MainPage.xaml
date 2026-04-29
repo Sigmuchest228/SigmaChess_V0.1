@@ -4,85 +4,203 @@
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
              x:Class="SigmaChess.Views.MainPage"
              x:DataType="viewModels:MainPageViewModel"
-             Title="Home">
-    <Grid Padding="10"
+             Title="Home"
+             BackgroundColor="#3E3E3E">
+    <Grid Padding="8"
           RowDefinitions="Auto,*,Auto"
-          RowSpacing="10">
+          RowSpacing="8">
         <Border Grid.Row="0"
-                Stroke="#222"
+                Stroke="#181818"
                 StrokeThickness="1"
-                BackgroundColor="#E6E6E6"
-                Padding="8"
-                StrokeShape="RoundRectangle 10">
+                BackgroundColor="#4A4A4A"
+                Padding="6"
+                StrokeShape="RoundRectangle 8">
             <Grid ColumnDefinitions="Auto,*,Auto"
-                  ColumnSpacing="8">
+                  ColumnSpacing="6">
                 <Button Grid.Column="0"
                         Text="Log In"
                         Command="{Binding OpenLoginCommand}"
-                        FontSize="12"
-                        Padding="10,4" />
+                        FontSize="11"
+                        BackgroundColor="#D7D7D7"
+                        TextColor="#121212"
+                        Padding="10,3"
+                        MinimumHeightRequest="30" />
                 <Label Grid.Column="1"
-                       Text="SIGMA CHE$$"
+                       Text="SIGMA CHESS"
                        HorizontalTextAlignment="Center"
                        VerticalTextAlignment="Center"
+                       TextColor="#ECECEC"
                        FontAttributes="Bold"
-                       FontSize="18" />
+                       FontSize="20" />
                 <Button Grid.Column="2"
-                        Text="Sign In"
+                        Text="Sign up"
                         Command="{Binding OpenSignupCommand}"
-                        FontSize="12"
-                        Padding="10,4" />
+                        FontSize="11"
+                        BackgroundColor="#D7D7D7"
+                        TextColor="#121212"
+                        Padding="10,3"
+                        MinimumHeightRequest="30" />
             </Grid>
         </Border>
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="10">
-                <Button Text="Play with bots"
-                        Command="{Binding OpenBotsCommand}"
-                        HorizontalOptions="Fill" />
+                <Border Stroke="#1D1D1D"
+                        StrokeThickness="1"
+                        BackgroundColor="#595959"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 8">
+                    <Grid ColumnDefinitions="64,*"
+                          ColumnSpacing="10">
+                        <Border BackgroundColor="#BFC2B5"
+                                Stroke="#2A2A2A"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="64"
+                                WidthRequest="64" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="2">
+                            <Button Text="Play with bots"
+                                    Command="{Binding OpenBotsCommand}"
+                                    BackgroundColor="#595959"
+                                    TextColor="#F2F2F2"
+                                    HorizontalOptions="Start"
+                                    Padding="0"
+                                    FontAttributes="Bold" />
+                            <Label Text="Choose bot level and play online."
+                                   FontSize="12"
+                                   TextColor="#D0D0D0" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
 
-                <Button Text="Solve puzzles"
-                        Command="{Binding OpenPuzzlesCommand}"
-                        HorizontalOptions="Fill" />
+                <Border Stroke="#1D1D1D"
+                        StrokeThickness="1"
+                        BackgroundColor="#595959"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 8">
+                    <Grid ColumnDefinitions="64,*"
+                          ColumnSpacing="10">
+                        <Border BackgroundColor="#BFC2B5"
+                                Stroke="#2A2A2A"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="64"
+                                WidthRequest="64" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="2">
+                            <Button Text="Solve puzzles"
+                                    Command="{Binding OpenPuzzlesCommand}"
+                                    BackgroundColor="#595959"
+                                    TextColor="#F2F2F2"
+                                    HorizontalOptions="Start"
+                                    Padding="0"
+                                    FontAttributes="Bold" />
+                            <Label Text="Sharpen your tactical skills daily."
+                                   FontSize="12"
+                                   TextColor="#D0D0D0" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
 
-                <Button Text="Add friends"
-                        Command="{Binding OpenFriendsCommand}"
-                        HorizontalOptions="Fill" />
+                <Border Stroke="#1D1D1D"
+                        StrokeThickness="1"
+                        BackgroundColor="#595959"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 8">
+                    <Grid ColumnDefinitions="64,*"
+                          ColumnSpacing="10">
+                        <Border BackgroundColor="#BFC2B5"
+                                Stroke="#2A2A2A"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="64"
+                                WidthRequest="64" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="2">
+                            <Button Text="Add friends"
+                                    Command="{Binding OpenFriendsCommand}"
+                                    BackgroundColor="#595959"
+                                    TextColor="#F2F2F2"
+                                    HorizontalOptions="Start"
+                                    Padding="0"
+                                    FontAttributes="Bold" />
+                            <Label Text="Find players and challenge together."
+                                   FontSize="12"
+                                   TextColor="#D0D0D0" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
 
-                <Button Text="Watch"
-                        Command="{Binding OpenWatchCommand}"
-                        HorizontalOptions="Fill" />
+                <Border Stroke="#1D1D1D"
+                        StrokeThickness="1"
+                        BackgroundColor="#595959"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 8">
+                    <Grid ColumnDefinitions="64,*"
+                          ColumnSpacing="10">
+                        <Border BackgroundColor="#BFC2B5"
+                                Stroke="#2A2A2A"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="64"
+                                WidthRequest="64" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="2">
+                            <Button Text="Watch"
+                                    Command="{Binding OpenWatchCommand}"
+                                    BackgroundColor="#595959"
+                                    TextColor="#F2F2F2"
+                                    HorizontalOptions="Start"
+                                    Padding="0"
+                                    FontAttributes="Bold" />
+                            <Label Text="Catch important chess events."
+                                   FontSize="12"
+                                   TextColor="#D0D0D0" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
 
         <Border Grid.Row="2"
-                Stroke="#222"
+                Stroke="#171717"
                 StrokeThickness="1"
-                BackgroundColor="#E6E6E6"
+                BackgroundColor="#4A4A4A"
                 Padding="4"
-                StrokeShape="RoundRectangle 10">
+                StrokeShape="RoundRectangle 8">
             <Grid ColumnDefinitions="*,*,*,*,*"
                   ColumnSpacing="4">
                 <Button Grid.Column="0"
                         Text="Home"
                         Command="{Binding OpenHomeCommand}"
-                        FontSize="12" />
+                        FontSize="11"
+                        BackgroundColor="#4A4A4A"
+                        TextColor="#F1F1F1" />
                 <Button Grid.Column="1"
                         Text="Puzzles"
                         Command="{Binding OpenPuzzlesCommand}"
-                        FontSize="12" />
+                        FontSize="11"
+                        BackgroundColor="#4A4A4A"
+                        TextColor="#F1F1F1" />
                 <Button Grid.Column="2"
                         Text="Learn"
                         Command="{Binding OpenLearnCommand}"
-                        FontSize="12" />
+                        FontSize="11"
+                        BackgroundColor="#4A4A4A"
+                        TextColor="#F1F1F1" />
                 <Button Grid.Column="3"
                         Text="Watch"
                         Command="{Binding OpenWatchCommand}"
-                        FontSize="12" />
+                        FontSize="11"
+                        BackgroundColor="#4A4A4A"
+                        TextColor="#F1F1F1" />
                 <Button Grid.Column="4"
                         Text="Menu"
                         Command="{Binding OpenMenuCommand}"
-                        FontSize="12" />
+                        FontSize="11"
+                        BackgroundColor="#4A4A4A"
+                        TextColor="#F1F1F1" />
             </Grid>
         </Border>
     </Grid>
