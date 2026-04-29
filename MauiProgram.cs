@@ -32,6 +32,11 @@ namespace SigmaChess
             builder.Services.AddTransient<AuthViewModel>();
             builder.Services.AddTransient<MainPageViewModel>();
             builder.Services.AddTransient<GameViewModel>();
+            builder.Services.AddTransient<PuzzlesPageViewModel>();
+            builder.Services.AddTransient<FriendsPageViewModel>();
+            builder.Services.AddTransient<WatchPageViewModel>();
+            builder.Services.AddTransient<LearnPageViewModel>();
+            builder.Services.AddTransient<MenuPageViewModel>();
 
             builder.Services.AddTransient<AuthPage>();
             builder.Services.AddTransient<MainPage>();
