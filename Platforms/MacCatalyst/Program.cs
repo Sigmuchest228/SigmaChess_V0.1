@@ -3,13 +3,12 @@ using UIKit;
 
 namespace SigmaChess
 {
+    // Стандартная точка входа Mac Catalyst-приложения (зеркало iOS/Program.cs).
+    // Шаблон MAUI создаёт её автоматически — мы здесь ничего не меняем.
     public class Program
     {
-        // This is the main entry point of the application.
         static void Main(string[] args)
         {
-            // if you want to use a different Application Delegate class from "AppDelegate"
-            // you can specify it here.
             UIApplication.Main(args, null, typeof(AppDelegate));
         }
     }

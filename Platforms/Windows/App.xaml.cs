@@ -1,19 +1,12 @@
 ﻿using Microsoft.UI.Xaml;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace SigmaChess.WinUI
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
+    // Стандартная стартовая обвязка MAUI для Windows (WinUI 3). Шаблон создаёт этот класс
+    // как точку входа WinUI-приложения; нам остаётся только связать его с общим MauiProgram,
+    // никакой собственной логики Windows-специфики мы здесь не пишем.
     public partial class App : MauiWinUIApplication
     {
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
         public App()
         {
             this.InitializeComponent();

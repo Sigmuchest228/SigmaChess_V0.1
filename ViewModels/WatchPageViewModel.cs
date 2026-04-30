@@ -1,5 +1,6 @@
 namespace SigmaChess.ViewModels;
 
+/// <summary>Заглушка под раздел «Watch» — трансляции/анонсы турниров.</summary>
 public class WatchPageViewModel : ViewModelBase
 {
     public string Title => "Watch";

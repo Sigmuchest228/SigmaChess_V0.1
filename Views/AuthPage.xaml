@@ -5,16 +5,12 @@
              x:Class="SigmaChess.Views.AuthPage"
              x:DataType="viewModels:AuthViewModel"
              Title="{Binding PageTitle}">
-    <ScrollView>
-        <VerticalStackLayout Padding="24"
+    <Grid RowDefinitions="*,Auto,*"
+          Padding="24">
+        <VerticalStackLayout Grid.Row="1"
                              Spacing="14"
                              HorizontalOptions="Center"
                              MaximumWidthRequest="420">
-            <Label Text="{Binding PageTitle}"
-                   FontAttributes="Bold"
-                   FontSize="24"
-                   HorizontalTextAlignment="Center" />
-
             <Label Text="{Binding ErrorMessage}"
                    TextColor="Red"
                    MinimumHeightRequest="22"
@@ -53,5 +49,5 @@
                     TextColor="#1565C0"
                     IsVisible="{Binding IsRegisterMode}" />
         </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 </ContentPage>

@@ -1,8 +1,17 @@
 using System.Windows.Input;
+using SigmaChess;
 using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
+/// <summary>
+/// ViewModel страницы входа/регистрации. Один и тот же экран служит обоим режимам;
+/// переключение между ними — через <see cref="IsRegisterMode"/>.
+/// <para>
+/// Реализует <see cref="IQueryAttributable"/>, чтобы Shell мог открыть страницу
+/// сразу в нужном режиме через query-параметр <c>?mode=register</c>.
+/// </para>
+/// </summary>
 public class AuthViewModel : ViewModelBase, IQueryAttributable
 {
     private readonly AppService _appService;
@@ -21,6 +30,11 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         ShowRegisterModeCommand = new Command(() => IsRegisterMode = true);
     }
 
+    /// <summary>
+    /// true — экран в режиме регистрации, false — в режиме логина.
+    /// При смене сбрасывается ошибка и обновляются зависимые свойства, на которые
+    /// привязан XAML (заголовок страницы, инверсный флаг IsLoginMode).
+    /// </summary>
     public bool IsRegisterMode
     {
         get => _isRegisterMode;
@@ -73,6 +87,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
+    /// <summary>Текст ошибки под формой. Пустая строка прячет блок (через Converter в XAML).</summary>
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -91,6 +106,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
 
     public ICommand ShowRegisterModeCommand { get; }
 
+    // Логин: валидируем поля, дёргаем сервис, при успехе — переключаем Shell на «авторизованный»
+    // и переходим на главную. Переключение Shell обязательно делать на UI-потоке.
     private async Task LoginAsync()
     {
         if (!ValidateEmailAndPassword(requireConfirmPassword: false))
@@ -102,10 +119,18 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         ErrorMessage = success ? string.Empty : "Login failed";
         if (success)
         {
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                if (Application.Current is App app)
+                {
+                    app.SetAuthenticatedShell();
+                }
+            });
             await Shell.Current.GoToAsync("//MainPage");
         }
     }
 
+    // Регистрация: при успехе переводим экран в режим логина, чтобы пользователь сразу залогинился.
     private async Task RegisterAsync()
     {
         if (!ValidateEmailAndPassword(requireConfirmPassword: true))
@@ -124,6 +149,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         IsRegisterMode = false;
     }
 
+    // Минимальная валидация на стороне клиента: формат email, длина пароля, совпадение паролей при регистрации.
     private bool ValidateEmailAndPassword(bool requireConfirmPassword)
     {
         if (string.IsNullOrWhiteSpace(Email) || !Email.Contains('@') || !Email.Contains('.'))
@@ -148,6 +174,10 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         return true;
     }
 
+    /// <summary>
+    /// Принимает query-параметры из Shell. Поддерживается только <c>mode=register</c>;
+    /// при остальных значениях остаёмся в режиме логина.
+    /// </summary>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (!query.TryGetValue("mode", out var modeObj))

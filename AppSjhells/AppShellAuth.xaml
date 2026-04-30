@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    x:Class="SigmaChess.AppShellAuth"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:SigmaChess.Views"
+    xmlns:m="clr-namespace:SigmaChess"
+    Shell.FlyoutBehavior="Flyout"
+    Shell.TabBarIsVisible="False"
+    Title="SigmaChess">
+
+    <FlyoutItem Title="Home">
+        <ShellContent
+            Title="Home"
+            Route="MainPage"
+            ContentTemplate="{DataTemplate m:MainPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Play on 1 device">
+        <ShellContent
+            Title="Game"
+            Route="GamePage"
+            ContentTemplate="{DataTemplate views:GamePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Play with bots">
+        <ShellContent
+            Title="Bots"
+            Route="BotsGamePage"
+            ContentTemplate="{DataTemplate views:BotsGamePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Puzzles">
+        <ShellContent
+            Title="Puzzles"
+            Route="PuzzlesPage"
+            ContentTemplate="{DataTemplate views:PuzzlesPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Friends">
+        <ShellContent
+            Title="Friends"
+            Route="FriendsPage"
+            ContentTemplate="{DataTemplate views:FriendsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Watch">
+        <ShellContent
+            Title="Watch"
+            Route="WatchPage"
+            ContentTemplate="{DataTemplate views:WatchPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Learn">
+        <ShellContent
+            Title="Learn"
+            Route="LearnPage"
+            ContentTemplate="{DataTemplate views:LearnPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Menu">
+        <ShellContent
+            Title="Menu"
+            Route="MenuPage"
+            ContentTemplate="{DataTemplate views:MenuPage}" />
+    </FlyoutItem>
+
+    <MenuItem Clicked="MenuItem_Logout_Clicked" Text="Logout" />
+</Shell>

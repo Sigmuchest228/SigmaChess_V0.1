@@ -3,6 +3,9 @@ using Android.Runtime;
 
 namespace SigmaChess
 {
+    // Стандартный Android-Application класс, создаваемый шаблоном MAUI.
+    // Здесь мы только пробрасываем CreateMauiApp в общий MauiProgram — никакой собственной
+    // логики не добавляем.
     [Application]
     public class MainApplication : MauiApplication
     {

@@ -1,14 +1,7 @@
 namespace SigmaChess.Engine;
 
-public class Piece
-{
-    public PieceType Type { get; set; }
-
-    public PieceColor Color { get; set; }
-
-    public Piece(PieceType type, PieceColor color)
-    {
-        Type = type;
-        Color = color;
-    }
-}
+/// <summary>
+/// Иммутабельная фигура: тип + цвет. Превращение пешки делается через создание
+/// нового Piece(promo, color), а не мутацию — поэтому setter'ов нет.
+/// </summary>
+public sealed record Piece(PieceType Type, PieceColor Color);

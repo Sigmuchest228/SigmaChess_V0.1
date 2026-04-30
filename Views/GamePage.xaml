@@ -4,134 +4,91 @@
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
              x:Class="SigmaChess.Views.GamePage"
              x:DataType="viewModels:GameViewModel"
-             Title="Игра">
+             Title="Game">
 
-    <ScrollView VerticalOptions="Fill"
-                HorizontalOptions="Fill"
-                Padding="12,8">
-        <VerticalStackLayout Spacing="12"
-                             HorizontalOptions="Center"
-                             VerticalOptions="Start"
-                             MaximumWidthRequest="720">
+    <Grid Padding="12,8"
+          RowDefinitions="Auto,Auto,*,Auto"
+          RowSpacing="8">
 
-            <Label Text="{Binding CurrentTurnText}"
-                   FontSize="20"
+        <!-- Хедер: Назад | ход | таймер‑слот | ⚙ -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*,Auto,Auto"
+              ColumnSpacing="8">
+            <Button Grid.Column="0"
+                    Text="←"
+                    FontSize="20"
+                    Padding="10,4"
+                    Command="{Binding BackToMenuCommand}" />
+            <Label Grid.Column="1"
+                   Text="{Binding CurrentTurnText}"
+                   FontSize="18"
                    FontAttributes="Bold"
-                   HorizontalTextAlignment="Center"
-                   HorizontalOptions="Center" />
+                   VerticalOptions="Center"
+                   HorizontalTextAlignment="Center" />
+            <Border Grid.Column="2"
+                    x:Name="TimerSlot"
+                    WidthRequest="84"
+                    HeightRequest="36"
+                    Stroke="#888"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 6"
+                    BackgroundColor="#EEE">
+                <Label Text="--:--"
+                       FontSize="14"
+                       TextColor="#666"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
+            <Button Grid.Column="3"
+                    Text="⚙"
+                    FontSize="20"
+                    Padding="10,4"
+                    Clicked="OnSettingsClicked" />
+        </Grid>
 
+        <!-- Статус (Шах) + результат -->
+        <VerticalStackLayout Grid.Row="1" Spacing="2">
             <Label Text="{Binding GameStatusText}"
-                   FontSize="17"
+                   FontSize="16"
                    HorizontalTextAlignment="Center"
                    HorizontalOptions="Center"
                    TextColor="#B71C1C"
-                   MinimumHeightRequest="22" />
-
+                   MinimumHeightRequest="20" />
             <Label Text="{Binding GameResultText}"
                    FontSize="18"
                    FontAttributes="Bold"
                    HorizontalTextAlignment="Center"
                    HorizontalOptions="Center"
                    TextColor="#1565C0"
-                   MinimumHeightRequest="26" />
-
-            <!-- Доска 8×8 + координаты; квадрат задаётся BoardExtent из VM (экран). -->
-            <Grid WidthRequest="{Binding BoardGridWidth}"
-                  HeightRequest="{Binding BoardGridHeight}"
-                  HorizontalOptions="Center"
-                  VerticalOptions="Center"
-                  ColumnDefinitions="28,*"
-                  RowDefinitions="*,28"
-                  RowSpacing="0"
-                  ColumnSpacing="4">
-
-                <!-- Ранги 8…1 слева -->
-                <Grid Grid.Row="0"
-                      Grid.Column="0"
-                      RowDefinitions="*,*,*,*,*,*,*,*"
-                      WidthRequest="28"
-                      HeightRequest="{Binding BoardExtent}"
-                      VerticalOptions="Start">
-                    <Label Grid.Row="0" Text="8" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="1" Text="7" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="2" Text="6" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="3" Text="5" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="4" Text="4" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="5" Text="3" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="6" Text="2" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Row="7" Text="1" VerticalOptions="Center" HorizontalTextAlignment="End" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                </Grid>
-
-                <!-- Квадратное поле 8×8: фиксированный квадрат + Vertical Span 8 (порядок ItemsSource — по колонкам). -->
-                <Grid Grid.Row="0"
-                      Grid.Column="1"
-                      WidthRequest="{Binding BoardExtent}"
-                      HeightRequest="{Binding BoardExtent}"
-                      MinimumWidthRequest="{Binding BoardExtent}"
-                      MinimumHeightRequest="{Binding BoardExtent}"
-                      HorizontalOptions="Center"
-                      VerticalOptions="Start"
-                      RowDefinitions="*"
-                      ColumnDefinitions="*">
-                    <CollectionView Grid.Row="0"
-                                    Grid.Column="0"
-                                    ItemsSource="{Binding Cells}"
-                                    SelectionMode="None"
-                                    HorizontalOptions="Fill"
-                                    VerticalOptions="Fill">
-                        <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="8" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="viewModels:BoardCellViewModel">
-                                <Border BackgroundColor="{Binding SquareBackground}"
-                                        Stroke="Transparent"
-                                        StrokeThickness="0"
-                                        Padding="0"
-                                        Margin="0"
-                                        HorizontalOptions="Fill"
-                                        VerticalOptions="Fill">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CellTappedCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
-                                            <Setter Property="Stroke" Value="Transparent" />
-                                            <Setter Property="StrokeThickness" Value="0" />
-                                        </DataTrigger>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Stroke" Value="#E65100" />
-                                            <Setter Property="StrokeThickness" Value="3" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-                                    <Label Text="{Binding PieceSymbol}"
-                                           FontSize="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.PieceFontSize}"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center" />
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Grid>
-
-                <!-- Файлы a…h снизу -->
-                <Grid Grid.Row="1"
-                      Grid.Column="1"
-                      ColumnDefinitions="*,*,*,*,*,*,*,*"
-                      HeightRequest="28"
-                      WidthRequest="{Binding BoardExtent}">
-                    <Label Grid.Column="0" Text="a" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="1" Text="b" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="2" Text="c" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="3" Text="d" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="4" Text="e" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="5" Text="f" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="6" Text="g" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                    <Label Grid.Column="7" Text="h" VerticalOptions="Center" HorizontalTextAlignment="Center" FontSize="{Binding CoordFontSize}" TextColor="#444" />
-                </Grid>
-            </Grid>
+                   MinimumHeightRequest="22" />
         </VerticalStackLayout>
-    </ScrollView>
+
+        <!-- Доска + координаты в едином 9×9 Grid: общие *‑строки/колонки ⇒ идеальное выравнивание -->
+        <Grid Grid.Row="2"
+              x:Name="BoardWithCoords"
+              HorizontalOptions="Center"
+              VerticalOptions="Center"
+              WidthRequest="{Binding BoardGridSize}"
+              HeightRequest="{Binding BoardGridSize}"
+              ColumnDefinitions="28,*,*,*,*,*,*,*,*"
+              RowDefinitions="*,*,*,*,*,*,*,*,28">
+            <!-- 8 рангов в col=0 (rows 0..7) и 8 файлов в row=8 (cols 1..8)
+                 создаются в code-behind для возможности переворота. -->
+            <Grid x:Name="BoardGrid"
+                  Grid.Row="0" Grid.RowSpan="8"
+                  Grid.Column="1" Grid.ColumnSpan="8"
+                  RowDefinitions="*,*,*,*,*,*,*,*"
+                  ColumnDefinitions="*,*,*,*,*,*,*,*"
+                  RowSpacing="0"
+                  ColumnSpacing="0" />
+        </Grid>
+
+        <!-- Нижний слот под действия (Сдаться / Ничья / История) — заглушка на будущее -->
+        <Border Grid.Row="3"
+                HeightRequest="48"
+                Stroke="#CCC"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 6"
+                BackgroundColor="#FAFAFA" />
+    </Grid>
 </ContentPage>

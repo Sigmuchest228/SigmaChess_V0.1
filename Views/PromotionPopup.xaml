@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="SigmaChess.Views.PromotionPopup"
+               CanBeDismissedByTappingOutsideOfPopup="False"
+               Color="Transparent">
+    <Border Padding="16"
+            StrokeShape="RoundRectangle 12"
+            BackgroundColor="#FAFAFA"
+            WidthRequest="320">
+        <VerticalStackLayout Spacing="12">
+            <Label Text="Promote pawn to..."
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="#1A1A1A" />
+            <Grid ColumnDefinitions="*,*,*,*"
+                  ColumnSpacing="6">
+                <Button Grid.Column="0"
+                        x:Name="QueenButton"
+                        Clicked="OnQueenClicked"
+                        FontSize="36"
+                        BackgroundColor="#EEE"
+                        TextColor="#1A1A1A" />
+                <Button Grid.Column="1"
+                        x:Name="RookButton"
+                        Clicked="OnRookClicked"
+                        FontSize="36"
+                        BackgroundColor="#EEE"
+                        TextColor="#1A1A1A" />
+                <Button Grid.Column="2"
+                        x:Name="BishopButton"
+                        Clicked="OnBishopClicked"
+                        FontSize="36"
+                        BackgroundColor="#EEE"
+                        TextColor="#1A1A1A" />
+                <Button Grid.Column="3"
+                        x:Name="KnightButton"
+                        Clicked="OnKnightClicked"
+                        FontSize="36"
+                        BackgroundColor="#EEE"
+                        TextColor="#1A1A1A" />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>
