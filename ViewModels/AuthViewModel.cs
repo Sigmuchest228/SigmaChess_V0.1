@@ -24,6 +24,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
     public AuthViewModel(AppService appService)
     {
         _appService = appService;
+        GuestCommand = new Command(async () => await LoginAsGuestAsync());
         LoginCommand = new Command(async () => await LoginAsync());
         RegisterCommand = new Command(async () => await RegisterAsync());
         ShowLoginModeCommand = new Command(() => IsRegisterMode = false);
@@ -97,8 +98,10 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             OnPropertyChanged();
         }
     }
+    public ICommand GuestCommand { get; }
 
     public ICommand LoginCommand { get; }
+
 
     public ICommand RegisterCommand { get; }
 
@@ -106,6 +109,10 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
 
     public ICommand ShowRegisterModeCommand { get; }
 
+    private async Task LoginAsGuestAsync()
+    {
+        await Shell.Current.GoToAsync("//MainPage");
+    }
     // Логин: валидируем поля, дёргаем сервис, при успехе — переключаем Shell на «авторизованный»
     // и переходим на главную. Переключение Shell обязательно делать на UI-потоке.
     private async Task LoginAsync()

@@ -109,6 +109,7 @@ public class AppService
         }
     }
 
+
     /// <summary>Аналогично <see cref="TryRegister"/>, но с проверкой существующих учётных данных.</summary>
     public async Task<bool> TryLogin(string email, string password)
     {

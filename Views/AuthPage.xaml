@@ -48,6 +48,18 @@
                     BackgroundColor="Transparent"
                     TextColor="#1565C0"
                     IsVisible="{Binding IsRegisterMode}" />
+           
+            <Button Text="Enter As Guest"
+                    Command="{Binding GuestCommand}"
+                    BackgroundColor="Gray"
+                    TextColor="White"
+                    IsVisible="{Binding IsLoginMode}" />
+
+            <Button Text="Enter As Guest"
+                    Command="{Binding GuestCommand}"
+                    BackgroundColor="Gray"
+                    TextColor="White"
+                    IsVisible="{Binding IsRegisterMode}" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

@@ -7,8 +7,16 @@
     xmlns:m="clr-namespace:SigmaChess"
     FlyoutBehavior="Disabled"
     Shell.TabBarIsVisible="False"
+    FlowDirection="LeftToRight"
     Title="SigmaChess">
 
+    <FlyoutItem Title="Auth Page">
+        <ShellContent
+        Title="Auth Page"
+        Route="AuthPage"
+        ContentTemplate="{DataTemplate views:AuthPage}" />
+    </FlyoutItem>
+    
     <FlyoutItem Title="Home">
         <ShellContent
             Title="Home"
