@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using Microsoft.Maui.Devices;
 using SigmaChess.Engine;
@@ -8,14 +9,19 @@ using SigmaChess.Views;
 namespace SigmaChess.ViewModels;
 
 /// <summary>
-/// ViewModel страницы игры на одном устройстве. Связывает <see cref="GameController"/>
+/// ViewModel страницы игры на одном устройстве. Связывает <see cref="SigmaChess.Engine.GameController"/>
 /// (движок) с UI-коллекцией из 64 ячеек, обрабатывает тапы пользователя, рассчитывает
 /// размер доски под экран и хранит пользовательские настройки партии.
 /// </summary>
 public class GameViewModel : ViewModelBase
 {
-    private readonly GameController _controller;
+    private readonly global::SigmaChess.Engine.GameController _controller;
     private readonly BoardLayoutService _layoutService;
+    private readonly AppService _appService;
+    private readonly FirebaseSyncRepository _firebaseSync;
+    private readonly List<FirebaseMoveRecord> _moveHistory = [];
+    private readonly Stopwatch _moveStopwatch = new();
+    private bool _gameSaved;
     private double _boardExtent = 320;
     private string _gameStatusText = string.Empty;
     private string _gameResultText = string.Empty;
@@ -145,10 +151,16 @@ public class GameViewModel : ViewModelBase
         }
     }
 
-    public GameViewModel(GameController controller, BoardLayoutService layoutService)
+    public GameViewModel(
+        global::SigmaChess.Engine.GameController controller,
+        BoardLayoutService layoutService,
+        AppService appService,
+        FirebaseSyncRepository firebaseSync)
     {
         _controller = controller;
         _layoutService = layoutService;
+        _appService = appService;
+        _firebaseSync = firebaseSync;
 
         CellTappedCommand = new Command<BoardCellViewModel>(async cell => await OnCellTappedAsync(cell));
         BackToMenuCommand = new Command(async () => await GoBackToMenuAsync());
@@ -174,6 +186,7 @@ public class GameViewModel : ViewModelBase
         UpdateBoardExtent();
         EnsureCellsCreated();
         _controller.InitializeGame();
+        ResetCloudGameTracking();
         RefreshBoard();
         _isInitialized = true;
         return Task.CompletedTask;
@@ -184,7 +197,15 @@ public class GameViewModel : ViewModelBase
     {
         _controller.InitializeGame();
         IsBoardFlipped = false;
+        ResetCloudGameTracking();
         RefreshBoard();
+    }
+
+    private void ResetCloudGameTracking()
+    {
+        _moveHistory.Clear();
+        _gameSaved = false;
+        _moveStopwatch.Restart();
     }
 
     private async Task GoBackToMenuAsync()
@@ -291,6 +312,25 @@ public class GameViewModel : ViewModelBase
 
         var turnBefore = _controller.GetCurrentTurn();
         var executed = _controller.ExecutePlannedMove(pending);
+        if (executed)
+        {
+            var elapsed = _moveStopwatch.Elapsed.TotalSeconds;
+            _moveStopwatch.Restart();
+            var uid = _appService.CurrentUserId ?? string.Empty;
+            var halfIndex = _moveHistory.Count;
+            var fullMoveNumber = halfIndex / 2 + 1;
+            var resultNow = _controller.GetGameResult();
+            _moveHistory.Add(new FirebaseMoveRecord
+            {
+                FromPos = AlgebraicNotation.ToSquare(pending.From),
+                ToPos = AlgebraicNotation.ToSquare(pending.To),
+                MoveNumber = fullMoveNumber,
+                User = uid,
+                TimePerMove = Math.Round(elapsed, 2),
+                IsCheckmate = resultNow == GameResult.Checkmate ? true : null
+            });
+        }
+
         var turnAfter = _controller.GetCurrentTurn();
 
         if (executed && turnBefore != turnAfter && AutoFlipEnabled)
@@ -300,6 +340,52 @@ public class GameViewModel : ViewModelBase
         }
 
         RefreshBoard();
+        await TrySaveCompletedGameIfTerminalAsync();
+    }
+
+    /// <summary>
+    /// Однократно пишет завершённую партию в RTDB при наличии сессии Firebase.
+    /// </summary>
+    private async Task TrySaveCompletedGameIfTerminalAsync()
+    {
+        if (_gameSaved)
+        {
+            return;
+        }
+
+        var r = _controller.GetGameResult();
+        if (r is GameResult.Ongoing or GameResult.Check)
+        {
+            return;
+        }
+
+        var uid = _appService.CurrentUserId;
+        if (string.IsNullOrEmpty(uid) || _moveHistory.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await _firebaseSync.EnsureUserProfileAsync().ConfigureAwait(false);
+            var winnerColor = FirebaseSyncRepository.ResolveWinnerColor(r, _controller.GetCurrentTurn());
+            var endReason = FirebaseSyncRepository.ToEndReason(r);
+            var gameId = await _firebaseSync.SaveCompletedGameAsync(
+                    uid,
+                    uid,
+                    winnerColor,
+                    endReason,
+                    _moveHistory)
+                .ConfigureAwait(false);
+            if (gameId is not null)
+            {
+                _gameSaved = true;
+            }
+        }
+        catch
+        {
+            // Ошибка сети или правил — партия локально уже завершена.
+        }
     }
 
     /// <summary>

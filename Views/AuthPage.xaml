@@ -20,6 +20,10 @@
                    Keyboard="Email"
                    Text="{Binding Email}" />
 
+            <Entry Placeholder="Username (2–24 characters)"
+                   Text="{Binding UserName}"
+                   IsVisible="{Binding IsRegisterMode}" />
+
             <Entry Placeholder="Password"
                    IsPassword="True"
                    Text="{Binding Password}" />

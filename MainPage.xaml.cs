@@ -16,12 +16,13 @@ public partial class MainPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         if (BindingContext is MainPageViewModel vm)
         {
             vm.RefreshAuthState();
+            await vm.SyncFirebaseProfileIfNeededAsync();
         }
     }
 }

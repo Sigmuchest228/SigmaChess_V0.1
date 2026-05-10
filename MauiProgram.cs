@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using SigmaChess.Engine;
 using SigmaChess.Services;
 using SigmaChess.ViewModels;
 using SigmaChess.Views;
@@ -37,8 +36,9 @@ public static class MauiProgram
         // BoardLayoutService — чистая утилита без состояния.
         // GameController — хранит партию, поэтому при возврате на GamePage партия НЕ сбрасывается.
         builder.Services.AddSingleton<AppService>();
+        builder.Services.AddSingleton<FirebaseSyncRepository>();
         builder.Services.AddSingleton<BoardLayoutService>();
-        builder.Services.AddSingleton<GameController>();
+        builder.Services.AddSingleton<global::SigmaChess.Engine.GameController>();
 
         // ---------- ViewModels ----------
         // Transient: легковесные VM-ы — на каждое открытие страницы получает свежий экземпляр.

@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using SigmaChess;
+using SigmaChess.Services;
 using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
@@ -12,6 +13,8 @@ namespace SigmaChess.ViewModels;
 /// </summary>
 public class MainPageViewModel : ViewModelBase
 {
+    private readonly AppService _appService;
+    private readonly FirebaseSyncRepository _firebaseSync;
     // Маршруты, зарегистрированные как корни Shell. Их нужно открывать с префиксом "//"
     // (Shell интерпретирует "//" как абсолютный путь к корню, а не относительный).
     private static readonly HashSet<string> ShellRootRoutes =
@@ -48,8 +51,10 @@ public class MainPageViewModel : ViewModelBase
     private const string LearnRoute = nameof(LearnPage);
     private const string MenuRoute = nameof(MenuPage);
 
-    public MainPageViewModel()
+    public MainPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
+        _appService = appService;
+        _firebaseSync = firebaseSync;
         OpenLoginCommand = new Command(async () => await NavigateAsync(AuthLoginRoute));
         OpenSignupCommand = new Command(async () => await NavigateAsync(AuthSignupRoute));
 
@@ -95,6 +100,26 @@ public class MainPageViewModel : ViewModelBase
     public void RefreshAuthState()
     {
         IsGuest = Shell.Current is AppShellNotAuth;
+    }
+
+    /// <summary>
+    /// При восстановленной из диска сессии Firebase подтягивает <c>users/{uid}</c>, если его ещё нет.
+    /// </summary>
+    public async Task SyncFirebaseProfileIfNeededAsync()
+    {
+        if (string.IsNullOrEmpty(_appService.CurrentUserId))
+        {
+            return;
+        }
+
+        try
+        {
+            await _firebaseSync.EnsureUserProfileAsync().ConfigureAwait(false);
+        }
+        catch
+        {
+            // Офлайн — попытка повторится при следующем появлении главной или сохранении партии.
+        }
     }
 
     // Универсальный навигатор: проверяет гость-гейт, нормализует маршрут и идёт в Shell.
