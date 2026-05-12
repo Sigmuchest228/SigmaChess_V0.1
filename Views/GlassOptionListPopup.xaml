@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="SigmaChess.Views.GlassOptionListPopup"
+               CanBeDismissedByTappingOutsideOfPopup="True"
+               Color="Transparent">
+    <toolkit:Popup.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </toolkit:Popup.Resources>
+    <Border Padding="22"
+            Background="{StaticResource GlassCardBrush}"
+            Stroke="{StaticResource GlassStrokeBrush}"
+            StrokeShape="RoundRectangle 18"
+            StrokeThickness="1"
+            WidthRequest="320">
+        <Border.Shadow>
+            <Shadow Brush="#88000000"
+                    Offset="0,12"
+                    Opacity="0.38"
+                    Radius="22" />
+        </Border.Shadow>
+        <VerticalStackLayout Spacing="10">
+            <Label x:Name="TitleLabel"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="{StaticResource GlassTitleText}" />
+            <ScrollView MaximumHeightRequest="360">
+                <VerticalStackLayout x:Name="OptionsStack"
+                                     Spacing="8" />
+            </ScrollView>
+            <Button Padding="14,10"
+                    BackgroundColor="Transparent"
+                    BorderWidth="0"
+                    Clicked="OnCancelClicked"
+                    CornerRadius="14"
+                    FontSize="14"
+                    Text="Cancel"
+                    TextColor="{StaticResource GlassSubtitleText}" />
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

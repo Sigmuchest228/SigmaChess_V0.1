@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SigmaChess.Services;
 using SigmaChess.ViewModels;
@@ -37,6 +38,9 @@ public static class MauiProgram
         // GameController — хранит партию, поэтому при возврате на GamePage партия НЕ сбрасывается.
         builder.Services.AddSingleton<AppService>();
         builder.Services.AddSingleton<FirebaseSyncRepository>();
+        builder.Services.AddSingleton<IPhotoSourcePicker, PhotoSourcePicker>();
+        builder.Services.AddSingleton<IUserAppearanceService, UserAppearanceService>();
+        builder.Services.AddSingleton<LogoutSessionService>();
         builder.Services.AddSingleton<BoardLayoutService>();
         builder.Services.AddSingleton<global::SigmaChess.Engine.GameController>();
 
@@ -47,25 +51,34 @@ public static class MauiProgram
         builder.Services.AddTransient<AuthViewModel>();
         builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddSingleton<GameViewModel>();
+        builder.Services.AddSingleton<BottomNavigationCoordinator>();
         builder.Services.AddTransient<PuzzlesPageViewModel>();
-        builder.Services.AddTransient<FriendsPageViewModel>();
-        builder.Services.AddTransient<WatchPageViewModel>();
-        builder.Services.AddTransient<LearnPageViewModel>();
-        builder.Services.AddTransient<MenuPageViewModel>();
+        builder.Services.AddTransient<FollowsPageViewModel>();
+        builder.Services.AddTransient<PlayedGamesPageViewModel>();
+        builder.Services.AddTransient<GameReplayViewModel>();
+        builder.Services.AddTransient<PuzzleSolveViewModel>();
+        builder.Services.AddTransient<UserProfileViewModel>();
+        // Singleton: коллекция пользовательских обоев и пресетов должна сохраняться между входами на страницу.
+        builder.Services.AddSingleton<ProfileWallpaperSettingsViewModel>();
+        builder.Services.AddTransient<SettingsViewModel>();
 
         // ---------- Страницы ----------
-        // Все страницы регистрируем как Transient — Shell сам управляет их жизненным циклом
-        // (создаёт при заходе в таб, освобождает при выгрузке таб-стека).
+        // Transient: Shell и RegisterRoute создают страницы через DI по шаблонам и при push-маршрутах.
+        builder.Services.AddTransient<LoaderPage>();
         builder.Services.AddTransient<AuthPage>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<PuzzlesPage>();
-        builder.Services.AddTransient<FriendsPage>();
-        builder.Services.AddTransient<WatchPage>();
-        builder.Services.AddTransient<LearnPage>();
-        builder.Services.AddTransient<MenuPage>();
+        builder.Services.AddTransient<FollowsPage>();
+        builder.Services.AddTransient<PlayedGamesPage>();
+        builder.Services.AddTransient<GameReplayPage>();
+        builder.Services.AddTransient<PuzzleSolvePage>();
         builder.Services.AddTransient<GamePage>();
-        builder.Services.AddTransient<BotsGamePage>();
+        builder.Services.AddTransient<UserProfilePage>();
+        builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<ProfileWallpaperSettingsPage>();
 
-        return builder.Build();
+        var app = builder.Build();
+        App.Services = app.Services;
+        return app;
     }
 }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.SettingsPage"
+             x:DataType="viewModels:SettingsViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <views:WallpaperBackdrop Grid.RowSpan="2" />
+
+        <Grid Grid.Row="0"
+              Padding="14,18,14,0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="12">
+            <Button Grid.Column="0"
+                    Style="{StaticResource GlassChevronBackButton}"
+                    Command="{Binding GoBackCommand}"
+                    Text="‹"
+                    VerticalOptions="Center" />
+            <Border Grid.Column="1"
+                    Padding="14,10"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Background="{StaticResource GlassTitleChipBrush}"
+                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1">
+                <Label CharacterSpacing="0.8"
+                       FontAttributes="Bold"
+                       FontSize="22"
+                       Text="Settings"
+                       TextColor="{StaticResource GlassTitleText}" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Margin="14,14,14,0"
+                Padding="18"
+                Background="{StaticResource GlassCardBrush}"
+                Stroke="{StaticResource GlassStrokeBrush}"
+                StrokeShape="RoundRectangle 18"
+                StrokeThickness="1"
+                VerticalOptions="Fill">
+            <Grid RowDefinitions="Auto,Auto,*,Auto"
+                  RowSpacing="16">
+                <Label Grid.Row="0"
+                       FontSize="14"
+                       Opacity="0.92"
+                       Text="Customize how SigmaChess looks."
+                       TextColor="{StaticResource GlassSubtitleText}" />
+                <Button Grid.Row="1"
+                        Command="{Binding OpenWallpapersCommand}"
+                        Text="Wallpapers"
+                        BackgroundColor="#62FFFFFF"
+                        CornerRadius="12"
+                        TextColor="{StaticResource GlassTitleText}" />
+                <BoxView Grid.Row="2"
+                         Color="Transparent" />
+                <Button Grid.Row="3"
+                        Command="{Binding LogoutCommand}"
+                        Text="Log out"
+                        BackgroundColor="#BBD32F2F"
+                        CornerRadius="12"
+                        FontAttributes="Bold"
+                        Padding="14,14"
+                        TextColor="#FFFFF5F5" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.Maui.Controls;
 using CommunityToolkit.Maui.Views;
 using SigmaChess.ViewModels;
 
@@ -8,7 +9,7 @@ namespace SigmaChess.Views;
 /// Страница партии. Сама XAML описывает только обрамление (заголовок, статусные лейблы,
 /// кнопки и квадратный Grid доски), а 64 клетки и подписи координат страница строит
 /// программно при первом <see cref="OnAppearing"/>. Это позволяет:
-///   - один раз создать UI-объекты (бордеры, лейблы) и переиспользовать их при перерисовке,
+///   - один раз создать UI-объекты (сетки клеток, лейблы) и переиспользовать их при перерисовке,
 ///   - перевешивать клетки при перевороте доски через <c>Grid.SetRow/SetColumn</c>,
 ///     не пересоздавая View'ы.
 /// </summary>
@@ -16,7 +17,7 @@ public partial class GamePage : ContentPage
 {
     // Кэшируем ссылки на View-элементы, чтобы переворот/обновления выполнялись по индексу,
     // без перебора всего визуального дерева.
-    private readonly Border[,] _squares = new Border[8, 8];
+    private readonly Grid[,] _squares = new Grid[8, 8];
     private readonly Label[] _rankLabels = new Label[8];
     private readonly Label[] _fileLabels = new Label[8];
     private bool _boardBuilt;
@@ -43,6 +44,27 @@ public partial class GamePage : ContentPage
 
         await vm.EnsureInitializedAsync();
 
+        if (vm.ShouldOfferTimeSetupOnAppear())
+        {
+            var popup = new NewGameSetupPopup();
+            await this.ShowPopupAsync(popup);
+            var result = await popup.WaitForResultAsync();
+            if (result is null)
+            {
+                await vm.NavigateToMainPageAsync();
+                return;
+            }
+
+            vm.ApplyTimeControl(result);
+            vm.StartNewGameAfterSetup();
+        }
+        else
+        {
+            vm.RefreshBoard();
+        }
+
+        PlaceBoardForLayoutMode(vm);
+
         if (!_boardBuilt)
         {
             BuildSquares(vm);
@@ -50,11 +72,15 @@ public partial class GamePage : ContentPage
             _boardBuilt = true;
         }
 
+        vm.OnGamePageAppeared();
+
         ApplyOrientation(vm.IsBoardFlipped);
 
-        // Сначала -=, потом += — чтобы не подписаться дважды при повторном входе на страницу.
         vm.PropertyChanged -= OnViewModelPropertyChanged;
         vm.PropertyChanged += OnViewModelPropertyChanged;
+
+        BoardGrid.InvalidateMeasure();
+        BoardWithCoords.InvalidateMeasure();
     }
 
     protected override void OnDisappearing()
@@ -62,18 +88,45 @@ public partial class GamePage : ContentPage
         base.OnDisappearing();
         if (BindingContext is GameViewModel vm)
         {
-            // Отписка обязательна — иначе VM (Singleton) будет держать ссылку на страницу
-            // и она не соберётся GC.
+            vm.OnGamePageDisappeared();
             vm.PropertyChanged -= OnViewModelPropertyChanged;
         }
     }
 
-    // Реагируем только на смену IsBoardFlipped — остальные свойства обновятся через биндинги.
+    private void PlaceBoardForLayoutMode(GameViewModel vm)
+    {
+        var targetHost = vm.IsFaceToFaceLayout ? FaceToFaceBoardHost : CasualBoardHost;
+        if (ReferenceEquals(BoardWithCoords.Parent, targetHost))
+        {
+            return;
+        }
+
+        if (BoardWithCoords.Parent is Layout layout)
+        {
+            layout.Children.Remove(BoardWithCoords);
+        }
+
+        targetHost.Children.Add(BoardWithCoords);
+    }
+
+    // Реагируем на смену ориентации доски и режима раскладки (доска переносится между хостами).
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (sender is GameViewModel vm && e.PropertyName == nameof(GameViewModel.IsBoardFlipped))
+        if (sender is not GameViewModel vm)
+        {
+            return;
+        }
+
+        if (e.PropertyName == nameof(GameViewModel.IsBoardFlipped))
         {
             ApplyOrientation(vm.IsBoardFlipped);
+        }
+
+        if (e.PropertyName == nameof(GameViewModel.LayoutMode))
+        {
+            PlaceBoardForLayoutMode(vm);
+            BoardGrid.InvalidateMeasure();
+            BoardWithCoords.InvalidateMeasure();
         }
     }
 
@@ -88,14 +141,16 @@ public partial class GamePage : ContentPage
         await this.ShowPopupAsync(new GameSettingsPopup(vm));
     }
 
-    // Создаёт 64 клетки доски: Border + Label (фигура), биндинги, DataTrigger для рамки выбора, тап.
+    // Создаёт 64 клетки доски: Grid + Label (фигура), фон клетки, тап.
     // ВАЖНО: каждый SetBinding получает СВОЙ Binding-объект (через `new Binding(...)`).
     // Если переиспользовать один экземпляр Binding между несколькими BindableObject —
     // MAUI кидает InvalidOperationException "Binding instances cannot be reused".
+    //
+    // Контейнер — Grid, не Border: на WinUI у Border даже при StrokeThickness=0 и прозрачном
+    // Stroke иногда остаётся «рваная» тёмная линия по периметру; выделение и так задаётся
+    // цветом фона в <see cref="BoardCellViewModel.SquareBackground"/> (IsSelected).
     private void BuildSquares(GameViewModel vm)
     {
-        var selectedColor = Color.FromArgb("#E65100");
-
         foreach (var cell in vm.Cells)
         {
             var label = new Label
@@ -107,38 +162,30 @@ public partial class GamePage : ContentPage
             // Размер шрифта берём с GameViewModel (он зависит от размера доски).
             // Здесь нужен кастомный source, поэтому используем new Binding(...).
             label.SetBinding(Label.FontSizeProperty, new Binding(nameof(GameViewModel.PieceFontSize), source: vm));
+            label.SetBinding(Label.RotationProperty, nameof(BoardCellViewModel.PieceGlyphRotation));
 
-            var border = new Border
+            var square = new Grid
             {
                 BindingContext = cell,
-                Stroke = Colors.Transparent,
-                StrokeThickness = 0,
                 Padding = 0,
                 Margin = 0,
-                Content = label,
             };
-            border.SetBinding(BackgroundColorProperty, nameof(BoardCellViewModel.SquareBackground));
-
-            // DataTrigger: когда у ячейки IsSelected=true — рисуем оранжевую рамку вокруг.
-            // Альтернативой был бы триггер в стиле/XAML, но программно проще держать всё рядом.
-            var trigger = new DataTrigger(typeof(Border))
-            {
-                Binding = new Binding(nameof(BoardCellViewModel.IsSelected)),
-                Value = true,
-            };
-            trigger.Setters.Add(new Setter { Property = Border.StrokeProperty, Value = selectedColor });
-            trigger.Setters.Add(new Setter { Property = Border.StrokeThicknessProperty, Value = 3 });
-            border.Triggers.Add(trigger);
+            square.SetBinding(BackgroundColorProperty, nameof(BoardCellViewModel.SquareBackground));
+            square.Children.Add(label);
 
             // Захватываем cell в локальную переменную, иначе все лямбды разделят ту же ссылку
             // и в обработчик попадёт последняя клетка цикла (классический foreach-closure-bug).
             var capturedCell = cell;
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) => await vm.OnCellTappedAsync(capturedCell);
-            border.GestureRecognizers.Add(tap);
+            square.GestureRecognizers.Add(tap);
 
-            _squares[cell.Row, cell.Col] = border;
-            BoardGrid.Children.Add(border);
+            _squares[cell.Row, cell.Col] = square;
+            // Сразу задаём ячейку сетки; иначе по умолчанию все дети попадают в (0,0) до первого
+            // ApplyOrientation — на WinUI при повторном появлении страницы это даёт «одна клетка».
+            Grid.SetRow(square, cell.Row);
+            Grid.SetColumn(square, cell.Col);
+            BoardGrid.Children.Add(square);
         }
     }
 
@@ -187,14 +234,14 @@ public partial class GamePage : ContentPage
         {
             for (var c = 0; c < 8; c++)
             {
-                var border = _squares[r, c];
-                if (border is null)
+                var square = _squares[r, c];
+                if (square is null)
                 {
                     continue;
                 }
 
-                Grid.SetRow(border, flipped ? 7 - r : r);
-                Grid.SetColumn(border, flipped ? 7 - c : c);
+                Grid.SetRow(square, flipped ? 7 - r : r);
+                Grid.SetColumn(square, flipped ? 7 - c : c);
             }
         }
 

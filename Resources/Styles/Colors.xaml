@@ -6,8 +6,8 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
+    <Color x:Key="Primary">#12161F</Color>
+    <Color x:Key="PrimaryDark">#2A3448</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>
     <Color x:Key="Secondary">#DFD8F7</Color>
     <Color x:Key="SecondaryDarkText">#9880e5</Color>
@@ -42,4 +42,70 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+
+    <!-- Crystal / glass morphism (dark UI over wallpapers) -->
+    <Color x:Key="GlassPageFallback">#12161F</Color>
+    <Color x:Key="GlassStroke">#5CFFFFFF</Color>
+    <Color x:Key="GlassStrokeSoft">#38FFFFFF</Color>
+    <Color x:Key="GlassTitleText">#FFFFFF</Color>
+    <Color x:Key="GlassSubtitleText">#D8FFFFFF</Color>
+
+    <SolidColorBrush x:Key="GlassStrokeBrush" Color="{StaticResource GlassStroke}"/>
+    <SolidColorBrush x:Key="GlassStrokeSoftBrush" Color="{StaticResource GlassStrokeSoft}"/>
+
+    <!-- Layer 2: icy veil over wallpaper -->
+    <LinearGradientBrush x:Key="CrystalVeilBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#22FFFFFF" Offset="0.0" />
+        <GradientStop Color="#06000000" Offset="0.4" />
+        <GradientStop Color="#52000000" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Layer 3: frosted panels -->
+    <LinearGradientBrush x:Key="GlassCardBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#58FFFFFF" Offset="0.0" />
+        <GradientStop Color="#22FFFFFF" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GlassChromeBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#62FFFFFF" Offset="0.0" />
+        <GradientStop Color="#2EFFFFFF" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GlassIconChipBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#70FFFFFF" Offset="0.0" />
+        <GradientStop Color="#28FFFFFF" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GlassTitleChipBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#46FFFFFF" Offset="0.0" />
+        <GradientStop Color="#1EFFFFFF" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GlassPrimaryButtonBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F2FFFFFF" Offset="0.0" />
+        <GradientStop Color="#CCE8EEF5" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GlassNavButtonBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#42FFFFFF" Offset="0.0" />
+        <GradientStop Color="#1CFFFFFF" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="GlassNavButtonSelectedBrush" Color="#B8182233" />
+
+    <Style x:Key="GlassChevronBackButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource GlassNavButtonBrush}" />
+        <Setter Property="TextColor" Value="{StaticResource GlassTitleText}" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="MinimumWidthRequest" Value="46" />
+        <Setter Property="BorderWidth" Value="0" />
+    </Style>
+
+    <Style x:Key="GlassGameStepButton" TargetType="Button" BasedOn="{StaticResource GlassChevronBackButton}">
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="FontSize" Value="22" />
+    </Style>
 </ResourceDictionary>

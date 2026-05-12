@@ -5,41 +5,64 @@
                x:Class="SigmaChess.Views.PromotionPopup"
                CanBeDismissedByTappingOutsideOfPopup="False"
                Color="Transparent">
-    <Border Padding="16"
-            StrokeShape="RoundRectangle 12"
-            BackgroundColor="#FAFAFA"
+    <toolkit:Popup.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </toolkit:Popup.Resources>
+    <Border Padding="18"
+            Background="{StaticResource GlassCardBrush}"
+            Stroke="{StaticResource GlassStrokeBrush}"
+            StrokeShape="RoundRectangle 18"
+            StrokeThickness="1"
             WidthRequest="320">
+        <Border.Shadow>
+            <Shadow Brush="#88000000"
+                    Offset="0,12"
+                    Opacity="0.38"
+                    Radius="22" />
+        </Border.Shadow>
         <VerticalStackLayout Spacing="12">
-            <Label Text="Promote pawn to..."
-                   FontAttributes="Bold"
+            <Label FontAttributes="Bold"
                    FontSize="18"
-                   TextColor="#1A1A1A" />
+                   Text="Promote pawn to..."
+                   TextColor="{StaticResource GlassTitleText}" />
             <Grid ColumnDefinitions="*,*,*,*"
-                  ColumnSpacing="6">
+                  ColumnSpacing="8">
                 <Button Grid.Column="0"
                         x:Name="QueenButton"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
                         Clicked="OnQueenClicked"
+                        CornerRadius="14"
                         FontSize="36"
-                        BackgroundColor="#EEE"
-                        TextColor="#1A1A1A" />
+                        TextColor="{StaticResource GlassTitleText}" />
                 <Button Grid.Column="1"
                         x:Name="RookButton"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
                         Clicked="OnRookClicked"
+                        CornerRadius="14"
                         FontSize="36"
-                        BackgroundColor="#EEE"
-                        TextColor="#1A1A1A" />
+                        TextColor="{StaticResource GlassTitleText}" />
                 <Button Grid.Column="2"
                         x:Name="BishopButton"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
                         Clicked="OnBishopClicked"
+                        CornerRadius="14"
                         FontSize="36"
-                        BackgroundColor="#EEE"
-                        TextColor="#1A1A1A" />
+                        TextColor="{StaticResource GlassTitleText}" />
                 <Button Grid.Column="3"
                         x:Name="KnightButton"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
                         Clicked="OnKnightClicked"
+                        CornerRadius="14"
                         FontSize="36"
-                        BackgroundColor="#EEE"
-                        TextColor="#1A1A1A" />
+                        TextColor="{StaticResource GlassTitleText}" />
             </Grid>
         </VerticalStackLayout>
     </Border>

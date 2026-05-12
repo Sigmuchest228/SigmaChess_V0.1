@@ -78,23 +78,35 @@ public class AppService
                 "https://sigmachess-75f04-default-rtdb.europe-west1.firebasedatabase.app",
                 new FirebaseOptions
                 {
-                    AuthTokenAsyncFactory = () => GetIdTokenAsync(auth)
+                    AuthTokenAsyncFactory = () => GetIdTokenFromAuthClientAsync(auth, false)
                 });
             _auth = auth;
         }
     }
 
+    /// <summary>IdToken текущего пользователя для Storage и др.; <c>null</c>, если сессии нет.</summary>
+    public Task<string?> GetIdTokenAsync(bool forceRefresh = false)
+    {
+        EnsureInitialized();
+        if (_auth?.User is null)
+        {
+            return Task.FromResult<string?>(null);
+        }
+
+        return GetIdTokenFromAuthClientAsync(_auth, forceRefresh);
+    }
+
     /// <summary>
     /// Свежий IdToken для каждого запроса RTDB (кэш Firebase сам отдаёт актуальный при forceRefresh: false).
     /// </summary>
-    private static async Task<string?> GetIdTokenAsync(FirebaseAuthClient auth)
+    private static async Task<string?> GetIdTokenFromAuthClientAsync(FirebaseAuthClient auth, bool forceRefresh)
     {
         if (auth.User is null)
         {
             return null;
         }
 
-        return await auth.User.GetIdTokenAsync(false).ConfigureAwait(false);
+        return await auth.User.GetIdTokenAsync(forceRefresh).ConfigureAwait(false);
     }
 
     public async Task<bool> TryRegister(string email, string password)

@@ -1,16 +1,21 @@
 {
   "rules": {
     "users": {
+      ".read": "auth != null",
+      ".indexOn": ["UserNameLower"],
       "$uid": {
-        ".read": "auth != null",
         ".write": "auth != null && auth.uid == $uid"
       }
     },
     "ChessGames": {
       "$gameId": {
-        ".read": "auth != null && data.exists() && (data.child('WhiteUid').val() == auth.uid || data.child('BlackUid').val() == auth.uid)",
+        ".read": "auth != null && data.exists()",
         ".write": "auth != null && (!data.exists() ? (newData.child('WhiteUid').val() == auth.uid || newData.child('BlackUid').val() == auth.uid) : (data.child('WhiteUid').val() == auth.uid || data.child('BlackUid').val() == auth.uid))"
       }
+    },
+    "ChessPuzzles": {
+      ".read": "auth != null",
+      ".write": false
     }
   }
 }

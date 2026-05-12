@@ -36,7 +36,42 @@ public class GameController
         ClearSelection();
     }
 
+    /// <summary>Загружает позицию из FEN (задачи).</summary>
+    public bool TryLoadFromFen(string fen)
+    {
+        var loaded = Game.TryFromFen(fen);
+        if (loaded is null)
+        {
+            return false;
+        }
+
+        _game = loaded;
+        _lastMove = null;
+        ClearSelection();
+        return true;
+    }
+
     public Board GetBoard() => _game.Board;
+
+    /// <summary>Полная история сыгранных ходов (полуходы по очереди белые-чёрные).</summary>
+    public IReadOnlyList<Move> GetPlayedMoves() => _game.History;
+
+    /// <summary>
+    /// Пересборка позиции после <paramref name="appliedPlies"/> полуходов из текущей истории
+    /// (0 — стартовая позиция, <see cref="GetPlayedMoves"/>.Count — совпадает с живой доской).
+    /// </summary>
+    public Board GetBoardAfterPlies(int appliedPlies)
+    {
+        var history = _game.History;
+        var n = Math.Clamp(appliedPlies, 0, history.Count);
+        var replay = new Game();
+        for (var i = 0; i < n; i++)
+        {
+            replay.MakeMove(history[i]);
+        }
+
+        return replay.Board;
+    }
 
     public PieceColor GetCurrentTurn() => _game.CurrentTurn;
 
@@ -127,6 +162,27 @@ public class GameController
         return true;
     }
 
+    /// <summary>Сброс и воспроизведение списка ходов (просмотр сохранённой партии).</summary>
+    public bool TryReplayMoves(IReadOnlyList<Move> moves)
+    {
+        InitializeGame();
+        Move? last = null;
+        foreach (var m in moves)
+        {
+            if (!_game.MakeMove(m))
+            {
+                InitializeGame();
+                return false;
+            }
+
+            last = m;
+        }
+
+        _lastMove = last;
+        ClearSelection();
+        return true;
+    }
+
     /// <summary>
     /// Тонкая обёртка для случаев без промоушена: сразу либо двигает, либо переключает выбор.
     /// Оставлена ради обратной совместимости и для тестов; основной поток UI идёт через
@@ -143,6 +199,9 @@ public class GameController
 
         HandleSelection(row, col);
     }
+
+    /// <summary>Снимает выделение фигуры (например после неверного хода в задаче).</summary>
+    public void ClearMoveSelection() => ClearSelection();
 
     private void ClearSelection()
     {

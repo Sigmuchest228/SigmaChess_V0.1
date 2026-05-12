@@ -1,69 +1,108 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
              x:Class="SigmaChess.Views.AuthPage"
              x:DataType="viewModels:AuthViewModel"
-             Title="{Binding PageTitle}">
-    <Grid RowDefinitions="*,Auto,*"
-          Padding="24">
-        <VerticalStackLayout Grid.Row="1"
-                             Spacing="14"
-                             HorizontalOptions="Center"
-                             MaximumWidthRequest="420">
-            <Label Text="{Binding ErrorMessage}"
-                   TextColor="Red"
-                   MinimumHeightRequest="22"
-                   HorizontalTextAlignment="Center" />
+             BackgroundColor="{StaticResource GlassPageFallback}"
+             Shell.NavBarIsVisible="False">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid>
+        <views:WallpaperBackdrop />
+        <Grid Padding="24"
+              RowDefinitions="*,Auto,*">
+            <VerticalStackLayout Grid.Row="1"
+                                 HorizontalOptions="Center"
+                                 MaximumWidthRequest="420"
+                                 Spacing="14">
+                <Label FontAttributes="Bold"
+                       FontSize="22"
+                       HorizontalTextAlignment="Center"
+                       Text="{Binding PageTitle}"
+                       TextColor="{StaticResource GlassTitleText}" />
+                <Label HorizontalTextAlignment="Center"
+                       MinimumHeightRequest="22"
+                       Text="{Binding ErrorMessage}"
+                       TextColor="#FFB4B4" />
 
-            <Entry Placeholder="Email"
-                   Keyboard="Email"
-                   Text="{Binding Email}" />
+                <Entry Keyboard="Email"
+                       Placeholder="Email"
+                       PlaceholderColor="{StaticResource GlassSubtitleText}"
+                       Text="{Binding Email}"
+                       TextColor="{StaticResource GlassTitleText}" />
 
-            <Entry Placeholder="Username (2–24 characters)"
-                   Text="{Binding UserName}"
-                   IsVisible="{Binding IsRegisterMode}" />
+                <Entry IsVisible="{Binding IsRegisterMode}"
+                       Placeholder="Username (2–24 characters)"
+                       PlaceholderColor="{StaticResource GlassSubtitleText}"
+                       Text="{Binding UserName}"
+                       TextColor="{StaticResource GlassTitleText}" />
 
-            <Entry Placeholder="Password"
-                   IsPassword="True"
-                   Text="{Binding Password}" />
+                <Entry IsPassword="True"
+                       Placeholder="Password"
+                       PlaceholderColor="{StaticResource GlassSubtitleText}"
+                       Text="{Binding Password}"
+                       TextColor="{StaticResource GlassTitleText}" />
 
-            <Entry Placeholder="Confirm password"
-                   IsPassword="True"
-                   Text="{Binding ConfirmPassword}"
-                   IsVisible="{Binding IsRegisterMode}" />
+                <Entry IsPassword="True"
+                       IsVisible="{Binding IsRegisterMode}"
+                       Placeholder="Confirm password"
+                       PlaceholderColor="{StaticResource GlassSubtitleText}"
+                       Text="{Binding ConfirmPassword}"
+                       TextColor="{StaticResource GlassTitleText}" />
 
-            <Button Text="Login"
-                    Command="{Binding LoginCommand}"
-                    IsVisible="{Binding IsLoginMode}" />
+                <Button Background="{StaticResource GlassPrimaryButtonBrush}"
+                        BorderWidth="0"
+                        Command="{Binding LoginCommand}"
+                        CornerRadius="14"
+                        IsVisible="{Binding IsLoginMode}"
+                        Text="Login"
+                        TextColor="#16161C" />
 
-            <Button Text="Create Account"
-                    Command="{Binding RegisterCommand}"
-                    IsVisible="{Binding IsRegisterMode}" />
+                <Button Background="{StaticResource GlassPrimaryButtonBrush}"
+                        BorderWidth="0"
+                        Command="{Binding RegisterCommand}"
+                        CornerRadius="14"
+                        IsVisible="{Binding IsRegisterMode}"
+                        Text="Create Account"
+                        TextColor="#16161C" />
 
-            <Button Text="Need an account?"
-                    Command="{Binding ShowRegisterModeCommand}"
-                    BackgroundColor="Transparent"
-                    TextColor="#1565C0"
-                    IsVisible="{Binding IsLoginMode}" />
+                <Button BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        Command="{Binding ShowRegisterModeCommand}"
+                        IsVisible="{Binding IsLoginMode}"
+                        Text="Need an account?"
+                        TextColor="{StaticResource GlassSubtitleText}" />
 
-            <Button Text="Already have an account?"
-                    Command="{Binding ShowLoginModeCommand}"
-                    BackgroundColor="Transparent"
-                    TextColor="#1565C0"
-                    IsVisible="{Binding IsRegisterMode}" />
-           
-            <Button Text="Enter As Guest"
-                    Command="{Binding GuestCommand}"
-                    BackgroundColor="Gray"
-                    TextColor="White"
-                    IsVisible="{Binding IsLoginMode}" />
+                <Button BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        Command="{Binding ShowLoginModeCommand}"
+                        IsVisible="{Binding IsRegisterMode}"
+                        Text="Already have an account?"
+                        TextColor="{StaticResource GlassSubtitleText}" />
 
-            <Button Text="Enter As Guest"
-                    Command="{Binding GuestCommand}"
-                    BackgroundColor="Gray"
-                    TextColor="White"
-                    IsVisible="{Binding IsRegisterMode}" />
-        </VerticalStackLayout>
+                <Button Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
+                        Command="{Binding GuestCommand}"
+                        CornerRadius="14"
+                        IsVisible="{Binding IsLoginMode}"
+                        Text="Enter As Guest"
+                        TextColor="{StaticResource GlassTitleText}" />
+
+                <Button Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
+                        Command="{Binding GuestCommand}"
+                        CornerRadius="14"
+                        IsVisible="{Binding IsRegisterMode}"
+                        Text="Enter As Guest"
+                        TextColor="{StaticResource GlassTitleText}" />
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

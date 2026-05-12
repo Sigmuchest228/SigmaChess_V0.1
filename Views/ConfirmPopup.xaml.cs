@@ -42,7 +42,8 @@ public partial class ConfirmPopup : Popup
     public static async Task<bool> ShowAsync(string title, string message, string primaryText, string? secondaryText = null)
     {
         // Берём активную страницу из Shell — на ней показываем попап.
-        var page = Shell.Current?.CurrentPage;
+        var page = Shell.Current?.CurrentPage
+                   ?? Application.Current?.Windows.FirstOrDefault()?.Page;
         if (page is null)
         {
             return false;

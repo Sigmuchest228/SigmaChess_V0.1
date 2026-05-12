@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             x:Class="SigmaChess.MainPage"
+             x:DataType="viewModels:MainPageViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <!-- На WinUI словарь приложения иногда недоступен при первом разборе корневой страницы — подключаем цвета явно. -->
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid>
+        <views:WallpaperBackdrop />
+
+        <!-- Layer 3: chrome -->
+        <Grid Padding="14,12,14,14"
+              RowDefinitions="Auto,*,Auto,Auto"
+              RowSpacing="14">
+            <Border Grid.Row="0"
+                    Padding="12,10"
+                    Background="{StaticResource GlassChromeBrush}"
+                    Stroke="{StaticResource GlassStrokeBrush}"
+                    StrokeShape="RoundRectangle 16"
+                    StrokeThickness="1">
+                <Border.Shadow>
+                    <Shadow Brush="#80000000"
+                            Offset="0,12"
+                            Opacity="0.35"
+                            Radius="26" />
+                </Border.Shadow>
+                <Grid ColumnDefinitions="84,*,84"
+                      ColumnSpacing="8">
+                    <Grid Grid.Column="0"
+                          MinimumWidthRequest="84"
+                          VerticalOptions="Center">
+                        <Button Padding="12,8"
+                                Background="{StaticResource GlassPrimaryButtonBrush}"
+                                Command="{Binding OpenLoginCommand}"
+                                CornerRadius="12"
+                                FontAttributes="Bold"
+                                FontSize="12"
+                                HorizontalOptions="Center"
+                                IsVisible="{Binding ShowGuestAuthButtons}"
+                                MinimumHeightRequest="38"
+                                Text="Log In"
+                                TextColor="#16161C"
+                                VerticalOptions="Center" />
+                    </Grid>
+                    <Border Grid.Column="1"
+                            Padding="16,8"
+                            Background="{StaticResource GlassTitleChipBrush}"
+                            HorizontalOptions="Center"
+                            Stroke="{StaticResource GlassStrokeSoftBrush}"
+                            StrokeShape="RoundRectangle 16"
+                            StrokeThickness="1"
+                            VerticalOptions="Center">
+                        <Label CharacterSpacing="1.2"
+                               FontAttributes="Bold"
+                               FontSize="17"
+                               HorizontalTextAlignment="Center"
+                               Text="SIGMA CHESS"
+                               TextColor="{StaticResource GlassTitleText}"
+                               VerticalTextAlignment="Center" />
+                    </Border>
+                    <Grid Grid.Column="2"
+                          MinimumWidthRequest="84"
+                          VerticalOptions="Center">
+                        <Button Padding="12,8"
+                                Background="{StaticResource GlassPrimaryButtonBrush}"
+                                Command="{Binding OpenSignupCommand}"
+                                CornerRadius="12"
+                                FontAttributes="Bold"
+                                FontSize="12"
+                                HorizontalOptions="Center"
+                                IsVisible="{Binding ShowGuestAuthButtons}"
+                                MinimumHeightRequest="38"
+                                Text="Sign up"
+                                TextColor="#16161C"
+                                VerticalOptions="Center" />
+                        <Border Padding="2"
+                                Background="#44000000"
+                                HeightRequest="42"
+                                HorizontalOptions="Center"
+                                InputTransparent="False"
+                                IsVisible="{Binding ShowProfileAvatar}"
+                                Stroke="{StaticResource GlassStrokeBrush}"
+                                StrokeShape="RoundRectangle 10"
+                                StrokeThickness="2"
+                                VerticalOptions="Center"
+                                WidthRequest="42">
+                            <Border.Shadow>
+                                <Shadow Brush="#60000000"
+                                        Offset="0,6"
+                                        Opacity="0.45"
+                                        Radius="12" />
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenProfileCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid IsClippedToBounds="True">
+                                <Image Aspect="AspectFill"
+                                       HeightRequest="38"
+                                       WidthRequest="38"
+                                       InputTransparent="True"
+                                       Source="{Binding ProfileAvatarSource}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <ScrollView Grid.Row="1"
+                        BackgroundColor="Transparent">
+                <VerticalStackLayout Padding="0,2,0,4"
+                                     Spacing="14">
+                    <!-- Карточки главного меню (локальная игра, задачи, подписки). -->
+                    <Border Padding="14"
+                            Background="{StaticResource GlassCardBrush}"
+                            Stroke="{StaticResource GlassStrokeBrush}"
+                            StrokeShape="RoundRectangle 16"
+                            StrokeThickness="1">
+                        <Border.Shadow>
+                            <Shadow Brush="#88000000"
+                                    Offset="0,10"
+                                    Opacity="0.35"
+                                    Radius="22" />
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenOneDeviceGameCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="58,*"
+                              ColumnSpacing="14">
+                            <Border Background="{StaticResource GlassIconChipBrush}"
+                                    HeightRequest="56"
+                                    InputTransparent="True"
+                                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                    StrokeShape="RoundRectangle 14"
+                                    StrokeThickness="1"
+                                    WidthRequest="56" />
+                            <VerticalStackLayout Grid.Column="1"
+                                                 InputTransparent="True"
+                                                 Spacing="6"
+                                                 VerticalOptions="Center">
+                                <Border Padding="10,4"
+                                        HorizontalOptions="Start"
+                                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeThickness="1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0"
+                                                             EndPoint="1,0">
+                                            <GradientStop Color="#55FFFFFF"
+                                                          Offset="0" />
+                                            <GradientStop Color="#20FFFFFF"
+                                                          Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Label CharacterSpacing="0.3"
+                                           FontAttributes="Bold"
+                                           FontSize="16"
+                                           LineBreakMode="TailTruncation"
+                                           Text="Play on 1 device"
+                                           TextColor="{StaticResource GlassTitleText}" />
+                                </Border>
+                                <Label FontSize="13"
+                                       LineBreakMode="WordWrap"
+                                       Opacity="0.92"
+                                       Text="Pass the device and play locally."
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <Border Padding="14"
+                            Background="{StaticResource GlassCardBrush}"
+                            Stroke="{StaticResource GlassStrokeBrush}"
+                            StrokeShape="RoundRectangle 16"
+                            StrokeThickness="1">
+                        <Border.Shadow>
+                            <Shadow Brush="#88000000"
+                                    Offset="0,10"
+                                    Opacity="0.35"
+                                    Radius="22" />
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenPuzzlesCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="58,*"
+                              ColumnSpacing="14">
+                            <Border Background="{StaticResource GlassIconChipBrush}"
+                                    HeightRequest="56"
+                                    InputTransparent="True"
+                                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                    StrokeShape="RoundRectangle 14"
+                                    StrokeThickness="1"
+                                    WidthRequest="56" />
+                            <VerticalStackLayout Grid.Column="1"
+                                                 InputTransparent="True"
+                                                 Spacing="6"
+                                                 VerticalOptions="Center">
+                                <Border Padding="10,4"
+                                        HorizontalOptions="Start"
+                                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeThickness="1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0"
+                                                             EndPoint="1,0">
+                                            <GradientStop Color="#55FFFFFF"
+                                                          Offset="0" />
+                                            <GradientStop Color="#20FFFFFF"
+                                                          Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Label CharacterSpacing="0.3"
+                                           FontAttributes="Bold"
+                                           FontSize="16"
+                                           Text="Solve puzzles"
+                                           TextColor="{StaticResource GlassTitleText}" />
+                                </Border>
+                                <Label FontSize="13"
+                                       Opacity="0.92"
+                                       Text="Sharpen your tactical skills daily."
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <Border Padding="14"
+                            Background="{StaticResource GlassCardBrush}"
+                            Stroke="{StaticResource GlassStrokeBrush}"
+                            StrokeShape="RoundRectangle 16"
+                            StrokeThickness="1">
+                        <Border.Shadow>
+                            <Shadow Brush="#88000000"
+                                    Offset="0,10"
+                                    Opacity="0.35"
+                                    Radius="22" />
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenFollowsCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="58,*"
+                              ColumnSpacing="14">
+                            <Border Background="{StaticResource GlassIconChipBrush}"
+                                    HeightRequest="56"
+                                    InputTransparent="True"
+                                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                    StrokeShape="RoundRectangle 14"
+                                    StrokeThickness="1"
+                                    WidthRequest="56" />
+                            <VerticalStackLayout Grid.Column="1"
+                                                 InputTransparent="True"
+                                                 Spacing="6"
+                                                 VerticalOptions="Center">
+                                <Border Padding="10,4"
+                                        HorizontalOptions="Start"
+                                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeThickness="1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0"
+                                                             EndPoint="1,0">
+                                            <GradientStop Color="#55FFFFFF"
+                                                          Offset="0" />
+                                            <GradientStop Color="#20FFFFFF"
+                                                          Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Label CharacterSpacing="0.3"
+                                           FontAttributes="Bold"
+                                           FontSize="16"
+                                           Text="Follows"
+                                           TextColor="{StaticResource GlassTitleText}" />
+                                </Border>
+                                <Label FontSize="13"
+                                       Opacity="0.92"
+                                       Text="Search players and open their profiles."
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Border Grid.Row="2"
+                    Padding="14,12"
+                    Background="{StaticResource GlassNavButtonBrush}"
+                    IsVisible="{Binding ShowPlayedGamesLink}"
+                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenPlayedGamesCommand}" />
+                </Border.GestureRecognizers>
+                <Label CharacterSpacing="0.5"
+                       FontAttributes="Bold"
+                       FontSize="15"
+                       HorizontalTextAlignment="Center"
+                       Text="Played games"
+                       TextColor="{StaticResource GlassTitleText}" />
+            </Border>
+
+            <views:MainBottomNavBar Grid.Row="3"
+                                    Margin="14,8,14,14" />
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -103,6 +103,24 @@ public class BoardCellViewModel : ViewModelBase
     /// <summary>Светлая клетка (по правилу: чётная сумма координат).</summary>
     public bool IsWhiteSquare => (Row + Col) % 2 == 0;
 
+    /// <summary>Поворот глифа фигуры (напр. 180 для чёрных в режиме Face-to-face).</summary>
+    public double PieceGlyphRotation
+    {
+        get => _pieceGlyphRotation;
+        set
+        {
+            if (Math.Abs(_pieceGlyphRotation - value) < 0.01)
+            {
+                return;
+            }
+
+            _pieceGlyphRotation = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private double _pieceGlyphRotation;
+
     /// <summary>Юникод-символ фигуры на клетке (или пустая строка).</summary>
     public string PieceSymbol => GetPieceSymbol(Piece);
 

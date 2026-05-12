@@ -3,50 +3,43 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+               xmlns:views="clr-namespace:SigmaChess.Views"
                x:Class="SigmaChess.Views.GameSettingsPopup"
                x:DataType="viewModels:GameViewModel"
                CanBeDismissedByTappingOutsideOfPopup="True"
                Color="Transparent">
-    <Border Padding="20"
-            StrokeShape="RoundRectangle 12"
-            BackgroundColor="#FAFAFA"
+    <toolkit:Popup.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </toolkit:Popup.Resources>
+    <Border Padding="22"
+            Background="{StaticResource GlassCardBrush}"
+            Stroke="{StaticResource GlassStrokeBrush}"
+            StrokeShape="RoundRectangle 18"
+            StrokeThickness="1"
             WidthRequest="320">
+        <Border.Shadow>
+            <Shadow Brush="#88000000"
+                    Offset="0,12"
+                    Opacity="0.38"
+                    Radius="22" />
+        </Border.Shadow>
         <VerticalStackLayout Spacing="14">
-            <Label Text="Game settings"
-                   FontAttributes="Bold"
+            <Label FontAttributes="Bold"
                    FontSize="18"
-                   TextColor="#1A1A1A" />
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <Label Grid.Column="0"
-                       Text="Auto-flip board each move"
-                       VerticalOptions="Center" />
-                <Switch Grid.Column="1"
-                        IsToggled="{Binding AutoFlipEnabled}" />
-            </Grid>
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <Label Grid.Column="0"
-                       Text="Highlight last move"
-                       VerticalOptions="Center" />
-                <Switch Grid.Column="1"
-                        IsToggled="{Binding HighlightLastMoveEnabled}" />
-            </Grid>
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <Label Grid.Column="0"
-                       Text="Auto-queen promotion"
-                       VerticalOptions="Center" />
-                <Switch Grid.Column="1"
-                        IsToggled="{Binding AutoQueenEnabled}" />
-            </Grid>
-
-            <Button Text="New game"
-                    Clicked="OnNewGameClicked" />
-            <Button Text="Close"
+                   Text="Game settings"
+                   TextColor="{StaticResource GlassTitleText}" />
+            <views:GameSettingsPanel />
+            <Button Padding="14,10"
+                    Background="{StaticResource GlassNavButtonBrush}"
+                    BorderWidth="0"
                     Clicked="OnCloseClicked"
-                    BackgroundColor="Transparent"
-                    TextColor="#1565C0" />
+                    CornerRadius="14"
+                    Text="Close"
+                    TextColor="{StaticResource GlassTitleText}" />
         </VerticalStackLayout>
     </Border>
 </toolkit:Popup>

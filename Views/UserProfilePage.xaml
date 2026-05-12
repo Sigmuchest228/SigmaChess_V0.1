@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.UserProfilePage"
+             x:DataType="viewModels:UserProfileViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <views:WallpaperBackdrop Grid.RowSpan="3" />
+
+        <Grid Grid.Row="0"
+              Grid.RowSpan="2"
+              Padding="14,18,14,0"
+              RowDefinitions="Auto,*"
+              RowSpacing="12">
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        Style="{StaticResource GlassChevronBackButton}"
+                        Command="{Binding GoBackCommand}"
+                        Text="‹"
+                        VerticalOptions="Center" />
+                <Border Grid.Column="1"
+                        Padding="14,10"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        Background="{StaticResource GlassTitleChipBrush}"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="1">
+                    <Label CharacterSpacing="0.8"
+                           FontAttributes="Bold"
+                           FontSize="26"
+                           Text="{Binding PageTitle}"
+                           TextColor="{StaticResource GlassTitleText}" />
+                </Border>
+                <Button Grid.Column="2"
+                        Padding="18,10"
+                        VerticalOptions="Center"
+                        BackgroundColor="#52FFFFFF"
+                        Command="{Binding OpenSettingsCommand}"
+                        IsVisible="{Binding IsOwnProfile}"
+                        Text="Settings"
+                        TextColor="{StaticResource GlassTitleText}" />
+            </Grid>
+
+            <ScrollView Grid.Row="1"
+                        VerticalOptions="Fill">
+                <Border Padding="22"
+                        Background="{StaticResource GlassCardBrush}"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 20"
+                        StrokeThickness="1">
+                    <Border.Shadow>
+                        <Shadow Brush="#88000000"
+                                Offset="0,14"
+                                Opacity="0.38"
+                                Radius="26" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="18">
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="14"
+                              HorizontalOptions="Fill">
+                            <Border Grid.Column="0"
+                                    Padding="0"
+                                    Background="#22101828"
+                                    HeightRequest="132"
+                                    Stroke="#88FF4444"
+                                    StrokeShape="RoundRectangle 22"
+                                    StrokeThickness="2"
+                                    VerticalOptions="Start"
+                                    WidthRequest="132">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ChangeAvatarCommand}" />
+                                </Border.GestureRecognizers>
+                                <Grid IsClippedToBounds="True">
+                                    <Image Aspect="AspectFill"
+                                           HorizontalOptions="Fill"
+                                           Source="{Binding ProfileAvatarSource}"
+                                           VerticalOptions="Fill" />
+                                </Grid>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="8"
+                                                 VerticalOptions="Center">
+                                <Label FontSize="13"
+                                       LineBreakMode="WordWrap"
+                                       Text="sigma's username:"
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                                <Label FontAttributes="Bold"
+                                       FontSize="17"
+                                       LineBreakMode="TailTruncation"
+                                       Text="{Binding ProfileUserName}"
+                                       TextColor="{StaticResource GlassTitleText}" />
+                                <CollectionView ItemsSource="{Binding ProfileStats}"
+                                                Margin="0,6,0,0"
+                                                SelectionMode="None">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="viewModels:ProfileStatRowViewModel">
+                                            <Grid Padding="0,8"
+                                                  ColumnDefinitions="Auto,*"
+                                                  ColumnSpacing="12">
+                                                <Label Grid.Column="0"
+                                                       FontSize="13"
+                                                       Text="{Binding Label}"
+                                                       TextColor="{StaticResource GlassSubtitleText}"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Column="1"
+                                                       FontAttributes="Bold"
+                                                       FontSize="14"
+                                                       HorizontalTextAlignment="End"
+                                                       LineBreakMode="TailTruncation"
+                                                       Text="{Binding Value}"
+                                                       TextColor="{StaticResource GlassTitleText}"
+                                                       VerticalOptions="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <Label Margin="0,4,0,0"
+                                       FontSize="12"
+                                       IsVisible="{Binding IsOwnProfile}"
+                                       Opacity="0.85"
+                                       Text="Tap photo to change"
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Label Margin="0,12,0,0"
+                               CharacterSpacing="0.3"
+                               FontAttributes="Bold"
+                               FontSize="16"
+                               Text="Played games"
+                               TextColor="{StaticResource GlassTitleText}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding PlayedGames}"
+                                             Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:PlayedGameRowViewModel">
+                                    <Border Padding="12,10"
+                                            Background="{StaticResource GlassNavButtonBrush}"
+                                            Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                            StrokeShape="RoundRectangle 12"
+                                            StrokeThickness="1">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenReplayCommand}"
+                                                                  CommandParameter="{Binding GameId}" />
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label FontAttributes="Bold"
+                                                   FontSize="14"
+                                                   LineBreakMode="TailTruncation"
+                                                   Text="{Binding TitleLine}"
+                                                   TextColor="{Binding OutcomeColor}" />
+                                            <Label FontSize="11"
+                                                   LineBreakMode="WordWrap"
+                                                   Opacity="0.92"
+                                                   Text="{Binding DetailLine}"
+                                                   TextColor="{StaticResource GlassSubtitleText}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label Margin="0,6,0,0"
+                               FontSize="13"
+                               IsVisible="{Binding ShowPlayedGamesEmpty}"
+                               LineBreakMode="WordWrap"
+                               Text="No completed games yet."
+                               TextColor="{StaticResource GlassSubtitleText}" />
+                        <Label Margin="0,6,0,0"
+                               FontSize="13"
+                               IsVisible="{Binding ShowSeeAllPlayedGames}"
+                               Text="See all games"
+                               TextColor="{StaticResource GlassSubtitleText}"
+                               TextDecorations="Underline">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenFullPlayedGamesCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
+            </ScrollView>
+        </Grid>
+
+        <views:MainBottomNavBar Grid.Row="2"
+                                Margin="14,8,14,14" />
+    </Grid>
+</ContentPage>

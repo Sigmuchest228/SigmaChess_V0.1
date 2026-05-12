@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.ProfileWallpaperSettingsPage"
+             x:Name="RootPage"
+             x:DataType="viewModels:ProfileWallpaperSettingsViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="WallpaperGradientCell"
+                          x:DataType="viewModels:WallpaperGridItem">
+                <Border Margin="0,2"
+                        Padding="3"
+                        Background="{StaticResource GlassCardBrush}"
+                        HeightRequest="146"
+                        HorizontalOptions="Fill"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 16"
+                        StrokeThickness="1">
+                    <Border.Shadow>
+                        <Shadow Brush="#70000000"
+                                Offset="0,8"
+                                Opacity="0.35"
+                                Radius="18" />
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.SelectWallpaperCommand}"
+                                              CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                    <Grid IsClippedToBounds="True">
+                        <Border Background="{Binding TilePreviewBrush}"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Fill" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
+            <DataTemplate x:Key="WallpaperImageCell"
+                          x:DataType="viewModels:WallpaperGridItem">
+                <Border Margin="0,2"
+                        Padding="3"
+                        Background="{StaticResource GlassCardBrush}"
+                        HeightRequest="146"
+                        HorizontalOptions="Fill"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 16"
+                        StrokeThickness="1">
+                    <Border.Shadow>
+                        <Shadow Brush="#70000000"
+                                Offset="0,8"
+                                Opacity="0.35"
+                                Radius="18" />
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.SelectWallpaperCommand}"
+                                              CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                    <Grid IsClippedToBounds="True">
+                        <Image Aspect="AspectFill"
+                               HorizontalOptions="Fill"
+                               Source="{Binding Thumb}"
+                               VerticalOptions="Fill" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
+            <DataTemplate x:Key="WallpaperAddTileCell"
+                          x:DataType="viewModels:WallpaperGridItem">
+                <Border Margin="0,2"
+                        Padding="3"
+                        Background="#28101828"
+                        HeightRequest="146"
+                        HorizontalOptions="Fill"
+                        Stroke="#88FF4444"
+                        StrokeShape="RoundRectangle 16"
+                        StrokeThickness="2">
+                    <Border.Shadow>
+                        <Shadow Brush="#70000000"
+                                Offset="0,8"
+                                Opacity="0.35"
+                                Radius="18" />
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.SelectWallpaperCommand}"
+                                              CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout HorizontalOptions="Center"
+                                         Spacing="6"
+                                         VerticalOptions="Center">
+                        <Label FontSize="42"
+                               HorizontalTextAlignment="Center"
+                               Text="+"
+                               TextColor="{StaticResource GlassTitleText}" />
+                        <Label FontAttributes="Bold"
+                               FontSize="14"
+                               HorizontalTextAlignment="Center"
+                               CharacterSpacing="1"
+                               Text="ADD"
+                               TextColor="#FFFF6B6B" />
+                    </VerticalStackLayout>
+                </Border>
+            </DataTemplate>
+
+            <views:WallpaperTileTemplateSelector x:Key="WallpaperTilePicker"
+                                                 AddTileTemplate="{StaticResource WallpaperAddTileCell}"
+                                                 GradientTemplate="{StaticResource WallpaperGradientCell}"
+                                                 ImageTileTemplate="{StaticResource WallpaperImageCell}" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid RowDefinitions="Auto,*,Auto"
+          RowSpacing="14">
+        <views:WallpaperBackdrop Grid.RowSpan="3" />
+
+        <Grid Grid.Row="0"
+              Padding="14,14,14,0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        Style="{StaticResource GlassChevronBackButton}"
+                        Command="{Binding GoBackCommand}"
+                        Text="‹"
+                        VerticalOptions="Center" />
+                <Border Grid.Column="1"
+                        Padding="14,12"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="1"
+                        VerticalOptions="Center">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0"
+                                             EndPoint="1,0">
+                            <GradientStop Color="#44FFFFFF"
+                                          Offset="0" />
+                            <GradientStop Color="#20FFFFFF"
+                                          Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Label FontSize="14"
+                           LineBreakMode="WordWrap"
+                           LineHeight="1.3"
+                           Text="Choose a preset or your own photo."
+                           TextColor="{StaticResource GlassTitleText}" />
+                </Border>
+            </Grid>
+
+            <CollectionView Grid.Row="1"
+                            Margin="14,0,14,0"
+                            BackgroundColor="Transparent"
+                            ItemTemplate="{StaticResource WallpaperTilePicker}"
+                            ItemsSource="{Binding WallpaperItems}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout HorizontalItemSpacing="10"
+                                     Orientation="Vertical"
+                                     Span="2"
+                                     VerticalItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+            </CollectionView>
+
+        <views:MainBottomNavBar Grid.Row="2"
+                                Margin="14,0,14,14" />
+    </Grid>
+</ContentPage>

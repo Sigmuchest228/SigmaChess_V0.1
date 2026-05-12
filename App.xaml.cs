@@ -1,53 +1,79 @@
-﻿using SigmaChess.Views;
+using Microsoft.Extensions.DependencyInjection;
+using SigmaChess.Services;
+using SigmaChess.Views;
 
 namespace SigmaChess;
 
 /// <summary>
-/// Корневой класс MAUI-приложения. Решает только две вещи:
-///   1. Регистрирует non-tab маршруты (страницы, которые открываются «push»-ом, а не из табов).
-///   2. Управляет тем, какой Shell сейчас активен — гостевой или авторизованный.
-/// <para>
-/// Сценарий смены Shell: при логине AuthViewModel вызывает <see cref="SetAuthenticatedShell"/>;
-/// при логауте AppShellAuth вызывает <see cref="SetUnauthenticatedShell"/>. MAUI рассматривает
-/// замену <see cref="Application.MainPage"/> как полную смену корня — и таб-бар, и состояние
-/// навигации полностью пересоздаются.
-/// </para>
+/// Корень приложения: гостевой или авторизованный <see cref="Shell"/> (без flyout).
+/// Первое окно создаётся после <see cref="MauiProgram.CreateMauiApp"/> — так безопасно на Android.
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>Выставляется в <see cref="MauiProgram.CreateMauiApp"/> до показа окна — чтобы проверить сохранённую сессию Firebase.</summary>
+    internal static IServiceProvider? Services { get; set; }
+
+    /// <summary>Перед <see cref="SetAuthenticatedShell"/> — следующий Loader на авторизованном Shell без задержки.</summary>
+    internal static bool SkipLoaderDelayOnceForAuthShell { get; set; }
+
     public App()
     {
         InitializeComponent();
         RegisterShellRoutes();
-        // Стартуем как гость: даже если пользователь авторизован, локально его подхватит
-        // FileUserRepository, а первый успешный навигационный сценарий переключит Shell.
-        MainPage = new AppShellNotAuth();
     }
 
-    // AuthPage не лежит в табах Shell — её регистрируем явно, чтобы можно было идти
-    // через Shell.Current.GoToAsync(nameof(AuthPage)).
     private static void RegisterShellRoutes()
     {
-        Routing.RegisterRoute(nameof(AuthPage), typeof(AuthPage));
+        Routing.RegisterRoute(nameof(PlayedGamesPage), typeof(PlayedGamesPage));
+        Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
+        Routing.RegisterRoute(nameof(ProfileWallpaperSettingsPage), typeof(ProfileWallpaperSettingsPage));
+        Routing.RegisterRoute(nameof(UserProfilePage), typeof(UserProfilePage));
+        Routing.RegisterRoute(nameof(GameReplayPage), typeof(GameReplayPage));
+        Routing.RegisterRoute(nameof(PuzzleSolvePage), typeof(PuzzleSolvePage));
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        Page root;
+        var appService = Services?.GetService<AppService>();
+        if (appService is not null
+            && !string.IsNullOrEmpty(appService.CurrentUserId)
+            && !appService.IsAnonymousUser)
+        {
+            root = new AppShellAuth();
+        }
+        else
+        {
+            root = new AppShellNotAuth();
+        }
+
+        return new Window(root);
     }
 
     public void SetAuthenticatedShell()
     {
-        MainPage = new AppShellAuth();
+        SkipLoaderDelayOnceForAuthShell = true;
+        if (Windows.Count > 0)
+        {
+            Windows[0].Page = new AppShellAuth();
+        }
+        else
+        {
+            MainPage = new AppShellAuth();
+        }
     }
 
     public void SetUnauthenticatedShell()
     {
-        MainPage = new AppShellNotAuth();
-        // После смены Shell нужно явно перейти на главную, иначе пользователь увидит
-        // первый таб гостевого Shell (что обычно тоже MainPage, но лучше явно).
-        // Делаем это на UI-потоке: Shell.GoToAsync требует UI-контекста.
-        _ = MainThread.InvokeOnMainThreadAsync(async () =>
+        // Не вызывать GoToAsync сразу после смены корня — на Android ломается FragmentManager.
+        // У AppShellNotAuth первый Tab — LoaderPage, затем переход на Auth.
+        if (Windows.Count > 0)
         {
-            if (Shell.Current is not null)
-            {
-                await Shell.Current.GoToAsync("//MainPage");
-            }
-        });
+            Windows[0].Page = new AppShellNotAuth();
+        }
+        else
+        {
+            MainPage = new AppShellNotAuth();
+        }
     }
 }

@@ -33,7 +33,8 @@ public partial class PromotionPopup : Popup
     /// </summary>
     public static async Task<PieceType> ShowAsync(PieceColor color)
     {
-        var page = Shell.Current?.CurrentPage;
+        var page = SigmaChess.PresentationHelper.CurrentPage
+                   ?? Application.Current?.Windows.FirstOrDefault()?.Page;
         if (page is null)
         {
             return PieceType.Queen;

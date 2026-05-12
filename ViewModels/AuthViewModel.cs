@@ -1,5 +1,4 @@
 using System.Windows.Input;
-using SigmaChess;
 using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
@@ -8,8 +7,7 @@ namespace SigmaChess.ViewModels;
 /// ViewModel страницы входа/регистрации. Один и тот же экран служит обоим режимам;
 /// переключение между ними — через <see cref="IsRegisterMode"/>.
 /// <para>
-/// Реализует <see cref="IQueryAttributable"/>, чтобы Shell мог открыть страницу
-/// сразу в нужном режиме через query-параметр <c>?mode=register</c>.
+/// Реализует <see cref="IQueryAttributable"/> для режима регистрации через query <c>?mode=register</c> при навигации Shell.
 /// </para>
 /// </summary>
 public class AuthViewModel : ViewModelBase, IQueryAttributable
@@ -140,10 +138,15 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             // Без сети гость всё равно может играть локально; облако — по возможности.
         }
 
-        await Shell.Current.GoToAsync("//MainPage");
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync("//MainPage");
+            }
+        });
     }
-    // Логин: валидируем поля, дёргаем сервис, при успехе — переключаем Shell на «авторизованный»
-    // и переходим на главную. Переключение Shell обязательно делать на UI-потоке.
+    // Логин: при успехе переключаем корень навигации на авторизованный и остаёмся на главной (новый стек).
     private async Task LoginAsync()
     {
         if (!ValidateEmailAndPassword(requireConfirmPassword: false))
@@ -171,11 +174,10 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
                     app.SetAuthenticatedShell();
                 }
             });
-            await Shell.Current.GoToAsync("//MainPage");
         }
     }
 
-    // Регистрация: создаёт пользователя в Firebase Auth, затем автоматический вход, профиль в RTDB и Shell «авторизованный».
+    // Регистрация: Firebase Auth + вход + профиль RTDB + авторизованный корень навигации.
     private async Task RegisterAsync()
     {
         if (!ValidateRegistrationFields())
@@ -219,7 +221,6 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
                 app.SetAuthenticatedShell();
             }
         });
-        await Shell.Current.GoToAsync("//MainPage");
     }
 
     private bool ValidateRegistrationFields()
@@ -278,8 +279,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
     }
 
     /// <summary>
-    /// Принимает query-параметры из Shell. Поддерживается только <c>mode=register</c>;
-    /// при остальных значениях остаёмся в режиме логина.
+    /// Принимает query-параметры при навигации (если используются). Поддерживается <c>mode=register</c>.
     /// </summary>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {

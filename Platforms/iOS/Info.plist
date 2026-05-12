@@ -28,5 +28,13 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app uses the camera for custom wallpapers and profile photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>The app accesses your photos for wallpapers and your profile picture.</string>
 </dict>
 </plist>

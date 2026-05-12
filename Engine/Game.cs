@@ -12,7 +12,7 @@ namespace SigmaChess.Engine;
 /// обновляет всё сопутствующее состояние.
 /// </para>
 /// </summary>
-public class Game
+public partial class Game
 {
     // Подсчёт повторов: ключ — FEN-подобная строка позиции, значение — сколько раз встретилась.
     private readonly Dictionary<string, int> _positionCounts = new(64);
@@ -47,11 +47,8 @@ public class Game
     public IReadOnlyDictionary<string, int> PositionCounts => _positionCounts;
 
     public Game()
+        : this(emptyForFen: false)
     {
-        Board.Initialize();
-        // Начальная позиция тоже считается «встреченной один раз», иначе троекратное повторение
-        // считалось бы неверно (3 встречи после старта были бы 4 фактических, и т. п.).
-        CountCurrentPosition();
     }
 
     /// <summary>

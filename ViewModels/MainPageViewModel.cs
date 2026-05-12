@@ -1,5 +1,4 @@
 using System.Windows.Input;
-using SigmaChess;
 using SigmaChess.Services;
 using SigmaChess.Views;
 
@@ -7,7 +6,7 @@ namespace SigmaChess.ViewModels;
 
 /// <summary>
 /// ViewModel главной страницы приложения. Отвечает за:
-///   1. Команды-кнопки навигации (открыть логин/регистрацию/игру/боты/паззлы и т. д.).
+///   1. Команды-кнопки навигации (открыть логин/регистрацию/игру/паззлы и т. д.).
 ///   2. Гость-гейт: для разделов, недоступных без логина, показывает попап «нужен аккаунт».
 ///   3. Управление видимостью кнопок «Log in / Sign up» через флаг <see cref="IsGuest"/>.
 /// </summary>
@@ -15,68 +14,55 @@ public class MainPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
-    // Маршруты, зарегистрированные как корни Shell. Их нужно открывать с префиксом "//"
-    // (Shell интерпретирует "//" как абсолютный путь к корню, а не относительный).
+    private readonly IUserAppearanceService _appearance;
+
+    /// <summary>Корневые маршруты Shell — открываются с префиксом "//".</summary>
     private static readonly HashSet<string> ShellRootRoutes =
     [
+        nameof(AuthPage),
         nameof(MainPage),
         nameof(GamePage),
-        nameof(BotsGamePage),
         nameof(PuzzlesPage),
-        nameof(FriendsPage),
-        nameof(WatchPage),
-        nameof(LearnPage),
-        nameof(MenuPage),
+        nameof(FollowsPage),
     ];
 
     // Список разделов, которые гостю не показываем — сначала просим залогиниться.
     private static readonly HashSet<string> GuestRestrictedRoutes =
     [
-        nameof(BotsGamePage),
         nameof(PuzzlesPage),
-        nameof(FriendsPage),
-        nameof(WatchPage),
-        nameof(LearnPage),
-        nameof(MenuPage),
+        nameof(FollowsPage),
+        nameof(SettingsPage),
+        nameof(PlayedGamesPage),
     ];
 
     private const string AuthLoginRoute = nameof(AuthPage);
     private const string AuthSignupRoute = nameof(AuthPage) + "?mode=register";
 
-    private bool _isGuest = true;
-    private const string BotsGameRoute = nameof(BotsGamePage);
     private const string PuzzlesRoute = nameof(PuzzlesPage);
-    private const string FriendsRoute = nameof(FriendsPage);
-    private const string WatchRoute = nameof(WatchPage);
-    private const string LearnRoute = nameof(LearnPage);
-    private const string MenuRoute = nameof(MenuPage);
+    private const string FollowsRoute = nameof(FollowsPage);
 
-    public MainPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
+    private bool _isGuest = true;
+
+    public MainPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync, IUserAppearanceService appearance)
     {
         _appService = appService;
         _firebaseSync = firebaseSync;
+        _appearance = appearance;
+
         OpenLoginCommand = new Command(async () => await NavigateAsync(AuthLoginRoute));
         OpenSignupCommand = new Command(async () => await NavigateAsync(AuthSignupRoute));
+        OpenProfileCommand = new Command(async () => await NavigateAsync(nameof(UserProfilePage)));
 
         OpenOneDeviceGameCommand = new Command(async () => await NavigateAsync("//GamePage"));
-        OpenBotsCommand = new Command(async () => await NavigateAsync(BotsGameRoute));
         OpenPuzzlesCommand = new Command(async () => await NavigateAsync(PuzzlesRoute));
-        OpenFriendsCommand = new Command(async () => await NavigateAsync(FriendsRoute));
-        OpenWatchCommand = new Command(async () => await NavigateAsync(WatchRoute));
+        OpenFollowsCommand = new Command(async () => await NavigateAsync(FollowsRoute));
+        OpenPlayedGamesCommand = new Command(async () => await NavigateAsync(nameof(PlayedGamesPage)));
 
-        OpenHomeCommand = new Command(async () => await NavigateAsync("//MainPage"));
-        OpenLearnCommand = new Command(async () => await NavigateAsync(LearnRoute));
-        OpenMenuCommand = new Command(async () => await NavigateAsync(MenuRoute));
-
-        // Без этого вызова при старте у гостя кнопки «Log in»/«Sign up» могли бы быть
-        // спрятаны (по дефолту IsGuest = true и так, но мы держим единую точку синхронизации).
         RefreshAuthState();
     }
 
-    /// <summary>
-    /// true — пользователь не вошёл в аккаунт. XAML по этому флагу показывает кнопки
-    /// «Log in» и «Sign up» и прячет их, когда пользователь авторизован.
-    /// </summary>
+    public bool ShowPlayedGamesLink => !IsGuest;
+
     public bool IsGuest
     {
         get => _isGuest;
@@ -89,51 +75,88 @@ public class MainPageViewModel : ViewModelBase
 
             _isGuest = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowProfileAvatar));
+            OnPropertyChanged(nameof(ShowGuestAuthButtons));
+            OnPropertyChanged(nameof(ShowPlayedGamesLink));
         }
     }
 
-    /// <summary>
-    /// Пересчитывает <see cref="IsGuest"/> по типу текущего <see cref="Shell.Current"/>.
-    /// Дёргается из <c>MainPage.OnAppearing</c>, потому что после логина мы заменяем Shell,
-    /// и страница могла «прилететь» в новый Shell — флаг надо обновить.
-    /// </summary>
+    public bool ShowProfileAvatar => !IsGuest;
+
+    public bool ShowGuestAuthButtons => IsGuest;
+
+    public ImageSource? ProfileAvatarSource
+    {
+        get => _profileAvatarSource;
+        private set
+        {
+            if (ReferenceEquals(_profileAvatarSource, value))
+            {
+                return;
+            }
+
+            _profileAvatarSource = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private ImageSource? _profileAvatarSource = ImageSource.FromFile("defaultsigma.jpg");
+
+    public ICommand OpenProfileCommand { get; }
+
+    /// <summary>Пересчитывает <see cref="IsGuest"/> по активному Shell.</summary>
     public void RefreshAuthState()
     {
         IsGuest = Shell.Current is AppShellNotAuth;
     }
 
-    /// <summary>
-    /// При восстановленной из диска сессии Firebase подтягивает <c>users/{uid}</c>, если его ещё нет.
-    /// </summary>
-    public async Task SyncFirebaseProfileIfNeededAsync()
+    public async Task SyncFirebaseProfileIfNeededAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_appService.CurrentUserId))
         {
             return;
         }
 
+        UserProfileRtdbDto? profile = null;
         try
         {
-            await _firebaseSync.EnsureUserProfileAsync().ConfigureAwait(false);
+            await _firebaseSync.EnsureUserProfileAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            profile = await _firebaseSync.GetUserProfileAsync(cancellationToken).ConfigureAwait(false);
+            await _appearance.ApplyFromProfileAsync(profile, cancellationToken).ConfigureAwait(false);
         }
         catch
         {
             // Офлайн — попытка повторится при следующем появлении главной или сохранении партии.
         }
+
+        await RefreshAvatarSourceAsync(profile?.AvatarUrl, cancellationToken).ConfigureAwait(false);
     }
 
-    // Универсальный навигатор: проверяет гость-гейт, нормализует маршрут и идёт в Shell.
-    private static async Task NavigateAsync(string route)
+    private async Task RefreshAvatarSourceAsync(string? avatarUrl, CancellationToken cancellationToken)
+    {
+        var src =
+            await UserAvatarPreview.LoadAsync(_appService.CurrentUserId, avatarUrl, cancellationToken)
+                .ConfigureAwait(false);
+        await MainThread.InvokeOnMainThreadAsync(() => ProfileAvatarSource = src).WaitAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task NavigateAsync(string route)
     {
         if (Shell.Current is null)
         {
             return;
         }
 
-        // Гость-гейт: если экран в списке закрытых — показываем попап и при «Log in»
-        // ведём на страницу логина (без префикса "//", потому что AuthPage не корень Shell).
-        if (Shell.Current is AppShellNotAuth &&
-            GuestRestrictedRoutes.Contains(GetRouteBase(route)))
+        var baseRoute = GetRouteBase(route);
+
+        if (route.StartsWith("//", StringComparison.Ordinal) && baseRoute == nameof(MainPage))
+        {
+            await Shell.Current.GoToAsync("//MainPage");
+            return;
+        }
+
+        if (Shell.Current is AppShellNotAuth && GuestRestrictedRoutes.Contains(baseRoute))
         {
             var goLogin = await ConfirmPopup.ShowAsync(
                 "Account required",
@@ -142,7 +165,7 @@ public class MainPageViewModel : ViewModelBase
                 "Cancel");
             if (goLogin)
             {
-                await Shell.Current.GoToAsync(nameof(AuthPage));
+                await Shell.Current.GoToAsync("//AuthPage");
             }
 
             return;
@@ -156,8 +179,6 @@ public class MainPageViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            // Иногда Shell кидает исключение, если маршрут не найден или прерывание навигации.
-            // Логируем + показываем попап на UI-потоке (диалог нельзя поднять из background).
             System.Diagnostics.Debug.WriteLine($"Navigation failed for route '{path}': {ex}");
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
@@ -166,8 +187,6 @@ public class MainPageViewModel : ViewModelBase
         }
     }
 
-    // Достаёт «голое» имя маршрута без "//" и без query-строки. Нужно, чтобы корректно
-    // сравнить с GuestRestrictedRoutes (там лежат именно базовые имена).
     private static string GetRouteBase(string route)
     {
         var s = route.Trim();
@@ -179,9 +198,6 @@ public class MainPageViewModel : ViewModelBase
         return s.Split('?', 2)[0].TrimStart('/');
     }
 
-    // Превращает короткое имя маршрута в полный Shell-путь: для корней — добавляем "//".
-    // Без префикса Shell попытался бы открыть страницу как push, и навигация бы поломалась
-    // (мы используем Shell с табами, где экраны только корневые).
     private static string NormalizeShellRoute(string route)
     {
         if (route.StartsWith("//", StringComparison.Ordinal))
@@ -204,17 +220,9 @@ public class MainPageViewModel : ViewModelBase
 
     public ICommand OpenOneDeviceGameCommand { get; }
 
-    public ICommand OpenBotsCommand { get; }
-
     public ICommand OpenPuzzlesCommand { get; }
 
-    public ICommand OpenFriendsCommand { get; }
+    public ICommand OpenFollowsCommand { get; }
 
-    public ICommand OpenWatchCommand { get; }
-
-    public ICommand OpenHomeCommand { get; }
-
-    public ICommand OpenLearnCommand { get; }
-
-    public ICommand OpenMenuCommand { get; }
+    public ICommand OpenPlayedGamesCommand { get; }
 }

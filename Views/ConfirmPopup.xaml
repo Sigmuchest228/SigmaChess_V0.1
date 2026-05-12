@@ -5,28 +5,52 @@
                x:Class="SigmaChess.Views.ConfirmPopup"
                CanBeDismissedByTappingOutsideOfPopup="True"
                Color="Transparent">
-    <Border Padding="20"
-            StrokeShape="RoundRectangle 12"
-            BackgroundColor="#FAFAFA"
+    <toolkit:Popup.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </toolkit:Popup.Resources>
+    <Border Padding="22"
+            Background="{StaticResource GlassCardBrush}"
+            Stroke="{StaticResource GlassStrokeBrush}"
+            StrokeShape="RoundRectangle 18"
+            StrokeThickness="1"
             WidthRequest="320">
+        <Border.Shadow>
+            <Shadow Brush="#88000000"
+                    Offset="0,12"
+                    Opacity="0.38"
+                    Radius="22" />
+        </Border.Shadow>
         <VerticalStackLayout Spacing="14">
             <Label x:Name="TitleLabel"
                    FontAttributes="Bold"
                    FontSize="18"
-                   TextColor="#1A1A1A" />
+                   TextColor="{StaticResource GlassTitleText}" />
             <Label x:Name="MessageLabel"
                    FontSize="14"
-                   TextColor="#444" />
+                   LineBreakMode="WordWrap"
+                   TextColor="{StaticResource GlassSubtitleText}" />
             <Grid ColumnDefinitions="*,Auto,Auto"
-                  ColumnSpacing="8">
+                  ColumnSpacing="10">
                 <Button Grid.Column="1"
                         x:Name="SecondaryButton"
+                        Padding="14,10"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        BorderWidth="0"
                         Clicked="OnSecondaryClicked"
-                        BackgroundColor="Transparent"
-                        TextColor="#1565C0" />
+                        CornerRadius="14"
+                        TextColor="{StaticResource GlassTitleText}" />
                 <Button Grid.Column="2"
                         x:Name="PrimaryButton"
-                        Clicked="OnPrimaryClicked" />
+                        Padding="14,10"
+                        Background="{StaticResource GlassPrimaryButtonBrush}"
+                        BorderWidth="0"
+                        Clicked="OnPrimaryClicked"
+                        CornerRadius="14"
+                        TextColor="#16161C" />
             </Grid>
         </VerticalStackLayout>
     </Border>

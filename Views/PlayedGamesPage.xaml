@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.PlayedGamesPage"
+             x:DataType="viewModels:PlayedGamesPageViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <views:WallpaperBackdrop Grid.RowSpan="3" />
+
+        <Grid Grid.Row="0"
+              Padding="14,18,14,8"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="12">
+            <Button Grid.Column="0"
+                    Style="{StaticResource GlassChevronBackButton}"
+                    Command="{Binding GoBackCommand}"
+                    Text="‹"
+                    VerticalOptions="Center" />
+            <Border Grid.Column="1"
+                    Padding="14,10"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Background="{StaticResource GlassTitleChipBrush}"
+                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1">
+                <Label CharacterSpacing="0.8"
+                       FontAttributes="Bold"
+                       FontSize="22"
+                       Text="{Binding PageTitle}"
+                       TextColor="{StaticResource GlassTitleText}" />
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1"
+              Padding="14,0,14,8">
+            <CollectionView IsVisible="{Binding HasGames}"
+                            ItemsSource="{Binding Games}"
+                            SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:PlayedGameRowViewModel">
+                        <Border Margin="0,6"
+                                Padding="14,12"
+                                Background="{StaticResource GlassCardBrush}"
+                                Stroke="{StaticResource GlassStrokeBrush}"
+                                StrokeShape="RoundRectangle 14"
+                                StrokeThickness="1">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenReplayCommand}"
+                                                      CommandParameter="{Binding GameId}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="6">
+                                <Label FontAttributes="Bold"
+                                       FontSize="15"
+                                       LineBreakMode="TailTruncation"
+                                       Text="{Binding TitleLine}"
+                                       TextColor="{Binding OutcomeColor}" />
+                                <Label FontSize="12"
+                                       LineBreakMode="WordWrap"
+                                       Opacity="0.92"
+                                       Text="{Binding DetailLine}"
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding IsEmpty}"
+                   LineBreakMode="WordWrap"
+                   Padding="24"
+                   Text="{Binding EmptyMessage}"
+                   TextColor="{StaticResource GlassSubtitleText}"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <views:MainBottomNavBar Grid.Row="2"
+                                Margin="14,8,14,14" />
+    </Grid>
+</ContentPage>

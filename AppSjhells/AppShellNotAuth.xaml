@@ -3,31 +3,30 @@
     x:Class="SigmaChess.AppShellNotAuth"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:views="clr-namespace:SigmaChess.Views"
     xmlns:m="clr-namespace:SigmaChess"
+    xmlns:views="clr-namespace:SigmaChess.Views"
+    Title="SigmaChess"
     FlyoutBehavior="Disabled"
-    Shell.TabBarIsVisible="False"
-    FlowDirection="LeftToRight"
-    Title="SigmaChess">
+    Shell.NavBarIsVisible="False"
+    Shell.TabBarIsVisible="False">
 
-    <FlyoutItem Title="Auth Page">
+    <!-- Первый ShellContent — Loader, затем Auth. -->
+    <TabBar>
         <ShellContent
-        Title="Auth Page"
-        Route="AuthPage"
-        ContentTemplate="{DataTemplate views:AuthPage}" />
-    </FlyoutItem>
-    
-    <FlyoutItem Title="Home">
+            Title="Loader"
+            Route="LoaderPage"
+            ContentTemplate="{DataTemplate views:LoaderPage}" />
         <ShellContent
-            Title="Home"
+            Route="AuthPage"
+            Title="Auth"
+            ContentTemplate="{DataTemplate views:AuthPage}" />
+        <ShellContent
             Route="MainPage"
+            Title="Home"
             ContentTemplate="{DataTemplate m:MainPage}" />
-    </FlyoutItem>
-
-    <FlyoutItem Title="Play on 1 device">
         <ShellContent
-            Title="Game"
             Route="GamePage"
+            Title="Game"
             ContentTemplate="{DataTemplate views:GamePage}" />
-    </FlyoutItem>
+    </TabBar>
 </Shell>

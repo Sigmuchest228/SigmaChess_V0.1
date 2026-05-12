@@ -1,17 +1,103 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
              x:Class="SigmaChess.Views.PuzzlesPage"
              x:DataType="viewModels:PuzzlesPageViewModel"
-             Title="Puzzles">
-    <VerticalStackLayout Padding="24" Spacing="12">
-        <Label Text="{Binding Title}"
-               FontAttributes="Bold"
-               FontSize="28"
-               HorizontalTextAlignment="Center" />
-        <Label Text="{Binding Subtitle}"
-               HorizontalTextAlignment="Center"
-               TextColor="#666" />
-    </VerticalStackLayout>
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <views:WallpaperBackdrop Grid.RowSpan="4" />
+
+        <Grid Grid.Row="0"
+              Padding="14,12,14,8">
+            <Border Padding="14,10"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Background="{StaticResource GlassTitleChipBrush}"
+                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1">
+                <Label CharacterSpacing="0.8"
+                       FontAttributes="Bold"
+                       FontSize="22"
+                       HorizontalTextAlignment="Center"
+                       Text="{Binding Title}"
+                       TextColor="{StaticResource GlassTitleText}" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Margin="14,0,14,10"
+                Padding="14,12"
+                Background="{StaticResource GlassCardBrush}"
+                Stroke="{StaticResource GlassStrokeBrush}"
+                StrokeShape="RoundRectangle 14"
+                StrokeThickness="1">
+            <VerticalStackLayout Spacing="6">
+                <Label FontAttributes="Bold"
+                       FontSize="15"
+                       Text="{Binding RankTitle, StringFormat='Rank: {0}'}"
+                       TextColor="{StaticResource GlassTitleText}" />
+                <Label FontSize="13"
+                       Opacity="0.92"
+                       Text="{Binding PuzzlesSolved, StringFormat='Puzzles solved: {0}'}"
+                       TextColor="{StaticResource GlassSubtitleText}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Grid Grid.Row="2"
+              Padding="14,0,14,8">
+            <CollectionView IsVisible="{Binding HasPuzzles}"
+                            ItemsSource="{Binding PuzzleRows}"
+                            SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:PuzzleRowViewModel">
+                        <Border Margin="0,6"
+                                Padding="14,12"
+                                Background="{StaticResource GlassCardBrush}"
+                                Stroke="{StaticResource GlassStrokeBrush}"
+                                StrokeShape="RoundRectangle 14"
+                                StrokeThickness="1">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenPuzzleCommand}"
+                                                      CommandParameter="{Binding PuzzleId}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="6">
+                                <Label FontAttributes="Bold"
+                                       FontSize="15"
+                                       LineBreakMode="TailTruncation"
+                                       Text="{Binding Title}"
+                                       TextColor="{StaticResource GlassTitleText}" />
+                                <Label FontSize="12"
+                                       LineBreakMode="WordWrap"
+                                       Opacity="0.92"
+                                       Text="{Binding Subtitle}"
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding ShowEmpty}"
+                   LineBreakMode="WordWrap"
+                   Padding="24"
+                   Text="No puzzles in the database yet. Import Resources/Raw/puzzles_seed.json into ChessPuzzles in Firebase Console."
+                   TextColor="{StaticResource GlassSubtitleText}"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <views:MainBottomNavBar Grid.Row="3"
+                                Margin="14,4,14,14" />
+    </Grid>
 </ContentPage>

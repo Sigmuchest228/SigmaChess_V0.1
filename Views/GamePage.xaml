@@ -2,93 +2,275 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             xmlns:views="clr-namespace:SigmaChess.Views"
              x:Class="SigmaChess.Views.GamePage"
-             x:DataType="viewModels:GameViewModel"
-             Title="Game">
+             x:DataType="viewModels:GameViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="MoveHistoryRowTemplate"
+                          x:DataType="viewModels:MoveHistoryRow">
+                <Grid ColumnDefinitions="28,*,*"
+                      Padding="0,2"
+                      ColumnSpacing="4">
+                    <Label Grid.Column="0"
+                           FontSize="12"
+                           Text="{Binding NumberLabel}"
+                           TextColor="{StaticResource GlassSubtitleText}"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="1"
+                           FontSize="12"
+                           Text="{Binding WhiteMove}"
+                           TextColor="{StaticResource GlassTitleText}"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="2"
+                           FontSize="12"
+                           Text="{Binding BlackMove}"
+                           TextColor="{StaticResource GlassTitleText}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid Padding="12,8"
-          RowDefinitions="Auto,Auto,*,Auto"
+          RowDefinitions="Auto,*,Auto"
           RowSpacing="8">
 
-        <!-- Хедер: Назад | ход | таймер‑слот | ⚙ -->
+        <views:WallpaperBackdrop Grid.RowSpan="3"
+                                 InputTransparent="True" />
+
+        <!-- Хедер: только назад -->
         <Grid Grid.Row="0"
-              ColumnDefinitions="Auto,*,Auto,Auto"
+              ColumnDefinitions="Auto,*"
               ColumnSpacing="8">
             <Button Grid.Column="0"
-                    Text="←"
-                    FontSize="20"
-                    Padding="10,4"
+                    Style="{StaticResource GlassChevronBackButton}"
+                    Text="‹"
+                    Padding="10,6"
                     Command="{Binding BackToMenuCommand}" />
-            <Label Grid.Column="1"
-                   Text="{Binding CurrentTurnText}"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   VerticalOptions="Center"
-                   HorizontalTextAlignment="Center" />
-            <Border Grid.Column="2"
-                    x:Name="TimerSlot"
-                    WidthRequest="84"
-                    HeightRequest="36"
-                    Stroke="#888"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 6"
-                    BackgroundColor="#EEE">
-                <Label Text="--:--"
-                       FontSize="14"
-                       TextColor="#666"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center" />
-            </Border>
-            <Button Grid.Column="3"
-                    Text="⚙"
-                    FontSize="20"
-                    Padding="10,4"
-                    Clicked="OnSettingsClicked" />
         </Grid>
 
-        <!-- Статус (Шах) + результат -->
-        <VerticalStackLayout Grid.Row="1" Spacing="2">
-            <Label Text="{Binding GameStatusText}"
-                   FontSize="16"
-                   HorizontalTextAlignment="Center"
-                   HorizontalOptions="Center"
-                   TextColor="#B71C1C"
-                   MinimumHeightRequest="20" />
-            <Label Text="{Binding GameResultText}"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   HorizontalTextAlignment="Center"
-                   HorizontalOptions="Center"
-                   TextColor="#1565C0"
-                   MinimumHeightRequest="22" />
-        </VerticalStackLayout>
+        <Grid Grid.Row="1"
+              MinimumHeightRequest="280">
 
-        <!-- Доска + координаты в едином 9×9 Grid: общие *‑строки/колонки ⇒ идеальное выравнивание -->
-        <Grid Grid.Row="2"
-              x:Name="BoardWithCoords"
-              HorizontalOptions="Center"
-              VerticalOptions="Center"
-              WidthRequest="{Binding BoardGridSize}"
-              HeightRequest="{Binding BoardGridSize}"
-              ColumnDefinitions="28,*,*,*,*,*,*,*,*"
-              RowDefinitions="*,*,*,*,*,*,*,*,28">
-            <!-- 8 рангов в col=0 (rows 0..7) и 8 файлов в row=8 (cols 1..8)
-                 создаются в code-behind для возможности переворота. -->
-            <Grid x:Name="BoardGrid"
-                  Grid.Row="0" Grid.RowSpan="8"
-                  Grid.Column="1" Grid.ColumnSpan="8"
-                  RowDefinitions="*,*,*,*,*,*,*,*"
-                  ColumnDefinitions="*,*,*,*,*,*,*,*"
-                  RowSpacing="0"
-                  ColumnSpacing="0" />
+            <!-- Обычный режим: чёрные сверху, белые снизу; одна колонка записей справа -->
+            <Grid IsVisible="{Binding IsCasualLayout}"
+                  ColumnDefinitions="*,140"
+                  RowDefinitions="Auto,*,Auto"
+                  ColumnSpacing="8"
+                  RowSpacing="8">
+                <Border Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalOptions="Center"
+                        MinimumWidthRequest="72"
+                        Padding="10,8"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="1">
+                    <VerticalStackLayout Spacing="0">
+                        <Label FontSize="10"
+                               Text="Black"
+                               TextColor="{StaticResource GlassSubtitleText}" />
+                        <Label FontAttributes="Bold"
+                               FontSize="14"
+                               Text="{Binding BlackClockText, Mode=OneWay}"
+                               TextColor="{StaticResource GlassTitleText}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Grid x:Name="CasualBoardHost"
+                      Grid.Row="1"
+                      Grid.Column="0"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center">
+                    <Grid x:Name="BoardWithCoords"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"
+                          WidthRequest="{Binding BoardGridSize}"
+                          HeightRequest="{Binding BoardGridSize}"
+                          ColumnDefinitions="28,*,*,*,*,*,*,*,*"
+                          RowDefinitions="*,*,*,*,*,*,*,*,28">
+                        <Grid x:Name="BoardGrid"
+                              Grid.Row="0" Grid.RowSpan="8"
+                              Grid.Column="1" Grid.ColumnSpan="8"
+                              RowDefinitions="*,*,*,*,*,*,*,*"
+                              ColumnDefinitions="*,*,*,*,*,*,*,*"
+                              RowSpacing="0"
+                              ColumnSpacing="0" />
+                    </Grid>
+                </Grid>
+                <Border Grid.Row="2"
+                        Grid.Column="0"
+                        HorizontalOptions="Center"
+                        MinimumWidthRequest="72"
+                        Padding="10,8"
+                        Background="{StaticResource GlassPrimaryButtonBrush}"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="1">
+                    <VerticalStackLayout Spacing="0">
+                        <Label FontSize="10"
+                               Text="White"
+                               TextColor="{StaticResource Gray600}" />
+                        <Label FontAttributes="Bold"
+                               FontSize="14"
+                               Text="{Binding WhiteClockText, Mode=OneWay}"
+                               TextColor="{StaticResource PrimaryDarkText}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="0"
+                        Grid.Column="1"
+                        Grid.RowSpan="3"
+                        Padding="8"
+                        Background="{StaticResource GlassCardBrush}"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="1"
+                        VerticalOptions="Fill">
+                    <CollectionView ItemsSource="{Binding MoveRows}"
+                                    ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
+                </Border>
+            </Grid>
+
+            <!-- Режим «за столом»: история чёрных сверху слева (180°), таймер чёрных сверху справа (180°),
+                 доска по центру, таймер белых снизу слева, история белых снизу справа -->
+            <Grid IsVisible="{Binding IsFaceToFaceLayout}"
+                  RowDefinitions="*,Auto,*"
+                  ColumnDefinitions="*,Auto,*"
+                  RowSpacing="8"
+                  ColumnSpacing="8">
+
+                <!-- История чёрных (сторона противника), перевёрнутая -->
+                <Border Grid.Row="0"
+                        Grid.Column="0"
+                        Padding="8"
+                        Background="{StaticResource GlassCardBrush}"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="1"
+                        VerticalOptions="End"
+                        HorizontalOptions="Fill"
+                        MaximumHeightRequest="168"
+                        MinimumWidthRequest="104">
+                    <Grid Rotation="180"
+                          AnchorX="0.5"
+                          AnchorY="0.5"
+                          HorizontalOptions="Fill"
+                          VerticalOptions="Fill">
+                        <CollectionView ItemsSource="{Binding MoveRows}"
+                                        ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="0"
+                        Grid.Column="2"
+                        Padding="14,8"
+                        Margin="0,0,0,2"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        MinimumWidthRequest="104"
+                        Rotation="180"
+                        AnchorX="0.5"
+                        AnchorY="0.5"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="1">
+                    <VerticalStackLayout Spacing="0">
+                        <Label FontSize="10"
+                               Text="Black"
+                               TextColor="{StaticResource GlassSubtitleText}" />
+                        <Label FontAttributes="Bold"
+                               FontSize="14"
+                               Text="{Binding BlackClockText, Mode=OneWay}"
+                               TextColor="{StaticResource GlassTitleText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid x:Name="FaceToFaceBoardHost"
+                      Grid.Row="1"
+                      Grid.Column="1"
+                      WidthRequest="{Binding BoardGridSize}"
+                      HeightRequest="{Binding BoardGridSize}"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center" />
+
+                <Border Grid.Row="2"
+                        Grid.Column="0"
+                        Padding="14,8"
+                        Margin="0,2,0,0"
+                        HorizontalOptions="Start"
+                        VerticalOptions="End"
+                        Background="{StaticResource GlassPrimaryButtonBrush}"
+                        MinimumWidthRequest="104"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 12"
+                        StrokeThickness="1">
+                    <VerticalStackLayout Spacing="0">
+                        <Label FontSize="10"
+                               Text="White"
+                               TextColor="{StaticResource Gray600}" />
+                        <Label FontAttributes="Bold"
+                               FontSize="14"
+                               Text="{Binding WhiteClockText, Mode=OneWay}"
+                               TextColor="{StaticResource PrimaryDarkText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Row="2"
+                        Grid.Column="2"
+                        Padding="8"
+                        Background="{StaticResource GlassCardBrush}"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="1"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Fill"
+                        MaximumHeightRequest="168"
+                        MinimumWidthRequest="104">
+                    <CollectionView ItemsSource="{Binding MoveRows}"
+                                    ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
+                </Border>
+            </Grid>
         </Grid>
 
-        <!-- Нижний слот под действия (Сдаться / Ничья / История) — заглушка на будущее -->
-        <Border Grid.Row="3"
-                HeightRequest="48"
-                Stroke="#CCC"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 6"
-                BackgroundColor="#FAFAFA" />
+        <!-- Нижняя панель -->
+        <Border Grid.Row="2"
+                Padding="12,10"
+                Background="{StaticResource GlassCardBrush}"
+                Stroke="{StaticResource GlassStrokeBrush}"
+                StrokeShape="RoundRectangle 16"
+                StrokeThickness="1">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                  ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        Background="{StaticResource GlassPrimaryButtonBrush}"
+                        BorderWidth="0"
+                        Clicked="OnSettingsClicked"
+                        CornerRadius="14"
+                        FontAttributes="Bold"
+                        FontSize="13"
+                        Padding="16,10"
+                        Text="Settings"
+                        TextColor="#16161C" />
+                <BoxView Grid.Column="1"
+                         Color="Transparent" />
+                <Button Grid.Column="2"
+                        MinimumWidthRequest="52"
+                        Style="{StaticResource GlassGameStepButton}"
+                        Text="◀"
+                        Command="{Binding StepBackwardCommand}" />
+                <Button Grid.Column="3"
+                        MinimumWidthRequest="52"
+                        Style="{StaticResource GlassGameStepButton}"
+                        Text="▶"
+                        Command="{Binding StepForwardCommand}" />
+            </Grid>
+        </Border>
     </Grid>
 </ContentPage>

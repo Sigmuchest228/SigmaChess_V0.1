@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             x:Class="SigmaChess.Views.GameReplayPage"
+             x:DataType="viewModels:GameReplayViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="ReplayMoveHistoryRowTemplate"
+                          x:DataType="viewModels:MoveHistoryRow">
+                <Grid ColumnDefinitions="28,*,*"
+                      Padding="0,2"
+                      ColumnSpacing="4">
+                    <Label Grid.Column="0"
+                           FontSize="12"
+                           Text="{Binding NumberLabel}"
+                           TextColor="{StaticResource GlassSubtitleText}"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="1"
+                           FontSize="12"
+                           Text="{Binding WhiteMove}"
+                           TextColor="{StaticResource GlassTitleText}"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="2"
+                           FontSize="12"
+                           Text="{Binding BlackMove}"
+                           TextColor="{StaticResource GlassTitleText}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Padding="12,8"
+          RowDefinitions="Auto,*,Auto"
+          RowSpacing="8">
+
+        <views:WallpaperBackdrop Grid.RowSpan="3"
+                                 InputTransparent="True" />
+
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="8">
+            <Button Grid.Column="0"
+                    Style="{StaticResource GlassChevronBackButton}"
+                    Text="‹"
+                    Padding="10,6"
+                    Command="{Binding GoBackCommand}" />
+            <VerticalStackLayout Grid.Column="1"
+                                 VerticalOptions="Center">
+                <Label FontAttributes="Bold"
+                       FontSize="16"
+                       LineBreakMode="TailTruncation"
+                       Text="{Binding HeaderText}"
+                       TextColor="{StaticResource GlassTitleText}" />
+                <HorizontalStackLayout Spacing="0">
+                    <Label FontSize="12"
+                           LineBreakMode="WordWrap"
+                           Opacity="0.95"
+                           IsVisible="{Binding HasWinnerCaption}"
+                           Text="{Binding WinnerOutcomeText}"
+                           TextColor="{Binding WinnerOutcomeColor}"
+                           VerticalTextAlignment="Center" />
+                    <Label FontSize="12"
+                           LineBreakMode="WordWrap"
+                           Opacity="0.9"
+                           Text="{Binding ReplaySubtitleTail}"
+                           TextColor="{StaticResource GlassSubtitleText}"
+                           VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,140"
+              ColumnSpacing="8">
+            <Grid x:Name="CasualBoardHost"
+                  Grid.Column="0"
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
+                <Grid x:Name="BoardWithCoords"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center"
+                      WidthRequest="{Binding BoardGridSize}"
+                      HeightRequest="{Binding BoardGridSize}"
+                      ColumnDefinitions="28,*,*,*,*,*,*,*,*"
+                      RowDefinitions="*,*,*,*,*,*,*,*,28">
+                    <Grid x:Name="BoardGrid"
+                          Grid.Row="0" Grid.RowSpan="8"
+                          Grid.Column="1" Grid.ColumnSpan="8"
+                          RowDefinitions="*,*,*,*,*,*,*,*"
+                          ColumnDefinitions="*,*,*,*,*,*,*,*"
+                          RowSpacing="0"
+                          ColumnSpacing="0" />
+                </Grid>
+            </Grid>
+
+            <Border Grid.Column="1"
+                    Padding="8"
+                    Background="{StaticResource GlassCardBrush}"
+                    Stroke="{StaticResource GlassStrokeBrush}"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1"
+                    VerticalOptions="Fill">
+                <CollectionView ItemsSource="{Binding MoveRows}"
+                                  ItemTemplate="{StaticResource ReplayMoveHistoryRowTemplate}" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Padding="12,10"
+                Background="{StaticResource GlassCardBrush}"
+                Stroke="{StaticResource GlassStrokeBrush}"
+                StrokeShape="RoundRectangle 16"
+                StrokeThickness="1">
+            <HorizontalStackLayout HorizontalOptions="Center"
+                                   Spacing="10">
+                <Button MinimumWidthRequest="48"
+                        Style="{StaticResource GlassGameStepButton}"
+                        Text="|◀"
+                        Command="{Binding StepFirstCommand}" />
+                <Button MinimumWidthRequest="52"
+                        Style="{StaticResource GlassGameStepButton}"
+                        Text="◀"
+                        Command="{Binding StepPrevCommand}" />
+                <Button MinimumWidthRequest="52"
+                        Style="{StaticResource GlassGameStepButton}"
+                        Text="▶"
+                        Command="{Binding StepNextCommand}" />
+                <Button MinimumWidthRequest="48"
+                        Style="{StaticResource GlassGameStepButton}"
+                        Text="▶|"
+                        Command="{Binding StepLastCommand}" />
+            </HorizontalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

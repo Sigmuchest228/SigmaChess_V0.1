@@ -99,6 +99,18 @@ public class Board
         Squares[row, 7] = new Piece(PieceType.Rook, color);
     }
 
+    /// <summary>Очищает все клетки (для загрузки позиции из FEN).</summary>
+    public void ClearAllPieces()
+    {
+        for (var row = 0; row < 8; row++)
+        {
+            for (var col = 0; col < 8; col++)
+            {
+                Squares[row, col] = null;
+            }
+        }
+    }
+
     // Защита от выхода за пределы — кидает исключение, чтобы быстро падать в багах.
     private void EnsureInsideBoard(Position position)
     {

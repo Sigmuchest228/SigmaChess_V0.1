@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:SigmaChess.Views"
+             xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
+             x:Class="SigmaChess.Views.FollowsPage"
+             x:DataType="viewModels:FollowsPageViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles/Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <views:WallpaperBackdrop Grid.RowSpan="3" />
+
+        <Grid Grid.Row="0"
+              Padding="14,12,14,8">
+            <Border Padding="14,10"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Background="{StaticResource GlassTitleChipBrush}"
+                    Stroke="{StaticResource GlassStrokeSoftBrush}"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1">
+                <Label CharacterSpacing="0.8"
+                       FontAttributes="Bold"
+                       FontSize="22"
+                       HorizontalTextAlignment="Center"
+                       Text="{Binding Title}"
+                       TextColor="{StaticResource GlassTitleText}" />
+            </Border>
+        </Grid>
+
+        <ScrollView Grid.Row="1"
+                    Padding="14,0,14,8">
+            <VerticalStackLayout Spacing="14">
+
+                <Border Padding="12,4"
+                        Background="{StaticResource GlassNavButtonBrush}"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="1">
+                    <Grid ColumnDefinitions="*,Auto"
+                          ColumnSpacing="8">
+                        <Entry Grid.Column="0"
+                               Placeholder="{Binding SearchPlaceholder}"
+                               Text="{Binding SearchQuery}"
+                               TextColor="{StaticResource GlassTitleText}"
+                               PlaceholderColor="{StaticResource GlassSubtitleText}"
+                               ReturnCommand="{Binding SearchUsersCommand}"
+                               ReturnType="Search" />
+                        <Button Grid.Column="1"
+                                Padding="14,8"
+                                Background="{StaticResource GlassPrimaryButtonBrush}"
+                                Command="{Binding SearchUsersCommand}"
+                                CornerRadius="12"
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                Text="Search"
+                                TextColor="#16161C" />
+                    </Grid>
+                </Border>
+
+                <VerticalStackLayout IsVisible="{Binding ShowSearchPanel}"
+                                     Spacing="8">
+                    <Label FontAttributes="Bold"
+                           FontSize="15"
+                           Text="Results"
+                           TextColor="{StaticResource GlassTitleText}" />
+                    <Label IsVisible="{Binding ShowNoSearchHits}"
+                           Padding="0,8"
+                           HorizontalOptions="Fill"
+                           LineBreakMode="WordWrap"
+                           Text="{Binding NoSearchHitsMessage}"
+                           TextColor="{StaticResource GlassSubtitleText}" />
+                    <CollectionView IsVisible="{Binding HasSearchResults}"
+                                    ItemsSource="{Binding SearchResults}"
+                                    SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:SearchUserRowViewModel">
+                                <Grid Padding="0,6"
+                                      ColumnDefinitions="52,*,Auto"
+                                      ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            HeightRequest="48"
+                                            Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                            StrokeShape="RoundRectangle 12"
+                                            StrokeThickness="1"
+                                            WidthRequest="48">
+                                        <Image Aspect="AspectFill"
+                                               HeightRequest="48"
+                                               Source="{Binding Avatar}"
+                                               WidthRequest="48" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         VerticalOptions="Center">
+                                        <Label FontAttributes="Bold"
+                                               FontSize="15"
+                                               LineBreakMode="TailTruncation"
+                                               Text="{Binding DisplayName}"
+                                               TextColor="{StaticResource GlassTitleText}" />
+                                        <Label FontSize="12"
+                                               Text="{Binding RankTitle}"
+                                               TextColor="{StaticResource GlassSubtitleText}" />
+                                        <Label FontSize="11"
+                                               Opacity="0.9"
+                                               Text="{Binding PuzzlesLine}"
+                                               TextColor="{StaticResource GlassSubtitleText}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="2"
+                                            Padding="12,8"
+                                            BackgroundColor="#2E7D32"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AddFollowCommand}"
+                                            CommandParameter="{Binding Uid}"
+                                            CornerRadius="12"
+                                            FontAttributes="Bold"
+                                            FontSize="11"
+                                            IsVisible="{Binding ShowFollowButton}"
+                                            Text="Follow"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Spacing="8">
+                    <Label FontAttributes="Bold"
+                           FontSize="17"
+                           Text="Following"
+                           TextColor="{StaticResource GlassTitleText}"
+                           VerticalOptions="Center" />
+                    <Border Padding="8,4"
+                            Background="#44FFFFFF"
+                            Stroke="{StaticResource GlassStrokeSoftBrush}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1"
+                            VerticalOptions="Center">
+                        <Label FontAttributes="Bold"
+                               FontSize="12"
+                               Text="{Binding FollowsCount}"
+                               TextColor="{StaticResource GlassTitleText}" />
+                    </Border>
+                </HorizontalStackLayout>
+
+                <Grid MinimumHeightRequest="120">
+                    <CollectionView IsVisible="{Binding HasFollows}"
+                                    ItemsSource="{Binding Follows}"
+                                    SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:FollowRowViewModel">
+                                <Border Margin="0,4"
+                                        Padding="12,10"
+                                        Background="{StaticResource GlassCardBrush}"
+                                        Stroke="{StaticResource GlassStrokeBrush}"
+                                        StrokeShape="RoundRectangle 14"
+                                        StrokeThickness="1">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding TapCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="52,*"
+                                          ColumnSpacing="12">
+                                        <Border Grid.Column="0"
+                                                HeightRequest="48"
+                                                Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                                StrokeShape="RoundRectangle 12"
+                                                StrokeThickness="1"
+                                                WidthRequest="48">
+                                            <Image Aspect="AspectFill"
+                                                   HeightRequest="48"
+                                                   Source="{Binding Avatar}"
+                                                   WidthRequest="48" />
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1"
+                                                             VerticalOptions="Center">
+                                            <Label FontAttributes="Bold"
+                                                   FontSize="15"
+                                                   LineBreakMode="TailTruncation"
+                                                   Text="{Binding DisplayName}"
+                                                   TextColor="{StaticResource GlassTitleText}" />
+                                            <Label FontSize="12"
+                                                   Text="{Binding RankTitle}"
+                                                   TextColor="{StaticResource GlassSubtitleText}" />
+                                            <Label FontSize="11"
+                                                   Opacity="0.9"
+                                                   Text="{Binding PuzzlesLine}"
+                                                   TextColor="{StaticResource GlassSubtitleText}" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           IsVisible="{Binding ShowEmptyFollowsMessage}"
+                           LineBreakMode="WordWrap"
+                           Padding="24"
+                           Text="{Binding EmptyFollowsMessage}"
+                           TextColor="{StaticResource GlassSubtitleText}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <views:MainBottomNavBar Grid.Row="2"
+                                Margin="14,0,14,14" />
+    </Grid>
+</ContentPage>
