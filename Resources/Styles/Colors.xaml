@@ -93,6 +93,9 @@
 
     <SolidColorBrush x:Key="GlassNavButtonSelectedBrush" Color="#B8182233" />
 
+    <!-- Прозрачная заливка: обои проступают, остаются только Stroke у Border при необходимости -->
+    <SolidColorBrush x:Key="GlassTransparentBrush" Color="Transparent" />
+
     <Style x:Key="GlassChevronBackButton" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource GlassNavButtonBrush}" />
         <Setter Property="TextColor" Value="{StaticResource GlassTitleText}" />

@@ -20,10 +20,10 @@ public class BoardLayoutService
     private const double GamePageMoveListColumn = 140;
 
     /// <summary>
-    /// Режим «за столом»: две боковые зоны делят оставшуюся ширину, отдельная колонка 140 не нужна —
-    /// берём меньший резерв, чтобы центральная доска могла быть крупнее.
+    /// Режим «за столом»: история ходов на всю ширину (не в узких боковых колонках) —
+    /// оставляем небольшой запас только к полям страницы и полосам координат.
     /// </summary>
-    private const double FaceToFaceHorizontalReserve = 64;
+    private const double FaceToFaceHorizontalReserve = 32;
 
     /// <summary>Вертикальный резерв чуть ниже, т.к. списки ходов ограничены по высоте и не забирают всю полосу.</summary>
     private const double FaceToFaceVerticalReserve = 238;

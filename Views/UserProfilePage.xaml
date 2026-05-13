@@ -129,6 +129,8 @@
                                 </CollectionView>
                                 <Label Margin="0,4,0,0"
                                        FontSize="12"
+                                       HorizontalOptions="Start"
+                                       HorizontalTextAlignment="Start"
                                        IsVisible="{Binding IsOwnProfile}"
                                        Opacity="0.85"
                                        Text="Tap photo to change"

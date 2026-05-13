@@ -14,9 +14,11 @@
 
             <DataTemplate x:Key="MoveHistoryRowTemplate"
                           x:DataType="viewModels:MoveHistoryRow">
-                <Grid ColumnDefinitions="28,*,*"
-                      Padding="0,2"
-                      ColumnSpacing="4">
+                <Grid ColumnDefinitions="32,*,*"
+                      Padding="0,3"
+                      ColumnSpacing="6"
+                      MinimumWidthRequest="120"
+                      HorizontalOptions="Fill">
                     <Label Grid.Column="0"
                            FontSize="12"
                            Text="{Binding NumberLabel}"
@@ -127,123 +129,113 @@
                         Grid.Column="1"
                         Grid.RowSpan="3"
                         Padding="8"
-                        Background="{StaticResource GlassCardBrush}"
-                        Stroke="{StaticResource GlassStrokeBrush}"
+                        Background="{StaticResource GlassTransparentBrush}"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
                         StrokeShape="RoundRectangle 14"
                         StrokeThickness="1"
                         VerticalOptions="Fill">
                     <CollectionView ItemsSource="{Binding MoveRows}"
+                                    BackgroundColor="Transparent"
                                     ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
                 </Border>
             </Grid>
 
-            <!-- Режим «за столом»: история чёрных сверху слева (180°), таймер чёрных сверху справа (180°),
-                 доска по центру, таймер белых снизу слева, история белых снизу справа -->
+            <!-- Режим «за столом»: полноширинные полосы истории (узкие боковые колонки сжимали текст в «лесенку»). -->
             <Grid IsVisible="{Binding IsFaceToFaceLayout}"
-                  RowDefinitions="*,Auto,*"
-                  ColumnDefinitions="*,Auto,*"
-                  RowSpacing="8"
-                  ColumnSpacing="8">
+                  RowDefinitions="Auto,*,Auto"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill"
+                  RowSpacing="10">
 
-                <!-- История чёрных (сторона противника), перевёрнутая -->
-                <Border Grid.Row="0"
-                        Grid.Column="0"
-                        Padding="8"
-                        Background="{StaticResource GlassCardBrush}"
-                        Stroke="{StaticResource GlassStrokeBrush}"
-                        StrokeShape="RoundRectangle 14"
-                        StrokeThickness="1"
-                        VerticalOptions="End"
-                        HorizontalOptions="Fill"
-                        MaximumHeightRequest="168"
-                        MinimumWidthRequest="104">
-                    <Grid Rotation="180"
-                          AnchorX="0.5"
-                          AnchorY="0.5"
-                          HorizontalOptions="Fill"
-                          VerticalOptions="Fill">
-                        <CollectionView ItemsSource="{Binding MoveRows}"
-                                        ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
-                    </Grid>
-                </Border>
-
-                <Border Grid.Row="0"
-                        Grid.Column="2"
-                        Padding="14,8"
-                        Margin="0,0,0,2"
-                        HorizontalOptions="End"
-                        VerticalOptions="Start"
-                        Background="{StaticResource GlassNavButtonBrush}"
-                        MinimumWidthRequest="104"
-                        Rotation="180"
-                        AnchorX="0.5"
-                        AnchorY="0.5"
-                        Stroke="{StaticResource GlassStrokeSoftBrush}"
-                        StrokeShape="RoundRectangle 12"
-                        StrokeThickness="1">
-                    <VerticalStackLayout Spacing="0">
-                        <Label FontSize="10"
-                               Text="Black"
-                               TextColor="{StaticResource GlassSubtitleText}" />
-                        <Label FontAttributes="Bold"
-                               FontSize="14"
-                               Text="{Binding BlackClockText, Mode=OneWay}"
-                               TextColor="{StaticResource GlassTitleText}" />
-                    </VerticalStackLayout>
-                </Border>
+                <VerticalStackLayout Grid.Row="0"
+                                     Spacing="8"
+                                     HorizontalOptions="Fill">
+                    <HorizontalStackLayout HorizontalOptions="End"
+                                           Spacing="0">
+                        <Border Padding="14,8"
+                                Background="{StaticResource GlassNavButtonBrush}"
+                                Stroke="{StaticResource GlassStrokeSoftBrush}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1"
+                                MinimumWidthRequest="104"
+                                Rotation="180">
+                            <VerticalStackLayout Spacing="0">
+                                <Label FontSize="10"
+                                       Text="Black"
+                                       TextColor="{StaticResource GlassSubtitleText}" />
+                                <Label FontAttributes="Bold"
+                                       FontSize="14"
+                                       Text="{Binding BlackClockText, Mode=OneWay}"
+                                       TextColor="{StaticResource GlassTitleText}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </HorizontalStackLayout>
+                    <Border Padding="10,8"
+                            Background="{StaticResource GlassTransparentBrush}"
+                            Stroke="{StaticResource GlassStrokeSoftBrush}"
+                            StrokeShape="RoundRectangle 14"
+                            StrokeThickness="1"
+                            HorizontalOptions="Fill"
+                            MaximumHeightRequest="128">
+                        <Grid Rotation="180"
+                              HorizontalOptions="Fill"
+                              VerticalOptions="Fill">
+                            <CollectionView ItemsSource="{Binding MoveRows}"
+                                            BackgroundColor="Transparent"
+                                            ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
 
                 <Grid x:Name="FaceToFaceBoardHost"
                       Grid.Row="1"
-                      Grid.Column="1"
                       WidthRequest="{Binding BoardGridSize}"
                       HeightRequest="{Binding BoardGridSize}"
                       HorizontalOptions="Center"
                       VerticalOptions="Center" />
 
-                <Border Grid.Row="2"
-                        Grid.Column="0"
-                        Padding="14,8"
-                        Margin="0,2,0,0"
-                        HorizontalOptions="Start"
-                        VerticalOptions="End"
-                        Background="{StaticResource GlassPrimaryButtonBrush}"
-                        MinimumWidthRequest="104"
-                        Stroke="{StaticResource GlassStrokeBrush}"
-                        StrokeShape="RoundRectangle 12"
-                        StrokeThickness="1">
-                    <VerticalStackLayout Spacing="0">
-                        <Label FontSize="10"
-                               Text="White"
-                               TextColor="{StaticResource Gray600}" />
-                        <Label FontAttributes="Bold"
-                               FontSize="14"
-                               Text="{Binding WhiteClockText, Mode=OneWay}"
-                               TextColor="{StaticResource PrimaryDarkText}" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Grid.Row="2"
-                        Grid.Column="2"
-                        Padding="8"
-                        Background="{StaticResource GlassCardBrush}"
-                        Stroke="{StaticResource GlassStrokeBrush}"
-                        StrokeShape="RoundRectangle 14"
-                        StrokeThickness="1"
-                        VerticalOptions="Start"
-                        HorizontalOptions="Fill"
-                        MaximumHeightRequest="168"
-                        MinimumWidthRequest="104">
-                    <CollectionView ItemsSource="{Binding MoveRows}"
-                                    ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
-                </Border>
+                <VerticalStackLayout Grid.Row="2"
+                                     Spacing="8"
+                                     HorizontalOptions="Fill">
+                    <HorizontalStackLayout HorizontalOptions="Start"
+                                           Spacing="0">
+                        <Border Padding="14,8"
+                                Background="{StaticResource GlassPrimaryButtonBrush}"
+                                Stroke="{StaticResource GlassStrokeBrush}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1"
+                                MinimumWidthRequest="104">
+                            <VerticalStackLayout Spacing="0">
+                                <Label FontSize="10"
+                                       Text="White"
+                                       TextColor="{StaticResource Gray600}" />
+                                <Label FontAttributes="Bold"
+                                       FontSize="14"
+                                       Text="{Binding WhiteClockText, Mode=OneWay}"
+                                       TextColor="{StaticResource PrimaryDarkText}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </HorizontalStackLayout>
+                    <Border Padding="10,8"
+                            Background="{StaticResource GlassTransparentBrush}"
+                            Stroke="{StaticResource GlassStrokeSoftBrush}"
+                            StrokeShape="RoundRectangle 14"
+                            StrokeThickness="1"
+                            HorizontalOptions="Fill"
+                            MaximumHeightRequest="128">
+                        <CollectionView ItemsSource="{Binding MoveRows}"
+                                        BackgroundColor="Transparent"
+                                        ItemTemplate="{StaticResource MoveHistoryRowTemplate}" />
+                    </Border>
+                </VerticalStackLayout>
             </Grid>
         </Grid>
 
-        <!-- Нижняя панель -->
+        <!-- Нижняя панель: только обводка, фон не перекрывает обои -->
         <Border Grid.Row="2"
                 Padding="12,10"
-                Background="{StaticResource GlassCardBrush}"
-                Stroke="{StaticResource GlassStrokeBrush}"
+                Background="{StaticResource GlassTransparentBrush}"
+                Stroke="{StaticResource GlassStrokeSoftBrush}"
                 StrokeShape="RoundRectangle 16"
                 StrokeThickness="1">
             <Grid ColumnDefinitions="Auto,*,Auto,Auto"

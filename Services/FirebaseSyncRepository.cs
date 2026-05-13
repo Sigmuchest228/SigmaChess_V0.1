@@ -570,41 +570,80 @@ public sealed class FirebaseSyncRepository
         var list = new List<FollowProfileSummary>();
         foreach (var kv in EnumerateUserProfiles(body).OrderBy(x => x.Key, StringComparer.Ordinal))
         {
-            if (string.Equals(kv.Key, me, StringComparison.Ordinal))
+            var row = MatchUserForClientSearch(kv, me, lower, prefixOnly: true);
+            if (row is null)
             {
                 continue;
             }
 
-            var dto = kv.Value;
-            if (string.IsNullOrWhiteSpace(dto.UserName))
-            {
-                continue;
-            }
-
-            var nameLower = !string.IsNullOrWhiteSpace(dto.UserNameLower)
-                ? dto.UserNameLower.Trim().ToLowerInvariant()
-                : dto.UserName.Trim().ToLowerInvariant();
-
-            if (!nameLower.StartsWith(lower, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            list.Add(new FollowProfileSummary
-            {
-                Uid = kv.Key,
-                DisplayName = dto.UserName.Trim(),
-                PuzzlesSolved = UserSigmaRank.NormalizePuzzlesSolved(dto.PuzzlesSolved),
-                AvatarUrl = dto.AvatarUrl
-            });
-
+            list.Add(row);
             if (list.Count >= limit)
             {
-                break;
+                return list;
+            }
+        }
+
+        if (list.Count == 0)
+        {
+            foreach (var kv in EnumerateUserProfiles(body).OrderBy(x => x.Key, StringComparer.Ordinal))
+            {
+                var row = MatchUserForClientSearch(kv, me, lower, prefixOnly: false);
+                if (row is null)
+                {
+                    continue;
+                }
+
+                list.Add(row);
+                if (list.Count >= limit)
+                {
+                    break;
+                }
             }
         }
 
         return list;
+    }
+
+    /// <summary>
+    /// Клиентский поиск по префиксу или подстроке (<paramref name="prefixOnly"/>).
+    /// </summary>
+    private static FollowProfileSummary? MatchUserForClientSearch(
+        KeyValuePair<string, UserProfileRtdbDto> kv,
+        string me,
+        string lower,
+        bool prefixOnly)
+    {
+        if (string.Equals(kv.Key, me, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var dto = kv.Value;
+        if (string.IsNullOrWhiteSpace(dto.UserName))
+        {
+            return null;
+        }
+
+        var nameLower = !string.IsNullOrWhiteSpace(dto.UserNameLower)
+            ? dto.UserNameLower.Trim().ToLowerInvariant()
+            : dto.UserName.Trim().ToLowerInvariant();
+
+        var matches = prefixOnly
+            ? nameLower.StartsWith(lower, StringComparison.Ordinal)
+            : nameLower.Contains(lower, StringComparison.Ordinal);
+
+        if (!matches)
+        {
+            return null;
+        }
+
+        return new FollowProfileSummary
+        {
+            Uid = kv.Key,
+            DisplayName = dto.UserName.Trim(),
+            PuzzlesSolved = UserSigmaRank.NormalizePuzzlesSolved(dto.PuzzlesSolved),
+            AvatarUrl = dto.AvatarUrl
+        };
     }
 
     /// <summary>

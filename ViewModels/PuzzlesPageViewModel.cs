@@ -41,13 +41,13 @@ public sealed class PuzzlesPageViewModel : ViewModelBase
     public string RankTitle
     {
         get => _rankTitle;
-        private set => SetField(ref _rankTitle, value);
+        private set => SetField(ref _rankTitle, value, nameof(RankTitle));
     }
 
     public int PuzzlesSolved
     {
         get => _puzzlesSolved;
-        private set => SetField(ref _puzzlesSolved, value);
+        private set => SetField(ref _puzzlesSolved, value, nameof(PuzzlesSolved));
     }
 
     public bool HasPuzzles => PuzzleRows.Count > 0;
@@ -116,7 +116,7 @@ public sealed class PuzzlesPageViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowEmpty));
     }
 
-    private bool SetField<T>(ref T field, T value)
+    private bool SetField<T>(ref T field, T value, string propertyName)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))
         {
@@ -124,7 +124,7 @@ public sealed class PuzzlesPageViewModel : ViewModelBase
         }
 
         field = value;
-        OnPropertyChanged();
+        OnPropertyChanged(propertyName);
         return true;
     }
 }

@@ -15,7 +15,7 @@
 
 Поля партии и ходов в JSON — PascalCase. Старые узлы с `User1`/`User2` и победителем-uid не совпадают с текущими правилами; при необходимости мигрируйте данные или удалите тестовые записи.
 
-Для **поиска по имени** в консоли RTDB у узла `users` нужен индекс: в [firebase/database.rules.json](firebase/database.rules.json) указано `"users": { ".indexOn": ["UserNameLower"], ... }` — опубликуйте правила. Без индекса REST/запросы с `orderBy=UserNameLower` вернут ошибку.
+Для **поиска по имени** в консоли RTDB у узла `users` нужен индекс: в [firebase/database.rules.json](firebase/database.rules.json) указано `"users": { ".indexOn": ["UserNameLower"], ... }` — опубликуйте правила. Без индекса REST/запросы с `orderBy=UserNameLower` вернут ошибку. Клиентский fallback сначала фильтрует по **префиксу** имени; если совпадений нет, выполняется второй проход с **подстрокой** (`Contains`) по `UserNameLower`, чтобы фрагмент имени тоже находился.
 
 На узле **`users`** также задано **`.read": "auth != null"`**: без чтения родителя запрос `GET .../users.json` (полный список для клиентского fallback поиска) в RTDB часто получает **Permission denied**, даже если у каждого `users/{uid}` есть своё правило — приложение после этого не находит других игроков.
 

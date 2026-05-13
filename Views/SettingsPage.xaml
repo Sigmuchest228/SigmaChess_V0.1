@@ -42,38 +42,44 @@
             </Border>
         </Grid>
 
-        <Border Grid.Row="1"
-                Margin="14,14,14,0"
-                Padding="18"
-                Background="{StaticResource GlassCardBrush}"
-                Stroke="{StaticResource GlassStrokeBrush}"
-                StrokeShape="RoundRectangle 18"
-                StrokeThickness="1"
-                VerticalOptions="Fill">
-            <Grid RowDefinitions="Auto,Auto,*,Auto"
-                  RowSpacing="16">
-                <Label Grid.Row="0"
-                       FontSize="14"
-                       Opacity="0.92"
-                       Text="Customize how SigmaChess looks."
-                       TextColor="{StaticResource GlassSubtitleText}" />
-                <Button Grid.Row="1"
-                        Command="{Binding OpenWallpapersCommand}"
-                        Text="Wallpapers"
-                        BackgroundColor="#62FFFFFF"
-                        CornerRadius="12"
-                        TextColor="{StaticResource GlassTitleText}" />
-                <BoxView Grid.Row="2"
-                         Color="Transparent" />
-                <Button Grid.Row="3"
-                        Command="{Binding LogoutCommand}"
-                        Text="Log out"
-                        BackgroundColor="#BBD32F2F"
-                        CornerRadius="12"
-                        FontAttributes="Bold"
-                        Padding="14,14"
-                        TextColor="#FFFFF5F5" />
-            </Grid>
-        </Border>
+        <Grid Grid.Row="1"
+              Margin="14,14,14,14">
+            <!-- Без огромной «морозной» подложки в середине экрана: обои видны между кнопками -->
+            <VerticalStackLayout Spacing="14">
+                <Border Padding="18"
+                        Background="{StaticResource GlassCardBrush}"
+                        Stroke="{StaticResource GlassStrokeBrush}"
+                        StrokeShape="RoundRectangle 18"
+                        StrokeThickness="1"
+                        HorizontalOptions="Fill">
+                    <VerticalStackLayout Spacing="16">
+                        <Label FontSize="14"
+                               Opacity="0.92"
+                               Text="Customize how SigmaChess looks."
+                               TextColor="{StaticResource GlassSubtitleText}" />
+                        <Button Command="{Binding OpenWallpapersCommand}"
+                                Text="Wallpapers"
+                                BackgroundColor="#62FFFFFF"
+                                CornerRadius="12"
+                                TextColor="{StaticResource GlassTitleText}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Padding="0"
+                        Background="{StaticResource GlassTransparentBrush}"
+                        Stroke="{StaticResource GlassStrokeSoftBrush}"
+                        StrokeShape="RoundRectangle 16"
+                        StrokeThickness="1"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="End">
+                    <Button Command="{Binding LogoutCommand}"
+                            Text="Log out"
+                            BackgroundColor="#BBD32F2F"
+                            CornerRadius="12"
+                            FontAttributes="Bold"
+                            Padding="14,14"
+                            TextColor="#FFFFF5F5" />
+                </Border>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

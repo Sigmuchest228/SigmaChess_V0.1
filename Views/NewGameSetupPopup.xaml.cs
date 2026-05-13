@@ -56,7 +56,7 @@ public partial class NewGameSetupPopup : Popup
         BlackTimeChoiceLabel.Text = TimePresetLabels[_blackTimeSelectedIndex];
     }
 
-    /// <summary>Скрывает этот попап на время дочернего списка опций, затем снова показывает — без наложения двух «стёкол».</summary>
+    /// <summary>Выбор строки через нативный action sheet: родительский попап не закрывается (повторный ShowPopupAsync после CloseAsync давал disposed).</summary>
     private Task<int?> PickOptionAsync(string title, IReadOnlyList<string> options) =>
         MainThread.InvokeOnMainThreadAsync(async () =>
         {
@@ -66,15 +66,22 @@ public partial class NewGameSetupPopup : Popup
                 return (int?)null;
             }
 
-            await CloseAsync();
-            try
+            const string cancel = "Cancel";
+            var picked = await page.DisplayActionSheet(title, cancel, null, options.ToArray());
+            if (string.IsNullOrEmpty(picked) || string.Equals(picked, cancel, StringComparison.Ordinal))
             {
-                return await GlassOptionListPopup.ShowAsync(page, title, options);
+                return (int?)null;
             }
-            finally
+
+            for (var i = 0; i < options.Count; i++)
             {
-                await page.ShowPopupAsync(this);
+                if (string.Equals(options[i], picked, StringComparison.Ordinal))
+                {
+                    return i;
+                }
             }
+
+            return (int?)null;
         });
 
     private async void OnLayoutPickTapped(object? sender, TappedEventArgs e)
