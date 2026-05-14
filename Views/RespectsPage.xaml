@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:SigmaChess.Views"
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
-             x:Class="SigmaChess.Views.FollowsPage"
-             x:DataType="viewModels:FollowsPageViewModel"
+             x:Class="SigmaChess.Views.RespectsPage"
+             x:DataType="viewModels:RespectsPageViewModel"
              BackgroundColor="{StaticResource GlassPageFallback}">
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -15,8 +15,6 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <views:WallpaperBackdrop Grid.RowSpan="3" />
-
         <Grid Grid.Row="0"
               Padding="14,12,14,8">
             <Border Padding="14,10"
@@ -91,6 +89,9 @@
                                             StrokeShape="RoundRectangle 12"
                                             StrokeThickness="1"
                                             WidthRequest="48">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding TapCommand}" />
+                                        </Border.GestureRecognizers>
                                         <Image Aspect="AspectFill"
                                                HeightRequest="48"
                                                Source="{Binding Avatar}"
@@ -102,25 +103,22 @@
                                                FontSize="15"
                                                LineBreakMode="TailTruncation"
                                                Text="{Binding DisplayName}"
-                                               TextColor="{StaticResource GlassTitleText}" />
-                                        <Label FontSize="12"
-                                               Text="{Binding RankTitle}"
-                                               TextColor="{StaticResource GlassSubtitleText}" />
-                                        <Label FontSize="11"
-                                               Opacity="0.9"
-                                               Text="{Binding PuzzlesLine}"
-                                               TextColor="{StaticResource GlassSubtitleText}" />
+                                               TextColor="{StaticResource GlassTitleText}">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding TapCommand}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
                                     </VerticalStackLayout>
                                     <Button Grid.Column="2"
                                             Padding="12,8"
                                             BackgroundColor="#2E7D32"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AddFollowCommand}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AddRespectCommand}"
                                             CommandParameter="{Binding Uid}"
                                             CornerRadius="12"
                                             FontAttributes="Bold"
                                             FontSize="11"
-                                            IsVisible="{Binding ShowFollowButton}"
-                                            Text="Follow"
+                                            IsVisible="{Binding ShowRespectButton}"
+                                            Text="Respect"
                                             TextColor="White"
                                             VerticalOptions="Center" />
                                 </Grid>
@@ -132,7 +130,7 @@
                 <HorizontalStackLayout Spacing="8">
                     <Label FontAttributes="Bold"
                            FontSize="17"
-                           Text="Following"
+                           Text="Respecting"
                            TextColor="{StaticResource GlassTitleText}"
                            VerticalOptions="Center" />
                     <Border Padding="8,4"
@@ -143,27 +141,24 @@
                             VerticalOptions="Center">
                         <Label FontAttributes="Bold"
                                FontSize="12"
-                               Text="{Binding FollowsCount}"
+                               Text="{Binding RespectCount}"
                                TextColor="{StaticResource GlassTitleText}" />
                     </Border>
                 </HorizontalStackLayout>
 
                 <Grid MinimumHeightRequest="120">
-                    <CollectionView IsVisible="{Binding HasFollows}"
-                                    ItemsSource="{Binding Follows}"
+                    <CollectionView IsVisible="{Binding HasRespects}"
+                                    ItemsSource="{Binding RespectList}"
                                     SelectionMode="None">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="viewModels:FollowRowViewModel">
+                            <DataTemplate x:DataType="viewModels:RespectRowViewModel">
                                 <Border Margin="0,4"
                                         Padding="12,10"
                                         Background="{StaticResource GlassCardBrush}"
                                         Stroke="{StaticResource GlassStrokeBrush}"
                                         StrokeShape="RoundRectangle 14"
                                         StrokeThickness="1">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding TapCommand}" />
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="52,*"
+                                    <Grid ColumnDefinitions="52,*,Auto"
                                           ColumnSpacing="12">
                                         <Border Grid.Column="0"
                                                 HeightRequest="48"
@@ -171,6 +166,9 @@
                                                 StrokeShape="RoundRectangle 12"
                                                 StrokeThickness="1"
                                                 WidthRequest="48">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding TapCommand}" />
+                                            </Border.GestureRecognizers>
                                             <Image Aspect="AspectFill"
                                                    HeightRequest="48"
                                                    Source="{Binding Avatar}"
@@ -182,15 +180,23 @@
                                                    FontSize="15"
                                                    LineBreakMode="TailTruncation"
                                                    Text="{Binding DisplayName}"
-                                                   TextColor="{StaticResource GlassTitleText}" />
-                                            <Label FontSize="12"
-                                                   Text="{Binding RankTitle}"
-                                                   TextColor="{StaticResource GlassSubtitleText}" />
-                                            <Label FontSize="11"
-                                                   Opacity="0.9"
-                                                   Text="{Binding PuzzlesLine}"
-                                                   TextColor="{StaticResource GlassSubtitleText}" />
+                                                   TextColor="{StaticResource GlassTitleText}">
+                                                <VerticalStackLayout.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding TapCommand}" />
+                                                </VerticalStackLayout.GestureRecognizers>
+                                            </Label>
                                         </VerticalStackLayout>
+                                        <Button Grid.Column="2"
+                                                Padding="10,6"
+                                                BackgroundColor="#8B0000"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRespectCommand}"
+                                                CommandParameter="{Binding Uid}"
+                                                CornerRadius="10"
+                                                FontAttributes="Bold"
+                                                FontSize="11"
+                                                Text="Remove"
+                                                TextColor="White"
+                                                VerticalOptions="Center" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -199,10 +205,10 @@
 
                     <Label HorizontalOptions="Center"
                            HorizontalTextAlignment="Center"
-                           IsVisible="{Binding ShowEmptyFollowsMessage}"
+                           IsVisible="{Binding ShowEmptyRespectList}"
                            LineBreakMode="WordWrap"
                            Padding="24"
-                           Text="{Binding EmptyFollowsMessage}"
+                           Text="{Binding EmptyRespectListMessage}"
                            TextColor="{StaticResource GlassSubtitleText}"
                            VerticalOptions="Center" />
                 </Grid>

@@ -4,26 +4,30 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-public sealed class FollowsPageViewModel : ViewModelBase
+public class RespectsPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
 
     private string _searchQuery = string.Empty;
-    private bool _isBusy;
     private bool _searchRunning;
     private bool _showSearchOutcome;
-    private HashSet<string> _followUids = [];
+    private HashSet<string> _respectUids = [];
 
-    public FollowsPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
+    public RespectsPageViewModel()
+        : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
+    {
+    }
+
+    public RespectsPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
         _appService = appService;
         _firebaseSync = firebaseSync;
 
-        Follows = new ObservableCollection<FollowRowViewModel>();
+        RespectList = new ObservableCollection<RespectRowViewModel>();
         SearchResults = new ObservableCollection<SearchUserRowViewModel>();
 
-        RefreshFollowsCommand = new Command(async () => await RefreshFollowsAsync());
+        RefreshRespectsCommand = new Command(async () => await RefreshRespectsAsync());
         SearchUsersCommand = new Command(async () => await ExecuteSearchAsync());
         ClearSearchCommand = new Command(() =>
         {
@@ -33,16 +37,17 @@ public sealed class FollowsPageViewModel : ViewModelBase
             OnPropertyChanged(nameof(HasSearchResults));
         });
 
-        AddFollowCommand = new Command<string>(async uid => await AddFollowAndRefreshAsync(uid));
+        AddRespectCommand = new Command<string>(async uid => await AddRespectAndRefreshAsync(uid));
+        RemoveRespectCommand = new Command<string>(async uid => await RemoveRespectAndRefreshAsync(uid));
     }
 
-    public ObservableCollection<FollowRowViewModel> Follows { get; }
+    public ObservableCollection<RespectRowViewModel> RespectList { get; }
 
     public ObservableCollection<SearchUserRowViewModel> SearchResults { get; }
 
-    public string Title => "Follows";
+    public string Title => "Respect";
 
-    public string EmptyFollowsMessage => "You are not following anyone yet.";
+    public string EmptyRespectListMessage => "Your respect list is empty.";
 
     public string SearchPlaceholder => "Search by name or username";
 
@@ -52,28 +57,13 @@ public sealed class FollowsPageViewModel : ViewModelBase
 
     public bool ShowNoSearchHits => _showSearchOutcome && !HasSearchResults;
 
-    public bool HasFollows => Follows.Count > 0;
+    public bool HasRespects => RespectList.Count > 0;
 
-    public bool ShowEmptyFollowsMessage => !HasFollows;
+    public bool ShowEmptyRespectList => !HasRespects;
 
-    public int FollowsCount => Follows.Count;
+    public int RespectCount => RespectList.Count;
 
     public bool HasSearchResults => SearchResults.Count > 0;
-
-    public bool IsBusy
-    {
-        get => _isBusy;
-        private set
-        {
-            if (_isBusy == value)
-            {
-                return;
-            }
-
-            _isBusy = value;
-            OnPropertyChanged();
-        }
-    }
 
     public string SearchQuery
     {
@@ -90,15 +80,17 @@ public sealed class FollowsPageViewModel : ViewModelBase
         }
     }
 
-    public ICommand RefreshFollowsCommand { get; }
+    public ICommand RefreshRespectsCommand { get; }
 
     public Command SearchUsersCommand { get; }
 
     public ICommand ClearSearchCommand { get; }
 
-    public Command<string> AddFollowCommand { get; }
+    public Command<string> AddRespectCommand { get; }
 
-    public Task LoadAsync(CancellationToken cancellationToken = default) => RefreshFollowsAsync(cancellationToken);
+    public Command<string> RemoveRespectCommand { get; }
+
+    public Task LoadAsync(CancellationToken cancellationToken = default) => RefreshRespectsAsync(cancellationToken);
 
     private void SetShowSearchOutcome(bool value)
     {
@@ -112,19 +104,17 @@ public sealed class FollowsPageViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowNoSearchHits));
     }
 
-    private static string FormatPuzzlesLine(int solved) => $"{solved} puzzles solved";
-
-    private async Task RefreshFollowsAsync(CancellationToken cancellationToken = default)
+    private async Task RefreshRespectsAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_appService.CurrentUserId))
         {
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                Follows.Clear();
-                _followUids = [];
-                OnPropertyChanged(nameof(HasFollows));
-                OnPropertyChanged(nameof(ShowEmptyFollowsMessage));
-                OnPropertyChanged(nameof(FollowsCount));
+                RespectList.Clear();
+                _respectUids = [];
+                OnPropertyChanged(nameof(HasRespects));
+                OnPropertyChanged(nameof(ShowEmptyRespectList));
+                OnPropertyChanged(nameof(RespectCount));
             }).WaitAsync(cancellationToken).ConfigureAwait(false);
             return;
         }
@@ -133,22 +123,19 @@ public sealed class FollowsPageViewModel : ViewModelBase
         try
         {
             await _firebaseSync.EnsureUserProfileAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var summaries = await _firebaseSync.LoadFollowsAsync(cancellationToken).ConfigureAwait(false);
-            _followUids = summaries.Select(s => s.Uid).ToHashSet(StringComparer.Ordinal);
+            var summaries = await _firebaseSync.LoadRespectsAsync(cancellationToken).ConfigureAwait(false);
+            _respectUids = summaries.Select(s => s.Uid).ToHashSet(StringComparer.Ordinal);
 
-            var rows = new List<FollowRowViewModel>();
+            var rows = new List<RespectRowViewModel>();
             foreach (var s in summaries)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var avatar = await UserAvatarPreview
                     .LoadAsync(s.Uid, s.AvatarUrl, cancellationToken, allowLocalPending: false).ConfigureAwait(false);
                 var uidLocal = s.Uid;
-                var rank = UserSigmaRank.GetRankTitle(s.PuzzlesSolved);
-                var row = new FollowRowViewModel(
+                var row = new RespectRowViewModel(
                     s.Uid,
                     s.DisplayName,
-                    rank,
-                    FormatPuzzlesLine(s.PuzzlesSolved),
                     () => OpenProfileAsync(uidLocal));
                 row.Avatar = avatar;
                 rows.Add(row);
@@ -156,15 +143,15 @@ public sealed class FollowsPageViewModel : ViewModelBase
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                Follows.Clear();
+                RespectList.Clear();
                 foreach (var r in rows)
                 {
-                    Follows.Add(r);
+                    RespectList.Add(r);
                 }
 
-                OnPropertyChanged(nameof(HasFollows));
-                OnPropertyChanged(nameof(ShowEmptyFollowsMessage));
-                OnPropertyChanged(nameof(FollowsCount));
+                OnPropertyChanged(nameof(HasRespects));
+                OnPropertyChanged(nameof(ShowEmptyRespectList));
+                OnPropertyChanged(nameof(RespectCount));
             }).WaitAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
@@ -204,15 +191,14 @@ public sealed class FollowsPageViewModel : ViewModelBase
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var me = _appService.CurrentUserId!;
-                var isFollowing = _followUids.Contains(s.Uid);
+                var isRespected = _respectUids.Contains(s.Uid);
                 var isSelf = string.Equals(s.Uid, me, StringComparison.Ordinal);
-                var rank = UserSigmaRank.GetRankTitle(s.PuzzlesSolved);
+                var uidLocal = s.Uid;
                 var row = new SearchUserRowViewModel(
                     s.Uid,
                     s.DisplayName,
-                    rank,
-                    FormatPuzzlesLine(s.PuzzlesSolved),
-                    !isFollowing && !isSelf);
+                    !isRespected && !isSelf,
+                    () => OpenProfileAsync(uidLocal));
                 row.Avatar = await UserAvatarPreview
                     .LoadAsync(s.Uid, s.AvatarUrl, cancellationToken, allowLocalPending: false).ConfigureAwait(false);
                 rows.Add(row);
@@ -236,9 +222,9 @@ public sealed class FollowsPageViewModel : ViewModelBase
         }
     }
 
-    private async Task AddFollowAndRefreshAsync(string? targetUid)
+    private async Task AddRespectAndRefreshAsync(string? targetUid)
     {
-        if (string.IsNullOrWhiteSpace(targetUid) || _isBusy)
+        if (string.IsNullOrWhiteSpace(targetUid) || IsBusy)
         {
             return;
         }
@@ -246,8 +232,28 @@ public sealed class FollowsPageViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _firebaseSync.AddFollowAsync(targetUid).ConfigureAwait(false);
-            await RefreshFollowsAsync().ConfigureAwait(false);
+            await _firebaseSync.AddRespectAsync(targetUid).ConfigureAwait(false);
+            await RefreshRespectsAsync().ConfigureAwait(false);
+            await ExecuteSearchAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task RemoveRespectAndRefreshAsync(string? targetUid)
+    {
+        if (string.IsNullOrWhiteSpace(targetUid) || IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            await _firebaseSync.RemoveRespectAsync(targetUid).ConfigureAwait(false);
+            await RefreshRespectsAsync().ConfigureAwait(false);
             await ExecuteSearchAsync().ConfigureAwait(false);
         }
         finally

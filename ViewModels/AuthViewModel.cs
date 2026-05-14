@@ -1,14 +1,12 @@
 using System.Windows.Input;
+using Microsoft.Maui.Controls;
 using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
 /// <summary>
-/// ViewModel страницы входа/регистрации. Один и тот же экран служит обоим режимам;
-/// переключение между ними — через <see cref="IsRegisterMode"/>.
-/// <para>
-/// Реализует <see cref="IQueryAttributable"/> для режима регистрации через query <c>?mode=register</c> при навигации Shell.
-/// </para>
+/// ViewModel страницы входа/регистрации. Переключение режимов — <see cref="IsRegisterMode"/>.
+/// Поддерживает query <c>?mode=register</c> через <see cref="IQueryAttributable"/>.
 /// </summary>
 public class AuthViewModel : ViewModelBase, IQueryAttributable
 {
@@ -21,6 +19,11 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
     private string _confirmPassword = string.Empty;
     private string _errorMessage = string.Empty;
 
+    public AuthViewModel()
+        : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
+    {
+    }
+
     public AuthViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
         _appService = appService;
@@ -32,11 +35,6 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         ShowRegisterModeCommand = new Command(() => IsRegisterMode = true);
     }
 
-    /// <summary>
-    /// true — экран в режиме регистрации, false — в режиме логина.
-    /// При смене сбрасывается ошибка и обновляются зависимые свойства, на которые
-    /// привязан XAML (заголовок страницы, инверсный флаг IsLoginMode).
-    /// </summary>
     public bool IsRegisterMode
     {
         get => _isRegisterMode;
@@ -74,7 +72,6 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
-    /// <summary>Отображаемое имя в RTDB; заполняется только при регистрации.</summary>
     public string UserName
     {
         get => _userName;
@@ -105,7 +102,6 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
-    /// <summary>Текст ошибки под формой. Пустая строка прячет блок (через Converter в XAML).</summary>
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -115,38 +111,40 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             OnPropertyChanged();
         }
     }
+
     public ICommand GuestCommand { get; }
-
     public ICommand LoginCommand { get; }
-
-
     public ICommand RegisterCommand { get; }
-
     public ICommand ShowLoginModeCommand { get; }
-
     public ICommand ShowRegisterModeCommand { get; }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (!query.TryGetValue("mode", out var modeObj))
+        {
+            return;
+        }
+
+        var mode = modeObj?.ToString();
+        IsRegisterMode = string.Equals(mode, "register", StringComparison.OrdinalIgnoreCase);
+    }
 
     private async Task LoginAsGuestAsync()
     {
-        _ = await _appService.TrySignInAnonymouslyAsync();
-        try
+        await RunBusyAsync(async () =>
         {
-            await _firebaseSync.EnsureUserProfileAsync();
-        }
-        catch
-        {
-            // Без сети гость всё равно может играть локально; облако — по возможности.
-        }
-
-        await MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            if (Shell.Current is not null)
+            _ = await _appService.TrySignInAnonymouslyAsync();
+            await TryEnsureUserProfileAsync();
+            await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                await Shell.Current.GoToAsync("//MainPage");
-            }
+                if (Shell.Current is not null)
+                {
+                    await Shell.Current.GoToAsync("//MainPage");
+                }
+            });
         });
     }
-    // Логин: при успехе переключаем корень навигации на авторизованный и остаёмся на главной (новый стек).
+
     private async Task LoginAsync()
     {
         if (!ValidateEmailAndPassword(requireConfirmPassword: false))
@@ -154,30 +152,20 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             return;
         }
 
-        var success = await _appService.TryLogin(Email, Password);
-        ErrorMessage = success ? string.Empty : "Login failed";
-        if (success)
+        await RunBusyAsync(async () =>
         {
-            try
+            var success = await _appService.TryLogin(Email, Password);
+            ErrorMessage = success ? string.Empty : "Login failed";
+            if (!success)
             {
-                await _firebaseSync.EnsureUserProfileAsync();
-            }
-            catch
-            {
-                // Профиль догрузится при первом сохранении партии.
+                return;
             }
 
-            await MainThread.InvokeOnMainThreadAsync(() =>
-            {
-                if (Application.Current is App app)
-                {
-                    app.SetAuthenticatedShell();
-                }
-            });
-        }
+            await TryEnsureUserProfileAsync();
+            await NavigateToAuthenticatedShellAsync();
+        });
     }
 
-    // Регистрация: Firebase Auth + вход + профиль RTDB + авторизованный корень навигации.
     private async Task RegisterAsync()
     {
         if (!ValidateRegistrationFields())
@@ -185,43 +173,63 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             return;
         }
 
-        var success = await _appService.TryRegister(Email, Password);
-        if (!success)
+        await RunBusyAsync(async () =>
         {
-            ErrorMessage = "Registration failed";
-            return;
-        }
+            if (!await _appService.TryRegister(Email, Password))
+            {
+                ErrorMessage = "Registration failed";
+                return;
+            }
 
-        // Сразу входим теми же учётными данными: в Authentication уже есть uid, создаём профиль в RTDB.
-        var loggedIn = await _appService.TryLogin(Email, Password);
-        if (!loggedIn)
-        {
+            if (!await _appService.TryLogin(Email, Password))
+            {
+                ErrorMessage = string.Empty;
+                IsRegisterMode = false;
+                return;
+            }
+
+            await TryEnsureUserProfileAsync(UserName.Trim());
+
             ErrorMessage = string.Empty;
+            UserName = string.Empty;
             IsRegisterMode = false;
-            return;
-        }
+            await NavigateToAuthenticatedShellAsync();
+        });
+    }
 
+    private async Task RunBusyAsync(Func<Task> work)
+    {
+        IsBusy = true;
         try
         {
-            await _firebaseSync.EnsureUserProfileAsync(UserName.Trim());
+            await work();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task TryEnsureUserProfileAsync(string? preferredUserName = null)
+    {
+        try
+        {
+            await _firebaseSync.EnsureUserProfileAsync(preferredUserName);
         }
         catch
         {
-            // Профиль догрузится при первом сохранении партии или при следующем открытии главной.
+            // Без сети или при сбое RTDB — локальная игра возможна, профиль догрузится позже.
         }
+    }
 
-        ErrorMessage = string.Empty;
-        UserName = string.Empty;
-        IsRegisterMode = false;
-
-        await MainThread.InvokeOnMainThreadAsync(() =>
+    private static Task NavigateToAuthenticatedShellAsync() =>
+        MainThread.InvokeOnMainThreadAsync(() =>
         {
             if (Application.Current is App app)
             {
                 app.SetAuthenticatedShell();
             }
         });
-    }
 
     private bool ValidateRegistrationFields()
     {
@@ -237,7 +245,6 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             return false;
         }
 
-        // Буквы/цифры/пробел/подчёркивание/дефис (латиница и кириллица).
         foreach (var ch in name)
         {
             if (char.IsLetterOrDigit(ch) || ch is ' ' or '_' or '-')
@@ -253,7 +260,6 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         return true;
     }
 
-    // Минимальная валидация на стороне клиента: формат email, длина пароля, совпадение паролей при регистрации.
     private bool ValidateEmailAndPassword(bool requireConfirmPassword)
     {
         if (string.IsNullOrWhiteSpace(Email) || !Email.Contains('@') || !Email.Contains('.'))
@@ -276,19 +282,5 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
 
         ErrorMessage = string.Empty;
         return true;
-    }
-
-    /// <summary>
-    /// Принимает query-параметры при навигации (если используются). Поддерживается <c>mode=register</c>.
-    /// </summary>
-    public void ApplyQueryAttributes(IDictionary<string, object> query)
-    {
-        if (!query.TryGetValue("mode", out var modeObj))
-        {
-            return;
-        }
-
-        var mode = modeObj?.ToString();
-        IsRegisterMode = string.Equals(mode, "register", StringComparison.OrdinalIgnoreCase);
     }
 }

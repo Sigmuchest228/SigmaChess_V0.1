@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using SigmaChess.Models;
 using SigmaChess.Services;
 using SigmaChess.Views;
 
@@ -6,7 +7,7 @@ namespace SigmaChess.ViewModels;
 
 /// <summary>
 /// ViewModel главной страницы приложения. Отвечает за:
-///   1. Команды-кнопки навигации (открыть логин/регистрацию/игру/паззлы и т. д.).
+///   1. Команды-кнопки навигации (открыть логин/регистрацию/игру и т. д.).
 ///   2. Гость-гейт: для разделов, недоступных без логина, показывает попап «нужен аккаунт».
 ///   3. Управление видимостью кнопок «Log in / Sign up» через флаг <see cref="IsGuest"/>.
 /// </summary>
@@ -14,7 +15,6 @@ public class MainPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
-    private readonly IUserAppearanceService _appearance;
 
     /// <summary>Корневые маршруты Shell — открываются с префиксом "//".</summary>
     private static readonly HashSet<string> ShellRootRoutes =
@@ -22,15 +22,13 @@ public class MainPageViewModel : ViewModelBase
         nameof(AuthPage),
         nameof(MainPage),
         nameof(GamePage),
-        nameof(PuzzlesPage),
-        nameof(FollowsPage),
+        nameof(RespectsPage),
     ];
 
     // Список разделов, которые гостю не показываем — сначала просим залогиниться.
     private static readonly HashSet<string> GuestRestrictedRoutes =
     [
-        nameof(PuzzlesPage),
-        nameof(FollowsPage),
+        nameof(RespectsPage),
         nameof(SettingsPage),
         nameof(PlayedGamesPage),
     ];
@@ -38,24 +36,26 @@ public class MainPageViewModel : ViewModelBase
     private const string AuthLoginRoute = nameof(AuthPage);
     private const string AuthSignupRoute = nameof(AuthPage) + "?mode=register";
 
-    private const string PuzzlesRoute = nameof(PuzzlesPage);
-    private const string FollowsRoute = nameof(FollowsPage);
+    private const string RespectListRoute = nameof(RespectsPage);
 
     private bool _isGuest = true;
 
-    public MainPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync, IUserAppearanceService appearance)
+    public MainPageViewModel()
+        : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
+    {
+    }
+
+    public MainPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
         _appService = appService;
         _firebaseSync = firebaseSync;
-        _appearance = appearance;
 
         OpenLoginCommand = new Command(async () => await NavigateAsync(AuthLoginRoute));
         OpenSignupCommand = new Command(async () => await NavigateAsync(AuthSignupRoute));
         OpenProfileCommand = new Command(async () => await NavigateAsync(nameof(UserProfilePage)));
 
         OpenOneDeviceGameCommand = new Command(async () => await NavigateAsync("//GamePage"));
-        OpenPuzzlesCommand = new Command(async () => await NavigateAsync(PuzzlesRoute));
-        OpenFollowsCommand = new Command(async () => await NavigateAsync(FollowsRoute));
+        OpenRespectListCommand = new Command(async () => await NavigateAsync(RespectListRoute));
         OpenPlayedGamesCommand = new Command(async () => await NavigateAsync(nameof(PlayedGamesPage)));
 
         RefreshAuthState();
@@ -117,12 +117,11 @@ public class MainPageViewModel : ViewModelBase
             return;
         }
 
-        UserProfileRtdbDto? profile = null;
+        UserProfile? profile = null;
         try
         {
             await _firebaseSync.EnsureUserProfileAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             profile = await _firebaseSync.GetUserProfileAsync(cancellationToken).ConfigureAwait(false);
-            await _appearance.ApplyFromProfileAsync(profile, cancellationToken).ConfigureAwait(false);
         }
         catch
         {
@@ -220,9 +219,7 @@ public class MainPageViewModel : ViewModelBase
 
     public ICommand OpenOneDeviceGameCommand { get; }
 
-    public ICommand OpenPuzzlesCommand { get; }
-
-    public ICommand OpenFollowsCommand { get; }
+    public ICommand OpenRespectListCommand { get; }
 
     public ICommand OpenPlayedGamesCommand { get; }
 }

@@ -1,5 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
-using SigmaChess;
+using SigmaChess.Services;
 
 namespace SigmaChess.Views;
 
@@ -20,21 +19,17 @@ public partial class MainBottomNavBar : ContentView
 
     /// <summary>
     /// Сразу задаём контекст навбара — иначе первый проход биндингов наследует страницу
-    /// (<see cref="ViewModels.FollowsPageViewModel"/> и т. п.) и даёт предупреждения / поломанные команды.
-    /// Повтор при Loaded — если в ctor ещё не был готов <see cref="App.Services"/>.
+    /// (<see cref="SigmaChess.ViewModels.RespectsPageViewModel"/> и т. п.) и даёт предупреждения / поломанные команды.
+    /// Повтор при Loaded — если первый проход был до готовности <see cref="SigmaChess.Services.AppService"/>.
     /// </summary>
     private void AttachCoordinator()
     {
-        if (BindingContext is Services.BottomNavigationCoordinator)
+        if (BindingContext is BottomNavigationCoordinator)
         {
             return;
         }
 
-        if (App.Services?.GetService<Services.BottomNavigationCoordinator>() is not { } c)
-        {
-            return;
-        }
-
+        var c = AppService.GetInstance().BottomNavigation;
         BindingContext = c;
         c.SyncFromShell();
     }

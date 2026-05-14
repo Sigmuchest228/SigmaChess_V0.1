@@ -8,9 +8,14 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-public sealed class GameReplayViewModel : ViewModelBase
+/// <summary>Просмотр сохранённой партии по <c>gameId</c>: загрузка ходов из RTDB и пошаговый реплей на движке.</summary>
+/// <remarks>
+/// В отличие от минимальных примеров MVVM, здесь есть <see cref="FirebaseSyncRepository"/> и разбор ходов через <see cref="GameReplayMoveResolver"/> —
+/// это не «магия», а необходимость приложения с облаком.
+/// </remarks>
+public class GameReplayViewModel : ViewModelBase
 {
-    private readonly GameController _controller = new();
+    private readonly global::SigmaChess.Engine.GameController _controller = new();
     private readonly BoardLayoutService _layoutService;
     private readonly FirebaseSyncRepository _firebaseSync;
 
@@ -22,6 +27,11 @@ public sealed class GameReplayViewModel : ViewModelBase
     private string _winnerOutcomeText = string.Empty;
     private Color _winnerOutcomeColor = ChessOutcomePalette.TextForWinner(string.Empty);
     private string _replaySubtitleTail = string.Empty;
+
+    public GameReplayViewModel()
+        : this(AppService.GetInstance().BoardLayout, AppService.GetInstance().FirebaseSync)
+    {
+    }
 
     public GameReplayViewModel(BoardLayoutService layoutService, FirebaseSyncRepository firebaseSync)
     {
@@ -345,8 +355,8 @@ public sealed class GameReplayViewModel : ViewModelBase
         var moves = _controller.GetPlayedMoves();
         for (var i = 0; i < moves.Count; i += 2)
         {
-            var white = AlgebraicNotation.MoveToShortNotation(moves[i]);
-            var black = i + 1 < moves.Count ? AlgebraicNotation.MoveToShortNotation(moves[i + 1]) : string.Empty;
+            var white = AlgebraicNotation.MoveToShortNotation(moves[i], moves, i);
+            var black = i + 1 < moves.Count ? AlgebraicNotation.MoveToShortNotation(moves[i + 1], moves, i + 1) : string.Empty;
             MoveRows.Add(new MoveHistoryRow
             {
                 FullMoveNumber = i / 2 + 1,

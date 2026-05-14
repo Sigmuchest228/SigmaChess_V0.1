@@ -2,9 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
-             xmlns:views="clr-namespace:SigmaChess.Views"
              x:Class="SigmaChess.Views.GamePage"
-             x:DataType="viewModels:GameViewModel">
+             x:DataType="viewModels:GameViewModel"
+             BackgroundColor="{StaticResource GlassPageFallback}">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -42,9 +42,6 @@
     <Grid Padding="12,8"
           RowDefinitions="Auto,*,Auto"
           RowSpacing="8">
-
-        <views:WallpaperBackdrop Grid.RowSpan="3"
-                                 InputTransparent="True" />
 
         <!-- Хедер: только назад -->
         <Grid Grid.Row="0"

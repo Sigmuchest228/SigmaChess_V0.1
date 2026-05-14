@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:views="clr-namespace:SigmaChess.Views"
              xmlns:viewModels="clr-namespace:SigmaChess.ViewModels"
              x:Class="SigmaChess.Views.AuthPage"
              x:DataType="viewModels:AuthViewModel"
@@ -14,9 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </ContentPage.Resources>
-    <Grid>
-        <views:WallpaperBackdrop />
-        <Grid Padding="24"
+    <Grid Padding="24"
               RowDefinitions="*,Auto,*">
             <VerticalStackLayout Grid.Row="1"
                                  HorizontalOptions="Center"
@@ -103,6 +100,5 @@
                         Text="Enter As Guest"
                         TextColor="{StaticResource GlassTitleText}" />
             </VerticalStackLayout>
-        </Grid>
     </Grid>
 </ContentPage>

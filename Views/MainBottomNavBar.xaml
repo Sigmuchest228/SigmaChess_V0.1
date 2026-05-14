@@ -20,7 +20,7 @@
                     Opacity="0.42"
                     Radius="28" />
         </Border.Shadow>
-        <Grid ColumnDefinitions="*,*,*,*"
+        <Grid ColumnDefinitions="*,*,*"
               ColumnSpacing="8">
             <Button Grid.Column="0"
                     BorderWidth="0"
@@ -48,20 +48,20 @@
             </Button>
             <Button Grid.Column="1"
                     BorderWidth="0"
-                    Command="{Binding NavigatePuzzlesCommand}"
+                    Command="{Binding NavigateRespectsCommand}"
                     CornerRadius="12"
                     FontAttributes="Bold"
                     FontSize="13"
                     HorizontalOptions="Fill"
                     LineBreakMode="WordWrap"
                     Padding="6,10"
-                    Text="Puzzles"
+                    Text="Respect"
                     TextColor="{StaticResource GlassTitleText}">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="{StaticResource GlassNavButtonBrush}" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsPuzzlesSelected}"
+                            <DataTrigger Binding="{Binding IsRespectSelected}"
                                          TargetType="Button"
                                          Value="True">
                                 <Setter Property="Background" Value="{StaticResource GlassNavButtonSelectedBrush}" />
@@ -71,30 +71,6 @@
                 </Button.Style>
             </Button>
             <Button Grid.Column="2"
-                    BorderWidth="0"
-                    Command="{Binding NavigateFollowsCommand}"
-                    CornerRadius="12"
-                    FontAttributes="Bold"
-                    FontSize="13"
-                    HorizontalOptions="Fill"
-                    LineBreakMode="WordWrap"
-                    Padding="6,10"
-                    Text="Follows"
-                    TextColor="{StaticResource GlassTitleText}">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Background" Value="{StaticResource GlassNavButtonBrush}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsFollowsSelected}"
-                                         TargetType="Button"
-                                         Value="True">
-                                <Setter Property="Background" Value="{StaticResource GlassNavButtonSelectedBrush}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button Grid.Column="3"
                     Background="{StaticResource GlassNavButtonBrush}"
                     BorderWidth="0"
                     Command="{Binding NavigateSettingsCommand}"

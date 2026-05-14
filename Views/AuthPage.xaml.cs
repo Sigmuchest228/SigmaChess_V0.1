@@ -4,14 +4,13 @@ namespace SigmaChess.Views;
 
 /// <summary>
 /// Страница входа/регистрации. Вся логика лежит в <see cref="AuthViewModel"/>;
-/// сама страница только связывает XAML с ViewModel и делегирует ему всё через
-/// биндинги. Параметр конструктора берётся из DI (см. MauiProgram).
+/// сама страница только связывает XAML с ViewModel и делегирует ему всё через биндинги.
 /// </summary>
 public partial class AuthPage : ContentPage
 {
-    public AuthPage(AuthViewModel viewModel)
+    public AuthPage()
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = new AuthViewModel();
     }
 }

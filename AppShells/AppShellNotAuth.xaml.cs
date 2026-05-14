@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+using SigmaChess.Services;
 
 namespace SigmaChess;
 
@@ -13,6 +13,6 @@ public partial class AppShellNotAuth : Shell
 
     private static void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
     {
-        App.Services?.GetService<Services.BottomNavigationCoordinator>()?.SyncFromShell();
+        AppService.GetInstance().BottomNavigation.SyncFromShell();
     }
 }

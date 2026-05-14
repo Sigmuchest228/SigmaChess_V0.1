@@ -9,10 +9,10 @@ namespace SigmaChess;
 /// </summary>
 public partial class MainPage : ContentPage
 {
-    public MainPage(MainPageViewModel viewModel)
+    public MainPage()
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = new MainPageViewModel();
     }
 
     protected override async void OnAppearing()

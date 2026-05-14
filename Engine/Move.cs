@@ -1,9 +1,23 @@
 namespace SigmaChess.Engine;
 
 /// <summary>
-/// Один шахматный ход: From → To. Promotion заполнен только для превращения пешки
+/// Один шахматный ход: From → To. <see cref="Promotion"/> заполнен только для превращения пешки
 /// (Queen/Rook/Bishop/Knight) — генератор выдаёт по одному Move на каждый вариант,
-/// а UI потом подменяет нужный через выражение <c>move with { Promotion = ... }</c>.
-/// Sealed record => иммутабельный, free Equals/GetHashCode по полям.
+/// а UI потом подменяет фигуру через <see cref="WithPromotion" />.
 /// </summary>
-public sealed record Move(Position From, Position To, PieceType? Promotion = null);
+public class Move
+{
+    public Position From { get; }
+    public Position To { get; }
+    public PieceType? Promotion { get; }
+
+    public Move(Position from, Position to, PieceType? promotion = null)
+    {
+        From = from;
+        To = to;
+        Promotion = promotion;
+    }
+
+    /// <summary>Копия хода с другой фигурой превращения (те же From/To).</summary>
+    public Move WithPromotion(PieceType promotion) => new(From, To, promotion);
+}

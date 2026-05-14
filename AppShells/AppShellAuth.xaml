@@ -24,12 +24,8 @@
             Route="GamePage"
             ContentTemplate="{DataTemplate views:GamePage}" />
         <ShellContent
-            Title="Puzzles"
-            Route="PuzzlesPage"
-            ContentTemplate="{DataTemplate views:PuzzlesPage}" />
-        <ShellContent
-            Title="Follows"
-            Route="FollowsPage"
-            ContentTemplate="{DataTemplate views:FollowsPage}" />
+            Title="Respect"
+            Route="RespectsPage"
+            ContentTemplate="{DataTemplate views:RespectsPage}" />
     </TabBar>
 </Shell>

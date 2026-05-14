@@ -1,7 +1,8 @@
 using Firebase.Auth;
 using Firebase.Auth.Providers;
-using Firebase.Auth.Repository;
 using Firebase.Database;
+using Microsoft.Maui.Controls;
+using SigmaChess.ViewModels;
 
 namespace SigmaChess.Services;
 
@@ -17,13 +18,56 @@ namespace SigmaChess.Services;
 /// </summary>
 public class AppService
 {
+    private static AppService? _instance;
+    private static readonly object InstanceLock = new();
+
     private readonly object _initLock = new();
     private FirebaseAuthClient? _auth;
     private FirebaseClient? _client;
 
-    public AppService()
+    private FirebaseSyncRepository? _firebaseSync;
+    private BoardLayoutService? _boardLayout;
+    private global::SigmaChess.Engine.GameController? _gameController;
+    private GameViewModel? _gameViewModel;
+    private BottomNavigationCoordinator? _bottomNavigation;
+    private IPhotoSourcePicker? _photoPicker;
+
+    private AppService()
     {
     }
+
+    /// <summary>Единственный экземпляр (как в MinimumMauiProjectExample).</summary>
+    public static AppService GetInstance()
+    {
+        if (_instance is not null)
+        {
+            return _instance;
+        }
+
+        lock (InstanceLock)
+        {
+            return _instance ??= new AppService();
+        }
+    }
+
+    /// <summary>Вызывать один раз из <c>MauiProgram.CreateMauiApp</c> до построения приложения.</summary>
+    public void Init()
+    {
+        EnsureInitialized();
+    }
+
+    public FirebaseSyncRepository FirebaseSync => _firebaseSync ??= new FirebaseSyncRepository(this);
+
+    public BoardLayoutService BoardLayout => _boardLayout ??= new BoardLayoutService();
+
+    public global::SigmaChess.Engine.GameController GameController => _gameController ??= new global::SigmaChess.Engine.GameController();
+
+    public GameViewModel GameViewModel =>
+        _gameViewModel ??= new GameViewModel(GameController, BoardLayout, this, FirebaseSync);
+
+    public BottomNavigationCoordinator BottomNavigation => _bottomNavigation ??= new BottomNavigationCoordinator(GameViewModel);
+
+    public IPhotoSourcePicker PhotoPicker => _photoPicker ??= new PhotoSourcePicker();
 
     private FirebaseAuthClient Auth
     {
@@ -70,7 +114,7 @@ public class AppService
                 ApiKey = "AIzaSyCl1Ix-ZEcM4JLBjFew5XsS1LTQIpg8j7U",
                 AuthDomain = "sigmachess-75f04.firebaseapp.com",
                 Providers = [new EmailProvider()],
-                UserRepository = new FileUserRepository("appUserData")
+                // UserRepository не задаём — по умолчанию in-memory; сессия не переживает перезапуск приложения.
             };
 
             var auth = new FirebaseAuthClient(config);
@@ -171,5 +215,24 @@ public class AppService
         {
             return false;
         }
+    }
+
+    /// <summary>Сценарий выхода: сброс локального черновика аватара, сброс сессии партии, SignOut, гостевой Shell.</summary>
+    public async Task PerformFullLogoutAsync(CancellationToken cancellationToken = default)
+    {
+        UserAvatarLocalStore.ClearPendingLocalAvatarPath();
+
+        await MainThread.InvokeOnMainThreadAsync(() => { GameViewModel.ResetSessionForLogout(); }).WaitAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        Logout();
+
+        await MainThread.InvokeOnMainThreadAsync(static () =>
+        {
+            if (Application.Current is App appShell)
+            {
+                appShell.SetUnauthenticatedShell();
+            }
+        }).WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 }

@@ -4,14 +4,13 @@
 
 Все ключи пользователей — **точный `auth.uid`** из Firebase Authentication (без ручного переименования регистра).
 
+Клиент использует **хранилище сессии по умолчанию (in-memory)** в `FirebaseAuthentication.net`: после **полного закрытия приложения** локальный токен не поднимается — при следующем запуске снова гостевой сценарий до явного входа.
+
 | Путь | Назначение |
 |------|------------|
-| `users/{uid}` | Профиль: `UserName`, **`UserNameLower`** (нижний регистр для поиска), **`PuzzlesSolved`** (решённые задачи; титул ранга выводится в приложении по порогам), `RegisterDate` (unix ms), опционально `UserChessGames/{gameId}` = true, **`follows/{targetUid}`** = true (подписка для быстрого открытия профиля). Поле `Elo` в старых узлах игнорируется UI. Устаревший **`friends/{uid}`** при первом входе может быть скопирован в `follows` приложением. |
+| `users/{uid}` | Профиль: `UserName`, **`UserNameLower`**, `RegisterDate` (unix ms), опционально `UserChessGames/{gameId}` = true, **`respects/{targetUid}`** = true (кого пользователь отмечает respect). Поле `Elo` в старых узлах игнорируется UI. |
+| `respectReceived/{uid}/{respecterUid}` | Кто отметил пользователя `uid`: запись/удаление только если `auth.uid == respecterUid`. **Чтение списка** (`GET .../respectReceived/{uid}.json`) требует `.read` на узле `$targetUid` — иначе счётчик в приложении всегда 0. |
 | `ChessGames/{gameId}` | Партия: `WhiteUid`, `BlackUid`, `Winner` (`White` / `Black` / `Draw`), `EndReason`, `DateTime` (ISO UTC), `Moves/{key}/...`. Чтение разрешено любому `auth != null`, чтобы в приложении показывать историю на профилях (запись по-прежнему только участникам). |
-| `ChessPuzzles/{puzzleId}` | Задача: `Fen`, `Solution` (`FromPos`, `ToPos`, опционально `Promotion` как `Queen`/`Rook`/…), опционально `Title`, `Difficulty`. Каталог только для чтения пользователями (`auth != null`); запись отключена в правилах — наполнение через консоль или Admin SDK. |
-| `users/{uid}/puzzleProgress/{puzzleId}` | `true` или объект с меткой времени — задача решена; запись только владельцем узла (`users/{uid}` пишет сам пользователь). Используется вместе с `PuzzlesSolved` на родительском профиле: счётчик увеличивается только при первом решении. |
-
-Пример для ручного импорта в консоли RTDB: [Resources/Raw/puzzles_seed.json](Resources/Raw/puzzles_seed.json) — вставьте дочерние узлы под **`ChessPuzzles`** (каждый ключ верхнего уровня JSON станет `puzzleId`).
 
 Поля партии и ходов в JSON — PascalCase. Старые узлы с `User1`/`User2` и победителем-uid не совпадают с текущими правилами; при необходимости мигрируйте данные или удалите тестовые записи.
 
@@ -19,7 +18,7 @@
 
 На узле **`users`** также задано **`.read": "auth != null"`**: без чтения родителя запрос `GET .../users.json` (полный список для клиентского fallback поиска) в RTDB часто получает **Permission denied**, даже если у каждого `users/{uid}` есть своё правило — приложение после этого не находит других игроков.
 
-Приложение дописывает `UserNameLower` и при необходимости **`PuzzlesSolved`** при `EnsureUserProfileAsync` и при первом входе с уже заданным `UserName`.
+Приложение дописывает `UserNameLower` при `EnsureUserProfileAsync` и при первом входе с уже заданным `UserName`.
 
 ## Правила безопасности
 

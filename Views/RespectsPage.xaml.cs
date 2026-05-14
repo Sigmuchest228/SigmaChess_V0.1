@@ -2,15 +2,15 @@ using SigmaChess.ViewModels;
 
 namespace SigmaChess.Views;
 
-public partial class FollowsPage : ContentPage
+public partial class RespectsPage : ContentPage
 {
-    private readonly FollowsPageViewModel _viewModel;
+    private readonly RespectsPageViewModel _viewModel;
 
-    public FollowsPage(FollowsPageViewModel viewModel)
+    public RespectsPage()
     {
         InitializeComponent();
-        _viewModel = viewModel;
-        BindingContext = viewModel;
+        _viewModel = new RespectsPageViewModel();
+        BindingContext = _viewModel;
     }
 
     protected override async void OnAppearing()

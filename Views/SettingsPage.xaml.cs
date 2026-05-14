@@ -4,9 +4,9 @@ namespace SigmaChess.Views;
 
 public partial class SettingsPage : ContentPage
 {
-    public SettingsPage(SettingsViewModel viewModel)
+    public SettingsPage()
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = new SettingsViewModel();
     }
 }

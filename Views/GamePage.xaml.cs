@@ -1,6 +1,6 @@
 using System.ComponentModel;
-using Microsoft.Maui.Controls;
 using CommunityToolkit.Maui.Views;
+using SigmaChess.Services;
 using SigmaChess.ViewModels;
 
 namespace SigmaChess.Views;
@@ -22,10 +22,10 @@ public partial class GamePage : ContentPage
     private readonly Label[] _fileLabels = new Label[8];
     private bool _boardBuilt;
 
-    public GamePage(GameViewModel viewModel)
+    public GamePage()
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = AppService.GetInstance().GameViewModel;
     }
 
     /// <summary>

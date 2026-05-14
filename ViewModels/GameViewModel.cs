@@ -7,10 +7,13 @@ using Microsoft.Maui.Devices;
 using Microsoft.Maui.Dispatching;
 using CommunityToolkit.Maui.Views;
 using SigmaChess.Engine;
+using SigmaChess.Models;
 using SigmaChess.Services;
 using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
+
+// Экран партии толще учебного LoginBaseApp: движок, таймеры, запись в Firebase — сигнатуры методов длиннее, это ожидаемо.
 
 /// <summary>
 /// ViewModel страницы игры на одном устройстве. Связывает <see cref="SigmaChess.Engine.GameController"/>
@@ -23,7 +26,7 @@ public class GameViewModel : ViewModelBase
     private readonly BoardLayoutService _layoutService;
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
-    private readonly List<FirebaseMoveRecord> _moveHistory = [];
+    private readonly List<SavedMove> _moveHistory = [];
     private readonly Stopwatch _moveStopwatch = new();
     private bool _gameSaved;
     private double _boardExtent = 320;
@@ -686,8 +689,8 @@ public class GameViewModel : ViewModelBase
         var moves = _controller.GetPlayedMoves();
         for (var i = 0; i < moves.Count; i += 2)
         {
-            var white = AlgebraicNotation.MoveToShortNotation(moves[i]);
-            var black = i + 1 < moves.Count ? AlgebraicNotation.MoveToShortNotation(moves[i + 1]) : string.Empty;
+            var white = AlgebraicNotation.MoveToShortNotation(moves[i], moves, i);
+            var black = i + 1 < moves.Count ? AlgebraicNotation.MoveToShortNotation(moves[i + 1], moves, i + 1) : string.Empty;
             MoveRows.Add(new MoveHistoryRow
             {
                 FullMoveNumber = i / 2 + 1,
@@ -725,7 +728,7 @@ public class GameViewModel : ViewModelBase
             var promo = AutoQueenEnabled
                 ? PieceType.Queen
                 : await PromotionPopup.ShowAsync(moverPiece.Color);
-            pending = pending with { Promotion = promo };
+            pending = pending.WithPromotion(promo);
         }
 
         var turnBefore = _controller.GetCurrentTurn();
@@ -738,7 +741,7 @@ public class GameViewModel : ViewModelBase
             var halfIndex = _moveHistory.Count;
             var fullMoveNumber = halfIndex / 2 + 1;
             var resultNow = _controller.GetGameResult();
-            _moveHistory.Add(new FirebaseMoveRecord
+            _moveHistory.Add(new SavedMove
             {
                 FromPos = AlgebraicNotation.ToSquare(pending.From),
                 ToPos = AlgebraicNotation.ToSquare(pending.To),

@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Input;
 using SigmaChess.Services;
 using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
 
-public sealed class UserProfileViewModel : ViewModelBase
+public class UserProfileViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
@@ -15,9 +16,21 @@ public sealed class UserProfileViewModel : ViewModelBase
 
     private string _profileUserName = "—";
 
+    private string _memberSinceDateText = "—";
+
     private string? _viewingUserId;
 
     private bool _playedGamesLoaded;
+
+    private string _respectFromSigmasText = string.Empty;
+
+    public UserProfileViewModel()
+        : this(
+            AppService.GetInstance(),
+            AppService.GetInstance().FirebaseSync,
+            AppService.GetInstance().PhotoPicker)
+    {
+    }
 
     public UserProfileViewModel(
         AppService appService,
@@ -85,6 +98,22 @@ public sealed class UserProfileViewModel : ViewModelBase
         OnPropertyChanged(nameof(PageTitle));
     }
 
+    /// <summary>Строка вида «Got respect from N sigmas» из <c>respectReceived</c>.</summary>
+    public string RespectFromSigmasText
+    {
+        get => _respectFromSigmasText;
+        private set
+        {
+            if (_respectFromSigmasText == value)
+            {
+                return;
+            }
+
+            _respectFromSigmasText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public bool IsOwnProfile =>
         string.IsNullOrWhiteSpace(_viewingUserId)
         || (_appService.CurrentUserId is not null
@@ -147,6 +176,45 @@ public sealed class UserProfileViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Дата регистрации (день, месяц прописью, год) из <c>RegisterDate</c> в локальном часовом поясе.</summary>
+    public string MemberSinceDateText
+    {
+        get => _memberSinceDateText;
+        private set
+        {
+            if (_memberSinceDateText == value)
+            {
+                return;
+            }
+
+            _memberSinceDateText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private static string FormatRegisterDateForDisplay(long? registerDateUnix)
+    {
+        if (registerDateUnix is null or < 1L)
+        {
+            return "—";
+        }
+
+        var raw = registerDateUnix.Value;
+        // Новые узлы — миллисекунды; если когда-то записали секунды, значение будет намного меньше.
+        var dto = raw < 10_000_000_000L
+            ? DateTimeOffset.FromUnixTimeSeconds(raw)
+            : DateTimeOffset.FromUnixTimeMilliseconds(raw);
+
+        try
+        {
+            return dto.ToLocalTime().ToString("dd MMMM yyyy", CultureInfo.CurrentCulture);
+        }
+        catch
+        {
+            return "—";
+        }
+    }
+
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         var profileUid = string.IsNullOrWhiteSpace(_viewingUserId)
@@ -159,6 +227,8 @@ public sealed class UserProfileViewModel : ViewModelBase
                 {
                     ProfileAvatarSource = ImageSource.FromFile("defaultsigma.jpg");
                     ProfileUserName = "—";
+                    MemberSinceDateText = "—";
+                    RespectFromSigmasText = string.Empty;
                     ProfileStats.Clear();
                     PlayedGames.Clear();
                     _playedGamesLoaded = true;
@@ -190,17 +260,27 @@ public sealed class UserProfileViewModel : ViewModelBase
                 ? (IsOwnProfile ? "Player" : profileUid[..Math.Min(8, profileUid.Length)])
                 : profile.UserName.Trim();
 
+            var respectCount = 0;
+            try
+            {
+                respectCount =
+                    await _firebaseSync.GetRespectReceivedCountAsync(profileUid, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Нет правил / сеть — не блокируем отображение профиля.
+            }
+
+            var respectLine = $"Got respect from {respectCount} sigmas";
+            var memberSince = FormatRegisterDateForDisplay(profile?.RegisterDate);
+
             await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     ProfileAvatarSource = src;
                     ProfileUserName = displayName;
+                    MemberSinceDateText = memberSince;
+                    RespectFromSigmasText = respectLine;
                     ProfileStats.Clear();
-                    if (profile is not null)
-                    {
-                        var n = UserSigmaRank.NormalizePuzzlesSolved(profile.PuzzlesSolved);
-                        ProfileStats.Add(new ProfileStatRowViewModel("Rank", UserSigmaRank.GetRankTitle(n)));
-                        ProfileStats.Add(new ProfileStatRowViewModel("Puzzles solved", n.ToString()));
-                    }
                 }).WaitAsync(cancellationToken)
                 .ConfigureAwait(false);
 
@@ -212,6 +292,8 @@ public sealed class UserProfileViewModel : ViewModelBase
                 {
                     ProfileAvatarSource = ImageSource.FromFile("defaultsigma.jpg");
                     ProfileUserName = "—";
+                    MemberSinceDateText = "—";
+                    RespectFromSigmasText = string.Empty;
                     ProfileStats.Clear();
                     PlayedGames.Clear();
                     _playedGamesLoaded = true;
@@ -322,7 +404,7 @@ public sealed class UserProfileViewModel : ViewModelBase
 
             UserAvatarLocalStore.SetPendingLocalAvatarPath(fullPickPath);
 
-            await _firebaseSync.PatchUserAppearanceAsync(new Dictionary<string, object?> { ["AvatarUrl"] = null })
+            await _firebaseSync.PatchUserProfileFieldsAsync(new Dictionary<string, object?> { ["AvatarUrl"] = null })
                 .ConfigureAwait(false);
 
             await MainThread.InvokeOnMainThreadAsync(() => ProfileAvatarSource = ImageSource.FromFile(fullPickPath))

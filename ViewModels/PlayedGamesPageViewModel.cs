@@ -4,12 +4,17 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-public sealed class PlayedGamesPageViewModel : ViewModelBase
+public class PlayedGamesPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
 
     private string? _profileUid;
+
+    public PlayedGamesPageViewModel()
+        : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
+    {
+    }
 
     public PlayedGamesPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {

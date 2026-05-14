@@ -6,11 +6,11 @@ public partial class PlayedGamesPage : ContentPage, IQueryAttributable
 {
     private readonly PlayedGamesPageViewModel _viewModel;
 
-    public PlayedGamesPage(PlayedGamesPageViewModel viewModel)
+    public PlayedGamesPage()
     {
         InitializeComponent();
-        _viewModel = viewModel;
-        BindingContext = viewModel;
+        _viewModel = new PlayedGamesPageViewModel();
+        BindingContext = _viewModel;
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)

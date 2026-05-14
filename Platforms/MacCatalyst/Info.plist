@@ -35,8 +35,8 @@
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
 	<key>NSCameraUsageDescription</key>
-	<string>The app uses the camera for custom wallpapers and profile photos.</string>
+	<string>The app uses the camera to take a profile photo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>The app accesses your photos for wallpapers and your profile picture.</string>
+	<string>The app accesses your photos to set your profile picture.</string>
 </dict>
 </plist>

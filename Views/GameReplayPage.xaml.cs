@@ -11,10 +11,10 @@ public partial class GameReplayPage : ContentPage, IQueryAttributable
     private readonly Label[] _fileLabels = new Label[8];
     private bool _boardBuilt;
 
-    public GameReplayPage(GameReplayViewModel viewModel)
+    public GameReplayPage()
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = new GameReplayViewModel();
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)

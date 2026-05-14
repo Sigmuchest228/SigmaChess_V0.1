@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using SigmaChess.Services;
 using SigmaChess.Views;
 
 namespace SigmaChess;
@@ -10,9 +8,6 @@ namespace SigmaChess;
 /// </summary>
 public partial class App : Application
 {
-    /// <summary>Выставляется в <see cref="MauiProgram.CreateMauiApp"/> до показа окна — чтобы проверить сохранённую сессию Firebase.</summary>
-    internal static IServiceProvider? Services { get; set; }
-
     /// <summary>Перед <see cref="SetAuthenticatedShell"/> — следующий Loader на авторизованном Shell без задержки.</summary>
     internal static bool SkipLoaderDelayOnceForAuthShell { get; set; }
 
@@ -26,28 +21,14 @@ public partial class App : Application
     {
         Routing.RegisterRoute(nameof(PlayedGamesPage), typeof(PlayedGamesPage));
         Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
-        Routing.RegisterRoute(nameof(ProfileWallpaperSettingsPage), typeof(ProfileWallpaperSettingsPage));
         Routing.RegisterRoute(nameof(UserProfilePage), typeof(UserProfilePage));
         Routing.RegisterRoute(nameof(GameReplayPage), typeof(GameReplayPage));
-        Routing.RegisterRoute(nameof(PuzzleSolvePage), typeof(PuzzleSolvePage));
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        Page root;
-        var appService = Services?.GetService<AppService>();
-        if (appService is not null
-            && !string.IsNullOrEmpty(appService.CurrentUserId)
-            && !appService.IsAnonymousUser)
-        {
-            root = new AppShellAuth();
-        }
-        else
-        {
-            root = new AppShellNotAuth();
-        }
-
-        return new Window(root);
+        // Токен Firebase не пишется на диск (InMemoryRepository) — при новом запуске процесса всегда гостевой Shell.
+        return new Window(new AppShellNotAuth());
     }
 
     public void SetAuthenticatedShell()
@@ -56,10 +37,6 @@ public partial class App : Application
         if (Windows.Count > 0)
         {
             Windows[0].Page = new AppShellAuth();
-        }
-        else
-        {
-            MainPage = new AppShellAuth();
         }
     }
 
@@ -70,10 +47,6 @@ public partial class App : Application
         if (Windows.Count > 0)
         {
             Windows[0].Page = new AppShellNotAuth();
-        }
-        else
-        {
-            MainPage = new AppShellNotAuth();
         }
     }
 }

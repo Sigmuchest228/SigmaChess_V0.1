@@ -13,9 +13,14 @@
         ".write": "auth != null && (!data.exists() ? (newData.child('WhiteUid').val() == auth.uid || newData.child('BlackUid').val() == auth.uid) : (data.child('WhiteUid').val() == auth.uid || data.child('BlackUid').val() == auth.uid))"
       }
     },
-    "ChessPuzzles": {
-      ".read": "auth != null",
-      ".write": false
+    "respectReceived": {
+      "$targetUid": {
+        ".read": "auth != null",
+        "$respecterUid": {
+          ".write": "auth != null && auth.uid == $respecterUid",
+          ".validate": "!newData.exists() || (newData.isBoolean() && newData.val() == true)"
+        }
+      }
     }
   }
 }
