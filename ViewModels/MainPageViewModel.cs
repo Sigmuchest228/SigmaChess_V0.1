@@ -102,7 +102,55 @@ public class MainPageViewModel : ViewModelBase
 
     private ImageSource? _profileAvatarSource = ImageSource.FromFile("defaultsigma.jpg");
 
+    private string _respectsSummaryText = string.Empty;
+
+    /// <summary>Крупный заголовок блока действий на главной (под шапкой).</summary>
+    public string GameSectionTitle => "SIGMA CHESS";
+
+    /// <summary>Строка под заголовком игры: респекты или подсказка для гостя.</summary>
+    public string RespectsSummaryText
+    {
+        get => _respectsSummaryText;
+        private set
+        {
+            if (_respectsSummaryText == value)
+            {
+                return;
+            }
+
+            _respectsSummaryText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public ICommand OpenProfileCommand { get; }
+
+    /// <summary>Обновляет подпись о списке респектов (гость / счётчик с Firebase).</summary>
+    public async Task RefreshRespectsSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        if (IsGuest)
+        {
+            await MainThread.InvokeOnMainThreadAsync(() => RespectsSummaryText = "Sign in to manage your respect list.")
+                .WaitAsync(cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        try
+        {
+            var uids = await _firebaseSync.GetRespectUidsAsync(cancellationToken).ConfigureAwait(false);
+            var n = uids.Count;
+            var text = n == 0
+                ? "Your respect list is empty."
+                : $"{n} player{(n == 1 ? string.Empty : "s")} in your respect list.";
+            await MainThread.InvokeOnMainThreadAsync(() => RespectsSummaryText = text).WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            await MainThread.InvokeOnMainThreadAsync(() => RespectsSummaryText = "Respects").WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+    }
 
     /// <summary>Пересчитывает <see cref="IsGuest"/> по активному Shell.</summary>
     public void RefreshAuthState()

@@ -329,7 +329,7 @@ public class GameReplayViewModel : ViewModelBase
     {
         BoardExtent = _layoutService.CalculateBoardExtentForGamePage(
             DeviceDisplay.Current.MainDisplayInfo,
-            faceToFaceLayout: false);
+            GamePageBoardExtentMode.SideMoveColumn);
     }
 
     private void EnsureCellsCreated()

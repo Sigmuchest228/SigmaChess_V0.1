@@ -663,7 +663,9 @@ public class GameViewModel : ViewModelBase
     {
         BoardExtent = _layoutService.CalculateBoardExtentForGamePage(
             DeviceDisplay.Current.MainDisplayInfo,
-            IsFaceToFaceLayout);
+            IsFaceToFaceLayout
+                ? GamePageBoardExtentMode.FaceToFace
+                : GamePageBoardExtentMode.CasualBottomMoveStrip);
     }
 
     private void EnsureCellsCreated()

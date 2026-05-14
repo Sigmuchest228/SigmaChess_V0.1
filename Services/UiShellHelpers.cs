@@ -10,6 +10,19 @@ namespace SigmaChess.Services;
 
 #region BoardLayoutService
 
+/// <summary>Как рассчитывать сторону доски на GamePage / реплее в зависимости от раскладки UI.</summary>
+public enum GamePageBoardExtentMode
+{
+    /// <summary>Узкая колонка справа (страница реплея).</summary>
+    SideMoveColumn,
+
+    /// <summary>История ходов полосой под доской (обычная игра, не «за столом»).</summary>
+    CasualBottomMoveStrip,
+
+    /// <summary>Режим «за столом».</summary>
+    FaceToFace,
+}
+
 /// <summary>
 /// Считает сторону доски в DIP под текущий экран. Делегирован, потому что эти константы
 /// «согласованы» с layout'ом GamePage (отступ страницы, ширина полосы координат,
@@ -24,8 +37,11 @@ public class BoardLayoutService
     private const double CoordStripWidth = 28;
     private const double VerticalReserve = 280;
 
-    /// <summary>Резерв под колонку записи ходов справа и нижнюю панель на странице партии.</summary>
+    /// <summary>Резерв под колонку записи ходов справа (реплей) и нижнюю панель на странице партии.</summary>
     private const double GamePageMoveListColumn = 140;
+
+    /// <summary>Полоса истории под доской в casual: MaximumHeightRequest + отступы и промежуток рядов.</summary>
+    private const double CasualBottomMoveHistoryReserve = 150;
 
     /// <summary>
     /// Режим «за столом»: история ходов на всю ширину (не в узких боковых колонках) —
@@ -58,18 +74,32 @@ public class BoardLayoutService
         return Math.Clamp(side, 260, 640);
     }
 
-    /// <summary>Как <see cref="CalculateBoardExtent"/>, но с учётом колонки истории ходов и нижней панели GamePage.</summary>
-    public double CalculateBoardExtentForGamePage(DisplayInfo info, bool faceToFaceLayout = false)
+    /// <summary>Как <see cref="CalculateBoardExtent"/>, но с учётом истории ходов и нижней панели GamePage / реплея.</summary>
+    public double CalculateBoardExtentForGamePage(DisplayInfo info, GamePageBoardExtentMode mode)
     {
         var density = info.Density <= 0 ? 1 : info.Density;
         var width = info.Width / density;
         var height = info.Height / density;
-        var widthReserve = faceToFaceLayout ? FaceToFaceHorizontalReserve : GamePageMoveListColumn;
+
+        var widthReserve = mode switch
+        {
+            GamePageBoardExtentMode.SideMoveColumn => GamePageMoveListColumn,
+            GamePageBoardExtentMode.CasualBottomMoveStrip => FaceToFaceHorizontalReserve,
+            GamePageBoardExtentMode.FaceToFace => FaceToFaceHorizontalReserve,
+        };
+
         var maxSquareFromWidth = width - PageHorizontalPadding - CoordStripWidth - widthReserve;
-        var verticalReserve = faceToFaceLayout ? FaceToFaceVerticalReserve : VerticalReserve;
-        var maxSquareFromHeight = height - verticalReserve - GamePageBottomPanelExtra;
+
+        var maxSquareFromHeight = mode switch
+        {
+            GamePageBoardExtentMode.FaceToFace => height - FaceToFaceVerticalReserve - GamePageBottomPanelExtra,
+            GamePageBoardExtentMode.CasualBottomMoveStrip =>
+                height - VerticalReserve - GamePageBottomPanelExtra - CasualBottomMoveHistoryReserve,
+            GamePageBoardExtentMode.SideMoveColumn => height - VerticalReserve - GamePageBottomPanelExtra,
+        };
+
         var side = Math.Min(maxSquareFromWidth, maxSquareFromHeight);
-        var minSide = faceToFaceLayout ? 230 : 220;
+        var minSide = mode == GamePageBoardExtentMode.FaceToFace ? 230 : 220;
         return Math.Clamp(side, minSide, 640);
     }
 }

@@ -21,7 +21,7 @@ public partial class MainPage : ContentPage
         if (BindingContext is MainPageViewModel vm)
         {
             vm.RefreshAuthState();
-            await vm.SyncFirebaseProfileIfNeededAsync();
+            await Task.WhenAll(vm.RefreshRespectsSummaryAsync(), vm.SyncFirebaseProfileIfNeededAsync());
         }
     }
 }
