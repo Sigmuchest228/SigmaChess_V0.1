@@ -59,7 +59,7 @@ public class FirebaseSyncRepository
     /// <c>guest_</c> + короткий суффикс от <c>uid</c>; для email без имени — <c>Player</c>.
     /// Если узел уже есть с <c>UserChessGames</c>, для проставления имени используется Patch, не полный Put.
     /// </summary>
-    public async Task EnsureUserProfileAsync(string? preferredUserName = null, CancellationToken cancellationToken = default)
+    public async Task EnsureUserAsync(string? preferredUserName = null, CancellationToken cancellationToken = default)
     {
         var uid = _app.CurrentUserId;
         if (uid is null)
@@ -76,8 +76,8 @@ public class FirebaseSyncRepository
 
         if (string.IsNullOrWhiteSpace(json) || json.Trim() == "null")
         {
-            var unix = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var body = new NewProfile
+            var unix = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var body = new User
             {
                 UserName = displayName,
                 UserNameLower = lower,
@@ -88,7 +88,7 @@ public class FirebaseSyncRepository
             return;
         }
 
-        var dto = JsonConvert.DeserializeObject<UserProfile>(json);
+        var dto = JsonConvert.DeserializeObject<User>(json);
         if (!string.IsNullOrWhiteSpace(dto?.UserName))
         {
             var syncLower = dto.UserName.Trim().ToLowerInvariant();
@@ -118,7 +118,7 @@ public class FirebaseSyncRepository
     }
 
     /// <summary>Читает узел <c>users/{uid}</c> как DTO или <c>null</c>.</summary>
-    public async Task<UserProfile?> GetUserProfileByUidAsync(string uid,
+    public async Task<User?> GetUserByUidAsync(string uid,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(uid))
@@ -134,20 +134,20 @@ public class FirebaseSyncRepository
             return null;
         }
 
-        return JsonConvert.DeserializeObject<UserProfile>(json);
+        return JsonConvert.DeserializeObject<User>(json);
     }
 
     /// <summary>Читает профиль текущего пользователя.</summary>
-    public Task<UserProfile?> GetUserProfileAsync(CancellationToken cancellationToken = default)
+    public Task<User?> GetUserAsync(CancellationToken cancellationToken = default)
     {
         var uid = _app.CurrentUserId;
         return uid is null
-            ? Task.FromResult<UserProfile?>(null)
-            : GetUserProfileByUidAsync(uid, cancellationToken);
+            ? Task.FromResult<User?>(null)
+            : GetUserByUidAsync(uid, cancellationToken);
     }
 
     /// <summary>Частичное обновление полей профиля в RTDB (например <c>AvatarUrl</c>).</summary>
-    public async Task PatchUserProfileFieldsAsync(IReadOnlyDictionary<string, object?> fields,
+    public async Task PatchUserFieldsAsync(IReadOnlyDictionary<string, object?> fields,
         CancellationToken cancellationToken = default)
     {
         var uid = _app.CurrentUserId;
@@ -441,7 +441,7 @@ public class FirebaseSyncRepository
         var list = new List<RespectUser>(uids.Count);
         foreach (var uid in uids)
         {
-            var dto = await GetUserProfileByUidAsync(uid, cancellationToken).ConfigureAwait(false);
+            var dto = await GetUserByUidAsync(uid, cancellationToken).ConfigureAwait(false);
             if (dto is null)
             {
                 continue;
@@ -512,7 +512,7 @@ public class FirebaseSyncRepository
     }
 
     /// <summary>
-    /// Поиск игроков по префиксу <see cref="SigmaChess.Models.UserProfile.UserNameLower" />.
+    /// Поиск игроков по префиксу <see cref="SigmaChess.Models.User.UserNameLower" />.
     /// Шаг 1: REST-запрос с orderBy/startAt/endAt.
     /// Шаг 2: если пусто или ошибка — скачать <c>users.json</c> и отфильтровать на клиенте.
     /// </summary>
@@ -618,7 +618,7 @@ public class FirebaseSyncRepository
             return [];
         }
 
-        var allProfiles = CollectUserProfilesSortedByUid(body);
+        var allProfiles = CollectUsersSortedByUid(body);
         var results = new List<RespectUser>();
 
         foreach (var kv in allProfiles)
@@ -653,10 +653,10 @@ public class FirebaseSyncRepository
         return results;
     }
 
-    private static List<KeyValuePair<string, UserProfile>> CollectUserProfilesSortedByUid(string body)
+    private static List<KeyValuePair<string, User>> CollectUsersSortedByUid(string body)
     {
-        var list = new List<KeyValuePair<string, UserProfile>>();
-        foreach (var kv in EnumerateUserProfiles(body))
+        var list = new List<KeyValuePair<string, User>>();
+        foreach (var kv in EnumerateUsers(body))
         {
             list.Add(kv);
         }
@@ -666,7 +666,7 @@ public class FirebaseSyncRepository
     }
 
     private static RespectUser? MatchUserForClientSearch(
-        KeyValuePair<string, UserProfile> kv,
+        KeyValuePair<string, User> kv,
         string me,
         string lower,
         bool prefixOnly)
@@ -703,7 +703,7 @@ public class FirebaseSyncRepository
         };
     }
 
-    private static IEnumerable<KeyValuePair<string, UserProfile>> EnumerateUserProfiles(string body)
+    private static IEnumerable<KeyValuePair<string, User>> EnumerateUsers(string body)
     {
         JToken root;
         try
@@ -727,10 +727,10 @@ public class FirebaseSyncRepository
                 continue;
             }
 
-            UserProfile? dto;
+            User? dto;
             try
             {
-                dto = prop.Value.ToObject<UserProfile>();
+                dto = prop.Value.ToObject<User>();
             }
             catch (JsonException)
             {
@@ -739,7 +739,7 @@ public class FirebaseSyncRepository
 
             if (dto is not null)
             {
-                yield return new KeyValuePair<string, UserProfile>(prop.Name, dto);
+                yield return new KeyValuePair<string, User>(prop.Name, dto);
             }
         }
     }
@@ -747,7 +747,7 @@ public class FirebaseSyncRepository
     private static IReadOnlyList<RespectUser> DeserializeAndFilterSearchResults(string body, string me, int limit)
     {
         var list = new List<RespectUser>();
-        foreach (var kv in EnumerateUserProfiles(body))
+        foreach (var kv in EnumerateUsers(body))
         {
             if (string.Equals(kv.Key, me, StringComparison.Ordinal))
             {

@@ -8,7 +8,7 @@
 
 | Путь | Назначение |
 |------|------------|
-| `users/{uid}` | Профиль: `UserName`, **`UserNameLower`**, `RegisterDate` (unix ms), опционально `UserChessGames/{gameId}` = true, **`respects/{targetUid}`** = true (кого пользователь отмечает respect). Поле `Elo` в старых узлах игнорируется UI. |
+| `users/{uid}` | Профиль: `UserName`, **`UserNameLower`**, `RegisterDate` (unix s, `int` до 2038), опционально `UserChessGames/{gameId}` = true, **`respects/{targetUid}`** = true (кого пользователь отмечает respect). Поле `Elo` в старых узлах игнорируется UI. |
 | `respectReceived/{uid}/{respecterUid}` | Кто отметил пользователя `uid`: запись/удаление только если `auth.uid == respecterUid`. **Чтение списка** (`GET .../respectReceived/{uid}.json`) требует `.read` на узле `$targetUid` — иначе счётчик в приложении всегда 0. |
 | `ChessGames/{gameId}` | Партия: `WhiteUid`, `BlackUid`, `Winner` (`White` / `Black` / `Draw`), `EndReason`, `DateTime` (ISO UTC), `Moves/{key}/...`. Чтение разрешено любому `auth != null`, чтобы в приложении показывать историю на профилях (запись по-прежнему только участникам). |
 
@@ -18,7 +18,7 @@
 
 На узле **`users`** также задано **`.read": "auth != null"`**: без чтения родителя запрос `GET .../users.json` (полный список для клиентского fallback поиска) в RTDB часто получает **Permission denied**, даже если у каждого `users/{uid}` есть своё правило — приложение после этого не находит других игроков.
 
-Приложение дописывает `UserNameLower` при `EnsureUserProfileAsync` и при первом входе с уже заданным `UserName`.
+Приложение дописывает `UserNameLower` при `EnsureUserAsync` и при первом входе с уже заданным `UserName`.
 
 ## Правила безопасности
 

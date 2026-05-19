@@ -192,18 +192,14 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
-    private static string FormatRegisterDateForDisplay(long? registerDateUnix)
+    private static string FormatRegisterDateForDisplay(int? registerDateUnix)
     {
-        if (registerDateUnix is null or < 1L)
+        if (registerDateUnix is null or < 1)
         {
             return "—";
         }
 
-        var raw = registerDateUnix.Value;
-        // Новые узлы — миллисекунды; если когда-то записали секунды, значение будет намного меньше.
-        var dto = raw < 10_000_000_000L
-            ? DateTimeOffset.FromUnixTimeSeconds(raw)
-            : DateTimeOffset.FromUnixTimeMilliseconds(raw);
+        var dto = DateTimeOffset.FromUnixTimeSeconds(registerDateUnix.Value);
 
         try
         {
@@ -245,12 +241,12 @@ public class UserProfileViewModel : ViewModelBase
         {
             if (IsOwnProfile && !string.IsNullOrEmpty(_appService.CurrentUserId))
             {
-                await _firebaseSync.EnsureUserProfileAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                await _firebaseSync.EnsureUserAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
             var profile = IsOwnProfile && _appService.CurrentUserId is not null
-                ? await _firebaseSync.GetUserProfileAsync(cancellationToken).ConfigureAwait(false)
-                : await _firebaseSync.GetUserProfileByUidAsync(profileUid, cancellationToken).ConfigureAwait(false);
+                ? await _firebaseSync.GetUserAsync(cancellationToken).ConfigureAwait(false)
+                : await _firebaseSync.GetUserByUidAsync(profileUid, cancellationToken).ConfigureAwait(false);
 
             var src = await UserAvatarPreview
                 .LoadAsync(profileUid, profile?.AvatarUrl, cancellationToken, IsOwnProfile)
@@ -404,7 +400,7 @@ public class UserProfileViewModel : ViewModelBase
 
             UserAvatarLocalStore.SetPendingLocalAvatarPath(fullPickPath);
 
-            await _firebaseSync.PatchUserProfileFieldsAsync(new Dictionary<string, object?> { ["AvatarUrl"] = null })
+            await _firebaseSync.PatchUserFieldsAsync(new Dictionary<string, object?> { ["AvatarUrl"] = null })
                 .ConfigureAwait(false);
 
             await MainThread.InvokeOnMainThreadAsync(() => ProfileAvatarSource = ImageSource.FromFile(fullPickPath))

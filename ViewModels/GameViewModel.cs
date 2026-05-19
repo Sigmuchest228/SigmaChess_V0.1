@@ -470,6 +470,7 @@ public class GameViewModel : ViewModelBase
                 StopClockTimer();
                 RefreshStatusLabels();
                 CellTappedCommand.ChangeCanExecute();
+                _ = TrySaveCompletedGameIfTerminalAsync();
                 _ = TryShowGameOverPopupIfNeededAsync();
                 return;
             }
@@ -487,6 +488,7 @@ public class GameViewModel : ViewModelBase
                 StopClockTimer();
                 RefreshStatusLabels();
                 CellTappedCommand.ChangeCanExecute();
+                _ = TrySaveCompletedGameIfTerminalAsync();
                 _ = TryShowGameOverPopupIfNeededAsync();
                 return;
             }
@@ -838,15 +840,23 @@ public class GameViewModel : ViewModelBase
             return;
         }
 
-        if (_timeoutLoser is not null)
+        string winnerColor;
+        string endReason;
+        if (_timeoutLoser is PieceColor loser)
         {
-            return;
+            winnerColor = loser == PieceColor.White ? "Black" : "White";
+            endReason = "timeout";
         }
-
-        var r = _controller.GetGameResult();
-        if (r is GameResult.Ongoing or GameResult.Check)
+        else
         {
-            return;
+            var r = _controller.GetGameResult();
+            if (r is GameResult.Ongoing or GameResult.Check)
+            {
+                return;
+            }
+
+            winnerColor = FirebaseSyncRepository.ResolveWinnerColor(r, _controller.GetCurrentTurn());
+            endReason = FirebaseSyncRepository.ToEndReason(r);
         }
 
         var uid = _appService.CurrentUserId;
@@ -857,9 +867,7 @@ public class GameViewModel : ViewModelBase
 
         try
         {
-            await _firebaseSync.EnsureUserProfileAsync().ConfigureAwait(false);
-            var winnerColor = FirebaseSyncRepository.ResolveWinnerColor(r, _controller.GetCurrentTurn());
-            var endReason = FirebaseSyncRepository.ToEndReason(r);
+            await _firebaseSync.EnsureUserAsync().ConfigureAwait(false);
             var gameId = await _firebaseSync.SaveCompletedGameAsync(
                     uid,
                     uid,

@@ -214,7 +214,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
     {
         try
         {
-            await _firebaseSync.EnsureUserProfileAsync(preferredUserName);
+            await _firebaseSync.EnsureUserAsync(preferredUserName);
         }
         catch
         {

@@ -122,7 +122,7 @@ public class RespectsPageViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            await _firebaseSync.EnsureUserProfileAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            await _firebaseSync.EnsureUserAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var summaries = await _firebaseSync.LoadRespectsAsync(cancellationToken).ConfigureAwait(false);
             _respectUids = summaries.Select(s => s.Uid).ToHashSet(StringComparer.Ordinal);
 

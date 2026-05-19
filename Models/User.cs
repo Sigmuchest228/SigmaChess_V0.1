@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 namespace SigmaChess.Models;
 
 /// <summary>Данные профиля пользователя в RTDB (узел users/{uid}).</summary>
-public class UserProfile
+public class User
 {
     [JsonProperty("UserName")]
     public string? UserName { get; set; }
@@ -12,10 +12,11 @@ public class UserProfile
     [JsonProperty("UserNameLower")]
     public string? UserNameLower { get; set; }
 
+    /// <summary>Unix time в секундах (UTC); <c>int</c> достаточен до 2038.</summary>
     [JsonProperty("RegisterDate")]
-    public long? RegisterDate { get; set; }
+    public int? RegisterDate { get; set; }
 
     /// <summary>Download URL после загрузки в Firebase Storage, аватар.</summary>
-    [JsonProperty("AvatarUrl")]
+    [JsonProperty("AvatarUrl", NullValueHandling = NullValueHandling.Ignore)]
     public string? AvatarUrl { get; set; }
 }

@@ -165,11 +165,11 @@ public class MainPageViewModel : ViewModelBase
             return;
         }
 
-        UserProfile? profile = null;
+        User? profile = null;
         try
         {
-            await _firebaseSync.EnsureUserProfileAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            profile = await _firebaseSync.GetUserProfileAsync(cancellationToken).ConfigureAwait(false);
+            await _firebaseSync.EnsureUserAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            profile = await _firebaseSync.GetUserAsync(cancellationToken).ConfigureAwait(false);
         }
         catch
         {

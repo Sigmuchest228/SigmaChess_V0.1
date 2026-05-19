@@ -298,6 +298,7 @@ public class GameReplayViewModel : ViewModelBase
             "fifty_move" => "50-move rule",
             "repetition" => "Repetition",
             "insufficient_material" => "Insufficient material",
+            "timeout" => "Time",
             _ => string.IsNullOrWhiteSpace(endReason) ? "—" : endReason
         };
 
