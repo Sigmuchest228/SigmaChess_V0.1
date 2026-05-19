@@ -1,5 +1,3 @@
-// Простые типы для списков и сеток (строки подписчиков, статистика, история ходов, партии).
-// Один файл — в Solution Explorer меньше файлов; у каждой страницы по-прежнему своя ViewModel в отдельном .cs.
 
 using System.Globalization;
 using System.Windows.Input;
@@ -12,17 +10,14 @@ namespace SigmaChess.ViewModels;
 
 #region Режим раскладки партии и результат диалога «новая игра»
 
-/// <summary>Раскладка экрана партии: обычная (экран) или «за доской» (обе стороны).</summary>
 public enum GameLayoutMode
 {
-    /// <summary>Таймеры сверху/снизу доски, одна колонка записи справа.</summary>
+
     Casual,
 
-    /// <summary>Таймеры сбоку, две колонки записей, чёрные фигуры повёрнуты на 180°.</summary>
     FaceToFace
 }
 
-/// <summary>Выбор времени и режима раскладки при старте партии.</summary>
 public record NewGameSetupResult(
     bool Unlimited,
     bool SameTimeForBoth,
@@ -107,7 +102,6 @@ public class SearchUserRowViewModel : ViewModelBase
 
 #region Профиль: строка статистики
 
-/// <summary>Строка статистики для профиля (опциональные поля).</summary>
 public class ProfileStatRowViewModel : ViewModelBase
 {
     public ProfileStatRowViewModel(string label, string value)
@@ -125,7 +119,6 @@ public class ProfileStatRowViewModel : ViewModelBase
 
 #region Запись ходов и сыгранные партии
 
-/// <summary>Одна строка записи ходов: полный номер хода и полуходы белых/чёрных.</summary>
 public class MoveHistoryRow
 {
     public int FullMoveNumber { get; init; }
@@ -137,7 +130,6 @@ public class MoveHistoryRow
     public string NumberLabel => $"{FullMoveNumber}.";
 }
 
-/// <summary>Строка списка сыгранных партий.</summary>
 public class PlayedGameRowViewModel : ViewModelBase
 {
     public PlayedGameRowViewModel(string gameId, string outcomeTitle, string detailLine, Color outcomeColor)
@@ -150,12 +142,10 @@ public class PlayedGameRowViewModel : ViewModelBase
 
     public string GameId { get; }
 
-    /// <summary>Исход партии: White wins / Black wins / Draw.</summary>
     public string TitleLine { get; }
 
     public string DetailLine { get; }
 
-    /// <summary>Цвет текста исхода — по победившей стороне.</summary>
     public Color OutcomeColor { get; }
 
     public static PlayedGameRowViewModel FromSummary(PastGame s)

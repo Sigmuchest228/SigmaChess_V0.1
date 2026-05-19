@@ -8,11 +8,6 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-/// <summary>Просмотр сохранённой партии по <c>gameId</c>: загрузка ходов из RTDB и пошаговый реплей на движке.</summary>
-/// <remarks>
-/// В отличие от минимальных примеров MVVM, здесь есть <see cref="FirebaseSyncRepository"/> и разбор ходов через <see cref="GameReplayMoveResolver"/> —
-/// это не «магия», а необходимость приложения с облаком.
-/// </remarks>
 public class GameReplayViewModel : ViewModelBase
 {
     private readonly global::SigmaChess.Engine.GameController _controller = new();

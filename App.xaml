@@ -10,7 +10,6 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Shell отключён; заголовки навигационной панели не показываем (контент страниц без верхней «Home» и т. п.). -->
             <Style ApplyToDerivedTypes="True" TargetType="ContentPage">
                 <Setter Property="Title" Value="" />
             </Style>

@@ -43,7 +43,6 @@
           RowDefinitions="Auto,*,Auto"
           RowSpacing="8">
 
-        <!-- Хедер: только назад -->
         <Grid Grid.Row="0"
               ColumnDefinitions="Auto,*"
               ColumnSpacing="8">
@@ -57,7 +56,6 @@
         <Grid Grid.Row="1"
               MinimumHeightRequest="280">
 
-            <!-- Обычный режим: чёрные сверху, белые снизу; история ходов полосой под доской (как в F2F по ширине). -->
             <Grid IsVisible="{Binding IsCasualLayout}"
                   ColumnDefinitions="*"
                   RowDefinitions="Auto,*,Auto,Auto"
@@ -132,7 +130,6 @@
                 </Border>
             </Grid>
 
-            <!-- Режим «за столом»: полноширинные полосы истории (узкие боковые колонки сжимали текст в «лесенку»). -->
             <Grid IsVisible="{Binding IsFaceToFaceLayout}"
                   RowDefinitions="Auto,*,Auto"
                   HorizontalOptions="Fill"
@@ -223,7 +220,6 @@
             </Grid>
         </Grid>
 
-        <!-- Нижняя панель: только обводка, фон не перекрывает обои -->
         <Border Grid.Row="2"
                 Padding="12,10"
                 Background="{StaticResource GlassTransparentBrush}"

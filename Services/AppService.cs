@@ -6,16 +6,6 @@ using SigmaChess.ViewModels;
 
 namespace SigmaChess.Services;
 
-/// <summary>
-/// Тонкая обёртка над Firebase: аутентификация (email/пароль + анонимная) и доступ к Realtime Database.
-/// <para>
-/// Конфиг (Api Key, URL RTDB) пока зашит в коде для прототипа — план переноса в User Secrets / env
-/// описан в <c>FIREBASE.md</c>.
-/// </para>
-/// <para>
-/// Ленивая инициализация под локом: создание клиентов в конструкторе даёт ANR на Android при старте.
-/// </para>
-/// </summary>
 public class AppService
 {
     private static AppService? _instance;
@@ -36,7 +26,6 @@ public class AppService
     {
     }
 
-    /// <summary>Единственный экземпляр (как в MinimumMauiProjectExample).</summary>
     public static AppService GetInstance()
     {
         if (_instance is not null)
@@ -50,7 +39,6 @@ public class AppService
         }
     }
 
-    /// <summary>Вызывать один раз из <c>MauiProgram.CreateMauiApp</c> до построения приложения.</summary>
     public void Init()
     {
         EnsureInitialized();
@@ -78,7 +66,6 @@ public class AppService
         }
     }
 
-    /// <summary>Клиент Realtime Database; не кэшируйте ссылку между SignOut/SignIn без повторного обращения.</summary>
     public FirebaseClient RealtimeDatabase
     {
         get
@@ -88,10 +75,8 @@ public class AppService
         }
     }
 
-    /// <summary>Текущий Firebase uid или null, если сессии нет.</summary>
     public string? CurrentUserId => Auth.User?.Uid;
 
-    /// <summary>true — текущая сессия создана через <see cref="TrySignInAnonymouslyAsync"/> (гость).</summary>
     public bool IsAnonymousUser => Auth.User?.IsAnonymous ?? false;
 
     private void EnsureInitialized()
@@ -110,11 +95,11 @@ public class AppService
 
             var config = new FirebaseAuthConfig
             {
-                // Публичный Web API key проекта. Для продакшена см. FIREBASE.md (User Secrets / env).
+
                 ApiKey = "AIzaSyCl1Ix-ZEcM4JLBjFew5XsS1LTQIpg8j7U",
                 AuthDomain = "sigmachess-75f04.firebaseapp.com",
                 Providers = [new EmailProvider()],
-                // UserRepository не задаём — по умолчанию in-memory; сессия не переживает перезапуск приложения.
+
             };
 
             var auth = new FirebaseAuthClient(config);
@@ -128,7 +113,6 @@ public class AppService
         }
     }
 
-    /// <summary>IdToken текущего пользователя для Storage и др.; <c>null</c>, если сессии нет.</summary>
     public Task<string?> GetIdTokenAsync(bool forceRefresh = false)
     {
         EnsureInitialized();
@@ -140,9 +124,6 @@ public class AppService
         return GetIdTokenFromAuthClientAsync(_auth, forceRefresh);
     }
 
-    /// <summary>
-    /// Свежий IdToken для каждого запроса RTDB (кэш Firebase сам отдаёт актуальный при forceRefresh: false).
-    /// </summary>
     private static async Task<string?> GetIdTokenFromAuthClientAsync(FirebaseAuthClient auth, bool forceRefresh)
     {
         if (auth.User is null)
@@ -189,7 +170,6 @@ public class AppService
         }
     }
 
-    /// <summary>Анонимный вход для гостя — стабильный uid и те же правила RTDB, что у email-пользователя.</summary>
     public async Task<bool> TrySignInAnonymouslyAsync()
     {
         try
@@ -217,7 +197,6 @@ public class AppService
         }
     }
 
-    /// <summary>Сценарий выхода: сброс локального черновика аватара, сброс сессии партии, SignOut, гостевой Shell.</summary>
     public async Task PerformFullLogoutAsync(CancellationToken cancellationToken = default)
     {
         UserAvatarLocalStore.ClearPendingLocalAvatarPath();

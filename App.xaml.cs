@@ -2,13 +2,9 @@ using SigmaChess.Views;
 
 namespace SigmaChess;
 
-/// <summary>
-/// Корень приложения: гостевой или авторизованный <see cref="Shell"/> (без flyout).
-/// Первое окно создаётся после <see cref="MauiProgram.CreateMauiApp"/> — так безопасно на Android.
-/// </summary>
 public partial class App : Application
 {
-    /// <summary>Перед <see cref="SetAuthenticatedShell"/> — следующий Loader на авторизованном Shell без задержки.</summary>
+
     internal static bool SkipLoaderDelayOnceForAuthShell { get; set; }
 
     public App()
@@ -27,7 +23,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        // Токен Firebase не пишется на диск (InMemoryRepository) — при новом запуске процесса всегда гостевой Shell.
+
         return new Window(new AppShellNotAuth());
     }
 
@@ -42,8 +38,7 @@ public partial class App : Application
 
     public void SetUnauthenticatedShell()
     {
-        // Не вызывать GoToAsync сразу после смены корня — на Android ломается FragmentManager.
-        // У AppShellNotAuth первый Tab — LoaderPage, затем переход на Auth.
+
         if (Windows.Count > 0)
         {
             Windows[0].Page = new AppShellNotAuth();

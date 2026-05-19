@@ -1,19 +1,5 @@
 namespace SigmaChess.Engine;
 
-/// <summary>
-/// «UI-фасад» над движком: хранит текущую партию, выбранную пользователем фигуру,
-/// список её легальных ходов и последний выполненный ход (для подсветки).
-/// <para>
-/// API специально расколот на три метода:
-///   <list type="bullet">
-///     <item><see cref="HandleSelection"/> — обработать тап без хода (выбор/сброс фигуры),</item>
-///     <item><see cref="GetPendingMove"/> — узнать, какой ход выполнится при тапе на клетку,</item>
-///     <item><see cref="ExecutePlannedMove"/> — собственно применить ход (возможно с Promotion).</item>
-///   </list>
-/// Это нужно, чтобы между «увидеть планируемый ход» и «исполнить» можно было
-/// показать UI-попап выбора фигуры превращения (асинхронный await).
-/// </para>
-/// </summary>
 public class GameController
 {
     private readonly MoveGenerator _moveGenerator = new();
@@ -28,7 +14,6 @@ public class GameController
         _rules = new GameRules(_moveGenerator);
     }
 
-    /// <summary>Создаёт новую партию (сбрасывает выбор и подсветку «последнего хода»).</summary>
     public void InitializeGame()
     {
         _game = new();
@@ -36,7 +21,6 @@ public class GameController
         ClearSelection();
     }
 
-    /// <summary>Загружает позицию из FEN (задачи).</summary>
     public bool TryLoadFromFen(string fen)
     {
         var loaded = Game.TryFromFen(fen);
@@ -53,13 +37,8 @@ public class GameController
 
     public Board GetBoard() => _game.Board;
 
-    /// <summary>Полная история сыгранных ходов (полуходы по очереди белые-чёрные).</summary>
     public IReadOnlyList<Move> GetPlayedMoves() => _game.History;
 
-    /// <summary>
-    /// Пересборка позиции после <paramref name="appliedPlies"/> полуходов из текущей истории
-    /// (0 — стартовая позиция, <see cref="GetPlayedMoves"/>.Count — совпадает с живой доской).
-    /// </summary>
     public Board GetBoardAfterPlies(int appliedPlies)
     {
         var history = _game.History;
@@ -79,10 +58,6 @@ public class GameController
 
     public Position? GetSelectedSquare() => _selected;
 
-    /// <summary>
-    /// Клетки, которые подсвечиваются как возможные цели хода выбранной фигуры.
-    /// 4 промоушен-хода целятся в одну клетку — здесь они схлопываются в одну подсветку.
-    /// </summary>
     public IReadOnlyList<(int Row, int Col)> GetHighlightedSquares()
     {
         var seen = new HashSet<(int, int)>();
@@ -98,13 +73,8 @@ public class GameController
         return result;
     }
 
-    /// <summary>Последний успешно выполненный ход (для подсветки в UI).</summary>
     public Move? GetLastMove() => _lastMove;
 
-    /// <summary>
-    /// Тап без выполнения хода: либо выбираем фигуру и считаем её легальные ходы,
-    /// либо снимаем выбор. Сюда попадаем, если нет «pending move» по координатам.
-    /// </summary>
     public void HandleSelection(int row, int col)
     {
         var to = new Position(row, col);
@@ -112,21 +82,15 @@ public class GameController
         var tapped = board.GetPiece(to);
         if (tapped is not null && tapped.Color == _game.CurrentTurn)
         {
-            // Своя фигура — выбираем её, считаем все легальные ходы из этой клетки.
+
             _selected = to;
             _legalMoves = [.._rules.GetLegalMovesFrom(board, to, _game)];
             return;
         }
 
-        // Кликнули по пустой клетке или фигуре противника без активного выбора — сбрасываем.
         ClearSelection();
     }
 
-    /// <summary>
-    /// Если уже что-то выбрано и (row,col) — легальная цель, возвращает первый из подходящих ходов.
-    /// Для промоушена 4 хода имеют общие From/To — ViewModel подменит Promotion перед исполнением.
-    /// Если нет «запланированного хода» — возвращает null (значит, надо переключать выбор).
-    /// </summary>
     public Move? GetPendingMove(int row, int col)
     {
         if (_selected is null)
@@ -146,10 +110,6 @@ public class GameController
         return null;
     }
 
-    /// <summary>
-    /// Применяет ход (включая возможный Promotion, который ViewModel мог подменить).
-    /// Возвращает false как страховка, если движок отказал — на практике не должен.
-    /// </summary>
     public bool ExecutePlannedMove(Move move)
     {
         if (!_game.MakeMove(move))
@@ -162,7 +122,6 @@ public class GameController
         return true;
     }
 
-    /// <summary>Сброс и воспроизведение списка ходов (просмотр сохранённой партии).</summary>
     public bool TryReplayMoves(IReadOnlyList<Move> moves)
     {
         InitializeGame();
@@ -183,11 +142,6 @@ public class GameController
         return true;
     }
 
-    /// <summary>
-    /// Тонкая обёртка для случаев без промоушена: сразу либо двигает, либо переключает выбор.
-    /// Оставлена ради обратной совместимости и для тестов; основной поток UI идёт через
-    /// разделённые методы <see cref="GetPendingMove"/>/<see cref="ExecutePlannedMove"/>.
-    /// </summary>
     public void HandleCellClick(int row, int col)
     {
         var pending = GetPendingMove(row, col);
@@ -200,7 +154,6 @@ public class GameController
         HandleSelection(row, col);
     }
 
-    /// <summary>Снимает выделение фигуры (например после неверного хода в задаче).</summary>
     public void ClearMoveSelection() => ClearSelection();
 
     private void ClearSelection()

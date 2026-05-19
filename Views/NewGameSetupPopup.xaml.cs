@@ -3,7 +3,6 @@ using SigmaChess.ViewModels;
 
 namespace SigmaChess.Views;
 
-/// <summary>Попап выбора контроля времени и режима раскладки перед стартом партии.</summary>
 public partial class NewGameSetupPopup : Popup
 {
     private static readonly string[] LayoutOptionLabels =
@@ -56,7 +55,6 @@ public partial class NewGameSetupPopup : Popup
         BlackTimeChoiceLabel.Text = TimePresetLabels[_blackTimeSelectedIndex];
     }
 
-    /// <summary>Выбор строки через нативный action sheet: родительский попап не закрывается (повторный ShowPopupAsync после CloseAsync давал disposed).</summary>
     private Task<int?> PickOptionAsync(string title, IReadOnlyList<string> options) =>
         MainThread.InvokeOnMainThreadAsync(async () =>
         {

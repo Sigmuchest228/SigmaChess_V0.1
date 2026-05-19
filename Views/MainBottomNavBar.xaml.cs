@@ -17,11 +17,6 @@ public partial class MainBottomNavBar : ContentView
         AttachCoordinator();
     }
 
-    /// <summary>
-    /// Сразу задаём контекст навбара — иначе первый проход биндингов наследует страницу
-    /// (<see cref="SigmaChess.ViewModels.RespectsPageViewModel"/> и т. п.) и даёт предупреждения / поломанные команды.
-    /// Повтор при Loaded — если первый проход был до готовности <see cref="SigmaChess.Services.AppService"/>.
-    /// </summary>
     private void AttachCoordinator()
     {
         if (BindingContext is BottomNavigationCoordinator)

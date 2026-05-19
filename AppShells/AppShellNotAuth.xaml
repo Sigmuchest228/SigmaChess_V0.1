@@ -10,7 +10,6 @@
     Shell.NavBarIsVisible="False"
     Shell.TabBarIsVisible="False">
 
-    <!-- Первый ShellContent — Loader, затем Auth. -->
     <TabBar>
         <ShellContent
             Title="Loader"

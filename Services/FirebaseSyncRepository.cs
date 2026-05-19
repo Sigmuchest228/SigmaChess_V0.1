@@ -1,4 +1,4 @@
-// RTDB: репозиторий (профиль, подписки, поиск, партии); DTO — в SigmaChess.Models.
+
 using System.Diagnostics;
 using System.Net.Http;
 using Firebase.Database;
@@ -10,10 +10,9 @@ using SigmaChess.Models;
 
 namespace SigmaChess.Services;
 
-/// <summary>Клиент синхронизации с Firebase RTDB.</summary>
 public class FirebaseSyncRepository
 {
-    /// <summary>Совпадает с базой в (REST-запросы префикс-поиска).</summary>
+
     private const string RtdbRestRoot =
         "https://sigmachess-75f04-default-rtdb.europe-west1.firebasedatabase.app";
 
@@ -24,7 +23,6 @@ public class FirebaseSyncRepository
         _app = app;
     }
 
-    /// <summary>Строка EndReason для RTDB из <see cref="GameResult"/>.</summary>
     public static string ToEndReason(GameResult result) =>
         result switch
         {
@@ -36,10 +34,6 @@ public class FirebaseSyncRepository
             _ => "unknown"
         };
 
-    /// <summary>
-    /// В терминальной позиции <paramref name="sideToMove"/> — сторона, обязанная ходить; при мате это проигравший.
-    /// Победитель — противоположный цвет. Любая ничья даёт <c>Draw</c>.
-    /// </summary>
     public static string ResolveWinnerColor(GameResult result, PieceColor sideToMove)
     {
         return result switch
@@ -53,12 +47,6 @@ public class FirebaseSyncRepository
         };
     }
 
-    /// <summary>
-    /// Создаёт минимальный профиль, если узла нет или не заполнен UserName.
-    /// <paramref name="preferredUserName"/> — при регистрации; для анонимного гостя без имени —
-    /// <c>guest_</c> + короткий суффикс от <c>uid</c>; для email без имени — <c>Player</c>.
-    /// Если узел уже есть с <c>UserChessGames</c>, для проставления имени используется Patch, не полный Put.
-    /// </summary>
     public async Task EnsureUserAsync(string? preferredUserName = null, CancellationToken cancellationToken = default)
     {
         var uid = _app.CurrentUserId;
@@ -117,7 +105,6 @@ public class FirebaseSyncRepository
             .ConfigureAwait(false);
     }
 
-    /// <summary>Читает узел <c>users/{uid}</c> как DTO или <c>null</c>.</summary>
     public async Task<User?> GetUserByUidAsync(string uid,
         CancellationToken cancellationToken = default)
     {
@@ -137,7 +124,6 @@ public class FirebaseSyncRepository
         return JsonConvert.DeserializeObject<User>(json);
     }
 
-    /// <summary>Читает профиль текущего пользователя.</summary>
     public Task<User?> GetUserAsync(CancellationToken cancellationToken = default)
     {
         var uid = _app.CurrentUserId;
@@ -146,7 +132,6 @@ public class FirebaseSyncRepository
             : GetUserByUidAsync(uid, cancellationToken);
     }
 
-    /// <summary>Частичное обновление полей профиля в RTDB (например <c>AvatarUrl</c>).</summary>
     public async Task PatchUserFieldsAsync(IReadOnlyDictionary<string, object?> fields,
         CancellationToken cancellationToken = default)
     {
@@ -187,7 +172,6 @@ public class FirebaseSyncRepository
         return "Player";
     }
 
-    /// <summary>Стабильное короткое имя гостя: <c>guest_</c> + последние до 6 символов <paramref name="uid"/> (нижний регистр).</summary>
     public static string GuestDisplayNameFromUid(string uid)
     {
         if (string.IsNullOrEmpty(uid))
@@ -200,7 +184,6 @@ public class FirebaseSyncRepository
         return $"guest_{suffix}";
     }
 
-    /// <summary>Ключи <c>users/{uid}/UserChessGames</c> (новее сверху — по строковому id).</summary>
     public async Task<IReadOnlyList<string>> GetUserChessGameIdsAsync(string uid,
         CancellationToken cancellationToken = default)
     {
@@ -237,7 +220,6 @@ public class FirebaseSyncRepository
         return keys;
     }
 
-    /// <summary>Читает <c>ChessGames/{gameId}</c>.</summary>
     public async Task<SavedGame?> GetChessGameByIdAsync(string gameId,
         CancellationToken cancellationToken = default)
     {
@@ -264,7 +246,6 @@ public class FirebaseSyncRepository
         }
     }
 
-    /// <summary>Завершённые партии пользователя для профиля и экрана истории.</summary>
     public async Task<IReadOnlyList<PastGame>> LoadPlayedGameSummariesForProfileAsync(string profileUid,
         int maxGames = 80,
         CancellationToken cancellationToken = default)
@@ -330,10 +311,6 @@ public class FirebaseSyncRepository
         return list;
     }
 
-    /// <summary>
-    /// Сохраняет партию и индексирует её у обоих участников (если белые и чёрные — один uid, индекс один раз).
-    /// <paramref name="winner"/> — <c>White</c>, <c>Black</c> или <c>Draw</c>.
-    /// </summary>
     public async Task<string?> SaveCompletedGameAsync(
         string whiteUid,
         string blackUid,
@@ -393,7 +370,6 @@ public class FirebaseSyncRepository
             .PutAsync(JsonConvert.SerializeObject(true)).WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>Список uid в <c>users/{me}/respects</c>.</summary>
     public async Task<IReadOnlyList<string>> GetRespectUidsAsync(CancellationToken cancellationToken = default)
     {
         var me = _app.CurrentUserId;
@@ -434,7 +410,6 @@ public class FirebaseSyncRepository
         return keys;
     }
 
-    /// <summary>Загружает профили по respect list.</summary>
     public async Task<IReadOnlyList<RespectUser>> LoadRespectsAsync(CancellationToken cancellationToken = default)
     {
         var uids = await GetRespectUidsAsync(cancellationToken).ConfigureAwait(false);
@@ -459,7 +434,6 @@ public class FirebaseSyncRepository
         return list;
     }
 
-    /// <summary>Добавляет uid в respect list и индекс <c>respectReceived</c>.</summary>
     public async Task AddRespectAsync(string targetUid, CancellationToken cancellationToken = default)
     {
         var me = _app.CurrentUserId;
@@ -476,7 +450,6 @@ public class FirebaseSyncRepository
             .ConfigureAwait(false);
     }
 
-    /// <summary>Удаляет из respect list и из <c>respectReceived</c>.</summary>
     public async Task RemoveRespectAsync(string targetUid, CancellationToken cancellationToken = default)
     {
         var me = _app.CurrentUserId;
@@ -492,7 +465,6 @@ public class FirebaseSyncRepository
             .ConfigureAwait(false);
     }
 
-    /// <summary>Число пользователей, отметивших <paramref name="profileUid"/> в respect list.</summary>
     public async Task<int> GetRespectReceivedCountAsync(string profileUid, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(profileUid))
@@ -511,11 +483,6 @@ public class FirebaseSyncRepository
         return dict?.Count ?? 0;
     }
 
-    /// <summary>
-    /// Поиск игроков по префиксу <see cref="SigmaChess.Models.User.UserNameLower" />.
-    /// Шаг 1: REST-запрос с orderBy/startAt/endAt.
-    /// Шаг 2: если пусто или ошибка — скачать <c>users.json</c> и отфильтровать на клиенте.
-    /// </summary>
     public async Task<IReadOnlyList<RespectUser>> SearchUsersByPrefixAsync(string prefix, int limit = 24,
         CancellationToken cancellationToken = default)
     {

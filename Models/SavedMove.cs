@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace SigmaChess.Models;
 
-/// <summary>Один записанный полуход для RTDB (PascalCase как в раннем экспорте).</summary>
 public class SavedMove
 {
     [JsonProperty("FromPos")]

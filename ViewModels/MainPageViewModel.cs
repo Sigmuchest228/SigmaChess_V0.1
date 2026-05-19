@@ -5,18 +5,11 @@ using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
 
-/// <summary>
-/// ViewModel главной страницы приложения. Отвечает за:
-///   1. Команды-кнопки навигации (открыть логин/регистрацию/игру и т. д.).
-///   2. Гость-гейт: для разделов, недоступных без логина, показывает попап «нужен аккаунт».
-///   3. Управление видимостью кнопок «Log in / Sign up» через флаг <see cref="IsGuest"/>.
-/// </summary>
 public class MainPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
 
-    /// <summary>Корневые маршруты Shell — открываются с префиксом "//".</summary>
     private static readonly HashSet<string> ShellRootRoutes =
     [
         nameof(AuthPage),
@@ -25,7 +18,6 @@ public class MainPageViewModel : ViewModelBase
         nameof(RespectsPage),
     ];
 
-    // Список разделов, которые гостю не показываем — сначала просим залогиниться.
     private static readonly HashSet<string> GuestRestrictedRoutes =
     [
         nameof(RespectsPage),
@@ -104,10 +96,8 @@ public class MainPageViewModel : ViewModelBase
 
     private string _respectsSummaryText = string.Empty;
 
-    /// <summary>Крупный заголовок блока действий на главной (под шапкой).</summary>
     public string GameSectionTitle => "SIGMA CHESS";
 
-    /// <summary>Строка под заголовком игры: респекты или подсказка для гостя.</summary>
     public string RespectsSummaryText
     {
         get => _respectsSummaryText;
@@ -125,7 +115,6 @@ public class MainPageViewModel : ViewModelBase
 
     public ICommand OpenProfileCommand { get; }
 
-    /// <summary>Обновляет подпись о списке респектов (гость / счётчик с Firebase).</summary>
     public async Task RefreshRespectsSummaryAsync(CancellationToken cancellationToken = default)
     {
         if (IsGuest)
@@ -152,7 +141,6 @@ public class MainPageViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Пересчитывает <see cref="IsGuest"/> по активному Shell.</summary>
     public void RefreshAuthState()
     {
         IsGuest = Shell.Current is AppShellNotAuth;
@@ -173,7 +161,7 @@ public class MainPageViewModel : ViewModelBase
         }
         catch
         {
-            // Офлайн — попытка повторится при следующем появлении главной или сохранении партии.
+
         }
 
         await RefreshAvatarSourceAsync(profile?.AvatarUrl, cancellationToken).ConfigureAwait(false);

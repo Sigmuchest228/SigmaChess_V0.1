@@ -4,10 +4,6 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-/// <summary>
-/// ViewModel страницы входа/регистрации. Переключение режимов — <see cref="IsRegisterMode"/>.
-/// Поддерживает query <c>?mode=register</c> через <see cref="IQueryAttributable"/>.
-/// </summary>
 public class AuthViewModel : ViewModelBase, IQueryAttributable
 {
     private readonly AppService _appService;
@@ -218,7 +214,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
         catch
         {
-            // Без сети или при сбое RTDB — локальная игра возможна, профиль догрузится позже.
+
         }
     }
 

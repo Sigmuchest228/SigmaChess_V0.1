@@ -79,7 +79,6 @@ public class UserProfileViewModel : ViewModelBase
             });
     }
 
-    /// <summary>Вызывается из <see cref="UserProfilePage.ApplyQueryAttributes"/> при переходе с query.</summary>
     public void ApplyNavigationQuery(IDictionary<string, object> query)
     {
         if (!query.TryGetValue("UserId", out var raw))
@@ -98,7 +97,6 @@ public class UserProfileViewModel : ViewModelBase
         OnPropertyChanged(nameof(PageTitle));
     }
 
-    /// <summary>Строка вида «Got respect from N sigmas» из <c>respectReceived</c>.</summary>
     public string RespectFromSigmasText
     {
         get => _respectFromSigmasText;
@@ -125,7 +123,6 @@ public class UserProfileViewModel : ViewModelBase
 
     public ObservableCollection<PlayedGameRowViewModel> PlayedGames { get; }
 
-    /// <summary>Uid профиля на экране (свой или из query).</summary>
     public string? ActiveProfileUid =>
         string.IsNullOrWhiteSpace(_viewingUserId) ? _appService.CurrentUserId : _viewingUserId;
 
@@ -160,7 +157,6 @@ public class UserProfileViewModel : ViewModelBase
 
     public ICommand ChangeAvatarCommand { get; }
 
-    /// <summary>Отображаемое имя из RTDB (<c>UserName</c>).</summary>
     public string ProfileUserName
     {
         get => _profileUserName;
@@ -176,7 +172,6 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Дата регистрации (день, месяц прописью, год) из <c>RegisterDate</c> в локальном часовом поясе.</summary>
     public string MemberSinceDateText
     {
         get => _memberSinceDateText;
@@ -264,7 +259,7 @@ public class UserProfileViewModel : ViewModelBase
             }
             catch
             {
-                // Нет правил / сеть — не блокируем отображение профиля.
+
             }
 
             var respectLine = $"Got respect from {respectCount} sigmas";

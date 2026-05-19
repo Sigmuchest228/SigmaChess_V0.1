@@ -4,7 +4,6 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
-/// <summary>Настройки приложения и выход из аккаунта.</summary>
 public class SettingsViewModel : ViewModelBase
 {
     public SettingsViewModel()

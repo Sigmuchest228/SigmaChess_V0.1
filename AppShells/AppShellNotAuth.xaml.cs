@@ -2,7 +2,6 @@ using SigmaChess.Services;
 
 namespace SigmaChess;
 
-/// <summary>Гостевой Shell: только маршруты Main/Game, таб-бар скрыт.</summary>
 public partial class AppShellNotAuth : Shell
 {
     public AppShellNotAuth()

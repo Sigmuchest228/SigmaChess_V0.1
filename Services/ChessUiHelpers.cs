@@ -1,5 +1,3 @@
-// Вспомогательный код для UI шахмат: алгебра полей, цвета/подписи исхода, разбор ходов реплея из RTDB.
-// Объединено в один файл — меньше узлов в папке Services.
 
 using System.Text;
 using Microsoft.Maui.Graphics;
@@ -10,16 +8,11 @@ namespace SigmaChess.Services;
 
 #region Алгебраическая нотация полей и короткая запись хода
 
-/// <summary>
-/// Координаты движка: row 0 — верх доски (чёрные), col 0 — файл a.
-/// В алгебре: rank = 8 - row, file = a + col.
-/// </summary>
 public static class AlgebraicNotation
 {
     public static string ToSquare(SigmaChess.Engine.Position pos) =>
         $"{(char)('a' + pos.Col)}{8 - pos.Row}";
 
-    /// <summary>Парсинг поля вроде <c>e4</c> в координаты движка.</summary>
     public static bool TryParseSquare(string? square, out Position pos)
     {
         pos = default;
@@ -53,10 +46,6 @@ public static class AlgebraicNotation
 
     private static readonly GameRules SanRules = new(new MoveGenerator());
 
-    /// <summary>
-    /// Стандартная алгебраическая запись (SAN) для списка ходов: <c>e4</c>, <c>Nf3</c>, <c>O-O</c>, <c>exd5</c>, <c>e8=Q+</c>.
-    /// <paramref name="moveIndex"/> — индекс <paramref name="move"/> в <paramref name="allMoves"/> (0 = первый полуход).
-    /// </summary>
     public static string MoveToShortNotation(Move move, IReadOnlyList<Move> allMoves, int moveIndex)
     {
         if (moveIndex < 0 || moveIndex >= allMoves.Count)
@@ -91,7 +80,6 @@ public static class AlgebraicNotation
         var movingColor = piece.Color;
         var opponent = movingColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
 
-        // Рокировка: король на два файла.
         if (piece.Type == PieceType.King && Math.Abs(move.To.Col - move.From.Col) == 2)
         {
             var castle = move.To.Col == 6 ? "O-O" : "O-O-O";
@@ -209,9 +197,6 @@ public static class AlgebraicNotation
             _ => 'Q',
         };
 
-    /// <summary>
-    /// Если на одно поле могут пойти несколько фигур одного типа, добавляем файл, ранг или оба (FIDE SAN).
-    /// </summary>
     private static string Disambiguate(Position from, List<Position> sources)
     {
         if (sources.Count <= 1)
@@ -239,7 +224,6 @@ public static class AlgebraicNotation
 
 #region Цвета и подписи исхода партии
 
-/// <summary>Цвет подписи исхода партии по победившей стороне (шахматные «белые/чёрные» оттенки).</summary>
 public static class ChessOutcomePalette
 {
     public static string NormalizeWinner(string? winner)
@@ -276,7 +260,6 @@ public static class ChessOutcomePalette
             _ => Color.FromArgb("#94A3B8"),
         };
 
-    /// <summary>Подпись исхода в списках сыгранных партий (нейтрально по победителю).</summary>
     public static string ListOutcomeTitle(string normalizedWinner) =>
         normalizedWinner switch
         {
@@ -286,7 +269,6 @@ public static class ChessOutcomePalette
             _ => "—",
         };
 
-    /// <summary>Краткая подпись победителя для реплея.</summary>
     public static string ReplayWinnerCaption(string normalizedWinner) =>
         normalizedWinner switch
         {
@@ -301,7 +283,6 @@ public static class ChessOutcomePalette
 
 #region Разбор цепочки ходов реплея из записей Firebase
 
-/// <summary>Восстанавливает цепочку движковых ходов из RTDB (FromPos/ToPos), в т. ч. при неоднозначном превращении.</summary>
 public static class GameReplayMoveResolver
 {
     public static bool TryResolve(IReadOnlyList<SavedMove> orderedMoves, out List<Move> resolved)

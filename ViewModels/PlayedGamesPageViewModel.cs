@@ -58,7 +58,6 @@ public class PlayedGamesPageViewModel : ViewModelBase
 
     public ICommand OpenReplayCommand { get; }
 
-    /// <summary>Optional query <c>UserId</c>; иначе текущий пользователь.</summary>
     public void ApplyNavigationQuery(IDictionary<string, object> query)
     {
         if (!query.TryGetValue("UserId", out var raw))

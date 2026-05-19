@@ -4,7 +4,6 @@ using SigmaChess.Views;
 
 namespace SigmaChess.Services;
 
-// Выбор источника фото, разрешения, галерея/камера, локальный pending-аватар и превью по URL.
 #region Интерфейс и результат выбора (Gallery / Camera)
 
 public interface IPhotoSourcePicker
@@ -19,7 +18,6 @@ public enum PickPhotoSource
     Camera,
 }
 
-/// <summary>Показывает попап выбора Gallery/Camera при добавлении фото (обои, аватар).</summary>
 public class PhotoSourcePicker : IPhotoSourcePicker
 {
     public Task<PickPhotoSource> PickSourceAsync(CancellationToken cancellationToken = default) =>
@@ -30,7 +28,6 @@ public class PhotoSourcePicker : IPhotoSourcePicker
 
 #region Разрешения и открытие потока фото
 
-/// <summary>Разрешения и системный выбор фото из галереи или камеры (для профиля).</summary>
 public static class PhotoMediaService
 {
     public static Task<bool> EnsurePhotosPermissionAsync() =>
@@ -60,7 +57,6 @@ public static class PhotoMediaService
         }
     }
 
-    /// <summary>Открывает поток снимка с камеры; на Windows при недоступности камеры — fallback через файловый пикер.</summary>
     public static async Task<Stream?> TryOpenCameraPhotoAsync(string pickerTitle)
     {
         Stream? stream = null;
@@ -87,7 +83,7 @@ public static class PhotoMediaService
             }
             catch (FeatureNotSupportedException)
             {
-                /* fallback ниже */
+
             }
 
             if (stream is null)
@@ -151,7 +147,7 @@ public static class PhotoMediaService
         }
         catch (FeatureNotSupportedException)
         {
-            // Fallback ниже.
+
         }
 
         var result = await FilePicker.Default.PickAsync(new PickOptions
@@ -191,9 +187,6 @@ public static class PhotoMediaService
 
 #region Локальный pending-аватар (Preferences)
 
-/// <summary>
-/// Локальный pending-аватар: путь в Preferences + файл в кэше, без Firebase Storage.
-/// </summary>
 public static class UserAvatarLocalStore
 {
     internal const string PendingLocalAvatarPathKey = "AvatarPendingLocalPath";
@@ -212,10 +205,9 @@ public static class UserAvatarLocalStore
 
 #region Превью аватара (pending → URL → дефолт)
 
-/// <summary>Приоритет: локальный pending (аватар) → URL из профиля → дефолт.</summary>
 public static class UserAvatarPreview
 {
-    /// <param name="allowLocalPending">Ложь для чужих профилей — иначе локальный черновик аватара текущего пользователя может отобразиться у другого uid.</param>
+
     public static async Task<ImageSource> LoadAsync(string? userId, string? avatarUrl,
         CancellationToken cancellationToken, bool allowLocalPending = true)
     {

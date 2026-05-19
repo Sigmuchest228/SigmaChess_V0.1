@@ -1,8 +1,5 @@
 namespace SigmaChess.Engine;
 
-/// <summary>
-/// Загрузка позиции из FEN (placement + сторона хода + рокировка + EP + halfmove).
-/// </summary>
 public partial class Game
 {
     private Game(bool emptyForFen)
@@ -27,7 +24,6 @@ public partial class Game
         }
     }
 
-    /// <summary>Возвращает партию из FEN или <c>null</c> при ошибке разбора.</summary>
     public static Game? TryFromFen(string fen)
     {
         if (string.IsNullOrWhiteSpace(fen))
@@ -228,7 +224,6 @@ public partial class Game
         return true;
     }
 
-    /// <summary>Клетка в нотации «e4», координаты как в движке (row 0 = чёрные сверху).</summary>
     private static bool TryParseAlgebraicSquare(string square, out Position pos)
     {
         pos = default;

@@ -2,7 +2,6 @@ using SigmaChess;
 
 namespace SigmaChess.Views;
 
-/// <summary>Первый экран сессии: короткая задержка, затем переход на Main или Auth.</summary>
 public partial class LoaderPage : ContentPage
 {
     private static readonly TimeSpan Delay = TimeSpan.FromSeconds(2.5);

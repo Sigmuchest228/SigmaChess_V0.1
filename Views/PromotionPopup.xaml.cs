@@ -3,18 +3,9 @@ using SigmaChess.Engine;
 
 namespace SigmaChess.Views;
 
-/// <summary>
-/// Попап выбора фигуры превращения пешки. Показывает 4 кнопки (ферзь/ладья/слон/конь)
-/// в цвете ходящей стороны, ждёт выбор и возвращает его через <see cref="Choice"/>.
-/// <para>
-/// Тап мимо для закрытия отключён (см. XAML, <c>CanBeDismissedByTappingOutsideOfPopup="False"</c>),
-/// потому что без выбора партия зависнет в подвешенном состоянии: пешка стоит на 8-й
-/// горизонтали без типа.
-/// </para>
-/// </summary>
 public partial class PromotionPopup : Popup
 {
-    /// <summary>Выбор пользователя. По умолчанию — ферзь (на случай, если попап закроют программно).</summary>
+
     public PieceType Choice { get; private set; } = PieceType.Queen;
 
     public PromotionPopup(PieceColor color)
@@ -27,10 +18,6 @@ public partial class PromotionPopup : Popup
         KnightButton.Text = SymbolFor(color, PieceType.Knight);
     }
 
-    /// <summary>
-    /// Открыть попап, дождаться выбора и вернуть его. Если активная страница не найдена
-    /// (теоретически невозможно во время игры) — возвращает Queen как безопасный дефолт.
-    /// </summary>
     public static async Task<PieceType> ShowAsync(PieceColor color)
     {
         var page = SigmaChess.PresentationHelper.CurrentPage
@@ -59,8 +46,6 @@ public partial class PromotionPopup : Popup
         await CloseAsync();
     }
 
-    // Юникод-символы тех же фигур, что и на доске. Дублируется здесь намеренно:
-    // BoardCellViewModel — это отдельный слой, и попап не должен от него зависеть.
     private static string SymbolFor(PieceColor color, PieceType type) => (color, type) switch
     {
         (PieceColor.White, PieceType.Queen) => "\u2655",

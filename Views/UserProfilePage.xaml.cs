@@ -16,7 +16,7 @@ public partial class UserProfilePage : ContentPage, IQueryAttributable
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         _viewModel.ApplyNavigationQuery(query);
-        // Shell иногда вызывает OnAppearing до применения query — перезагружаем после UserId.
+
         _ = MainThread.InvokeOnMainThreadAsync(() => _viewModel.InitializeAsync());
     }
 

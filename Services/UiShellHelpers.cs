@@ -10,71 +10,47 @@ namespace SigmaChess.Services;
 
 #region BoardLayoutService
 
-/// <summary>Как рассчитывать сторону доски на GamePage / реплее в зависимости от раскладки UI.</summary>
 public enum GamePageBoardExtentMode
 {
-    /// <summary>Узкая колонка справа (страница реплея).</summary>
+
     SideMoveColumn,
 
-    /// <summary>История ходов полосой под доской (обычная игра, не «за столом»).</summary>
     CasualBottomMoveStrip,
 
-    /// <summary>Режим «за столом».</summary>
     FaceToFace,
 }
 
-/// <summary>
-/// Считает сторону доски в DIP под текущий экран. Делегирован, потому что эти константы
-/// «согласованы» с layout'ом GamePage (отступ страницы, ширина полосы координат,
-/// высота, занятая хедером/статусом/подсказками).
-/// </summary>
 public class BoardLayoutService
 {
-    // Согласовано с GameViewModel: единый Grid доски + полоса координат 28 px;
-    // отступ страницы по ширине 12+12. По высоте резерв под хедер, статус,
-    // полосу файлов снизу и нижний слот действий.
+
     private const double PageHorizontalPadding = 24;
     private const double CoordStripWidth = 28;
     private const double VerticalReserve = 280;
 
-    /// <summary>Резерв под колонку записи ходов справа (реплей) и нижнюю панель на странице партии.</summary>
     private const double GamePageMoveListColumn = 140;
 
-    /// <summary>Полоса истории под доской в casual: MaximumHeightRequest + отступы и промежуток рядов.</summary>
     private const double CasualBottomMoveHistoryReserve = 150;
 
-    /// <summary>
-    /// Режим «за столом»: история ходов на всю ширину (не в узких боковых колонках) —
-    /// оставляем небольшой запас только к полям страницы и полосам координат.
-    /// </summary>
     private const double FaceToFaceHorizontalReserve = 32;
 
-    /// <summary>Вертикальный резерв чуть ниже, т.к. списки ходов ограничены по высоте и не забирают всю полосу.</summary>
     private const double FaceToFaceVerticalReserve = 238;
 
     private const double GamePageBottomPanelExtra = 76;
 
-    /// <summary>
-    /// Возвращает максимальную сторону доски, при которой она помещается в экран
-    /// и по ширине, и по высоте, ограниченную диапазоном [260, 640].
-    /// </summary>
     public double CalculateBoardExtent(DisplayInfo info)
     {
-        // info.Width/Height в пикселях, делим на плотность чтобы получить DIP.
-        // Защита от нулевой плотности (бывает в эмуляторах/тестах).
+
         var density = info.Density <= 0 ? 1 : info.Density;
         var width = info.Width / density;
         var height = info.Height / density;
         var maxSquareFromWidth = width - PageHorizontalPadding - CoordStripWidth;
         var maxSquareFromHeight = height - VerticalReserve;
-        // Доска квадратная — берём минимум из двух осей.
+
         var side = Math.Min(maxSquareFromWidth, maxSquareFromHeight);
-        // Снизу — чтобы фигуры не превратились в точки, сверху — чтобы на больших мониторах
-        // доска не занимала пол-экрана.
+
         return Math.Clamp(side, 260, 640);
     }
 
-    /// <summary>Как <see cref="CalculateBoardExtent"/>, но с учётом истории ходов и нижней панели GamePage / реплея.</summary>
     public double CalculateBoardExtentForGamePage(DisplayInfo info, GamePageBoardExtentMode mode)
     {
         var density = info.Density <= 0 ? 1 : info.Density;
@@ -115,7 +91,6 @@ public enum BottomNavSection
     Respect,
 }
 
-/// <summary>Общая нижняя навигация: Home учитывает партию на GamePage (тот же попап, что «назад»).</summary>
 public class BottomNavigationCoordinator : INotifyPropertyChanged
 {
     private readonly GameViewModel _game;
@@ -143,7 +118,6 @@ public class BottomNavigationCoordinator : INotifyPropertyChanged
 
     public bool IsRespectSelected => _section == BottomNavSection.Respect;
 
-    /// <summary>Синхронизация подсветки вкладки с текущей страницей Shell (в т.ч. после push/pop).</summary>
     public void SyncFromShell()
     {
         void Apply()
@@ -257,7 +231,6 @@ public class BottomNavigationCoordinator : INotifyPropertyChanged
         }).ConfigureAwait(false);
     }
 
-    /// <summary>Разделы нижней панели на гостевом Shell недоступны без входа.</summary>
     private static async Task<bool> EnsureAuthenticatedForRestrictedAsync()
     {
         if (Shell.Current is not AppShellNotAuth)

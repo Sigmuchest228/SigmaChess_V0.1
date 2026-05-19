@@ -13,13 +13,6 @@ using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
 
-// Экран партии толще учебного LoginBaseApp: движок, таймеры, запись в Firebase — сигнатуры методов длиннее, это ожидаемо.
-
-/// <summary>
-/// ViewModel страницы игры на одном устройстве. Связывает <see cref="SigmaChess.Engine.GameController"/>
-/// (движок) с UI-коллекцией из 64 ячеек, обрабатывает тапы пользователя, рассчитывает
-/// размер доски под экран и хранит пользовательские настройки партии.
-/// </summary>
 public class GameViewModel : ViewModelBase
 {
     private readonly global::SigmaChess.Engine.GameController _controller;
@@ -52,7 +45,6 @@ public class GameViewModel : ViewModelBase
     private bool _gameOverPopupShown;
     private bool _shellHomeNavRegistered;
 
-    /// <summary>Первая сессия без выбора времени: показать попап на GamePage.</summary>
     public bool NeedsInitialTimePopup
     {
         get => _needsInitialTimePopup;
@@ -68,14 +60,10 @@ public class GameViewModel : ViewModelBase
         }
     }
 
-    // Полоса с координатами файлов/рангов вокруг доски (по 28 px на одну сторону).
-    // Используется только для расчёта размера внешнего Grid.
     private const double CoordStrip = 28;
 
-    /// <summary>64 клетки доски в порядке (row=0,col=0)...(row=7,col=7).</summary>
     public ObservableCollection<BoardCellViewModel> Cells { get; } = [];
 
-    /// <summary>Строки записи ходов для списка справа от доски.</summary>
     public ObservableCollection<MoveHistoryRow> MoveRows { get; } = [];
 
     public Command<BoardCellViewModel> CellTappedCommand { get; }
@@ -101,7 +89,6 @@ public class GameViewModel : ViewModelBase
 
     public bool CanStepForward => _replayPliesApplied < _controller.GetPlayedMoves().Count;
 
-    /// <summary>Сторона квадрата самой доски в DIP. Меняется при ротации/смене окна.</summary>
     public double BoardExtent
     {
         get => _boardExtent;
@@ -120,7 +107,6 @@ public class GameViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Сторона внешнего квадрата (доска + полоса координат с двух сторон).</summary>
     public double BoardGridSize => BoardExtent + CoordStrip;
 
     public double PieceFontSize => Math.Clamp(BoardExtent / 8.0 * 0.62, 14, 44);
@@ -231,20 +217,18 @@ public class GameViewModel : ViewModelBase
         DeviceDisplay.MainDisplayInfoChanged += OnDisplayInfoChanged;
     }
 
-    /// <summary>Ячейки и размер доски без старта партии.</summary>
     public Task EnsureInitializedAsync()
     {
         if (_isInitialized)
         {
-            // Повторный заход на GamePage: всё ещё обновляем размер доски под текущее окно
-            // (иначе на WinUI Grid может отрисоваться с нулевыми строками/колонками).
+
             UpdateBoardExtent();
             return Task.CompletedTask;
         }
 
         UpdateBoardExtent();
         EnsureCellsCreated();
-        // Если пользователь уже играл (есть ходы), попап выбора времени при входе не нужен.
+
         if (_controller.GetPlayedMoves().Count > 0)
         {
             NeedsInitialTimePopup = false;
@@ -261,7 +245,6 @@ public class GameViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
-    /// <summary>Регистрирует обработчик <see cref="OnShellNavigatedForHomeFromGame"/> (один раз).</summary>
     private void TryRegisterShellHomeNavigationHandler()
     {
         if (_shellHomeNavRegistered || Shell.Current is null)
@@ -295,14 +278,9 @@ public class GameViewModel : ViewModelBase
         });
     }
 
-    /// <summary>Показать попап выбора времени при первом заходе на пустую партию.</summary>
     public bool ShouldOfferTimeSetupOnAppear() =>
         _controller.GetPlayedMoves().Count == 0 && NeedsInitialTimePopup;
 
-    /// <summary>
-    /// Полный сброс singleton-состояния партии при переходе с GamePage на главную
-    /// (обработчик <see cref="Shell.Navigated"/>).
-    /// </summary>
     private void ResetGameStateWhenNavigatingHome()
     {
         InternalResetGameState();
@@ -319,7 +297,6 @@ public class GameViewModel : ViewModelBase
         StepForwardCommand.ChangeCanExecute();
     }
 
-    /// <summary>Полный сброс партии и настроек до дефолта (выход из аккаунта).</summary>
     public void ResetSessionForLogout()
     {
         StopClockTimer();
@@ -347,7 +324,6 @@ public class GameViewModel : ViewModelBase
         NotifyClocks();
     }
 
-    /// <summary>Старт партии после выбора времени (новая игра с нуля).</summary>
     public void StartNewGameAfterSetup()
     {
         InternalResetGameState();
@@ -537,10 +513,6 @@ public class GameViewModel : ViewModelBase
         _moveStopwatch.Restart();
     }
 
-    /// <summary>
-    /// Переход на главную (Shell). После навигации полностью сбрасывает партию в VM;
-    /// тот же сброс выполняется в <see cref="OnShellNavigatedForHomeFromGame"/> при других переходах на главную.
-    /// </summary>
     public async Task NavigateToMainPageAsync()
     {
         try
@@ -591,10 +563,8 @@ public class GameViewModel : ViewModelBase
         await NavigateToMainPageAsync();
     }
 
-    /// <summary>Тот же сценарий, что и стрелка «назад» на партии (нижняя панель Home).</summary>
     public Task ConfirmLeaveGameAndGoHomeAsync() => GoBackToMenuAsync();
 
-    /// <summary>Новая партия: только попап контроля времени (без отдельного подтверждения).</summary>
     public async Task StartNewGameWithTimeSetupAsync()
     {
         var page = Shell.Current?.CurrentPage as ContentPage
@@ -882,7 +852,7 @@ public class GameViewModel : ViewModelBase
         }
         catch
         {
-            // Игнорируем сеть
+
         }
     }
 

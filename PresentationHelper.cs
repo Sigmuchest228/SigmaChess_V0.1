@@ -1,6 +1,5 @@
 namespace SigmaChess;
 
-/// <summary>Текущая страница Shell (или корень окна).</summary>
 public static class PresentationHelper
 {
     public static Page? CurrentPage =>

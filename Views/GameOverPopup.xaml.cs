@@ -3,7 +3,6 @@ using SigmaChess.ViewModels;
 
 namespace SigmaChess.Views;
 
-/// <summary>Попап итога партии: новая игра (с выбором времени) или выход на главную.</summary>
 public partial class GameOverPopup : Popup
 {
     private readonly GameViewModel _viewModel;

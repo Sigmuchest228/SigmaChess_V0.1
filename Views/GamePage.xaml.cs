@@ -5,18 +5,9 @@ using SigmaChess.ViewModels;
 
 namespace SigmaChess.Views;
 
-/// <summary>
-/// Страница партии. Сама XAML описывает только обрамление (заголовок, статусные лейблы,
-/// кнопки и квадратный Grid доски), а 64 клетки и подписи координат страница строит
-/// программно при первом <see cref="OnAppearing"/>. Это позволяет:
-///   - один раз создать UI-объекты (сетки клеток, лейблы) и переиспользовать их при перерисовке,
-///   - перевешивать клетки при перевороте доски через <c>Grid.SetRow/SetColumn</c>,
-///     не пересоздавая View'ы.
-/// </summary>
 public partial class GamePage : ContentPage
 {
-    // Кэшируем ссылки на View-элементы, чтобы переворот/обновления выполнялись по индексу,
-    // без перебора всего визуального дерева.
+
     private readonly Grid[,] _squares = new Grid[8, 8];
     private readonly Label[] _rankLabels = new Label[8];
     private readonly Label[] _fileLabels = new Label[8];
@@ -28,12 +19,6 @@ public partial class GamePage : ContentPage
         BindingContext = AppService.GetInstance().GameViewModel;
     }
 
-    /// <summary>
-    /// Первая инициализация (ленивая): дёргает VM, строит клетки/координаты,
-    /// подписывается на PropertyChanged для авто-переворота. Безопасно вызывается повторно
-    /// (флаг <c>_boardBuilt</c> и метод <see cref="GameViewModel.EnsureInitializedAsync"/>
-    /// идемпотентны).
-    /// </summary>
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -109,7 +94,6 @@ public partial class GamePage : ContentPage
         targetHost.Children.Add(BoardWithCoords);
     }
 
-    // Реагируем на смену ориентации доски и режима раскладки (доска переносится между хостами).
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is not GameViewModel vm)
@@ -137,18 +121,9 @@ public partial class GamePage : ContentPage
             return;
         }
 
-        // Передаём ту же VM, чтобы биндинги внутри попапа управляли реальными настройками.
         await this.ShowPopupAsync(new GameSettingsPopup(vm));
     }
 
-    // Создаёт 64 клетки доски: Grid + Label (фигура), фон клетки, тап.
-    // ВАЖНО: каждый SetBinding получает СВОЙ Binding-объект (через `new Binding(...)`).
-    // Если переиспользовать один экземпляр Binding между несколькими BindableObject —
-    // MAUI кидает InvalidOperationException "Binding instances cannot be reused".
-    //
-    // Контейнер — Grid, не Border: на WinUI у Border даже при StrokeThickness=0 и прозрачном
-    // Stroke иногда остаётся «рваная» тёмная линия по периметру; выделение и так задаётся
-    // цветом фона в <see cref="BoardCellViewModel.SquareBackground"/> (IsSelected).
     private void BuildSquares(GameViewModel vm)
     {
         foreach (var cell in vm.Cells)
@@ -159,8 +134,7 @@ public partial class GamePage : ContentPage
                 VerticalOptions = LayoutOptions.Center,
             };
             label.SetBinding(Label.TextProperty, nameof(BoardCellViewModel.PieceSymbol));
-            // Размер шрифта берём с GameViewModel (он зависит от размера доски).
-            // Здесь нужен кастомный source, поэтому используем new Binding(...).
+
             label.SetBinding(Label.FontSizeProperty, new Binding(nameof(GameViewModel.PieceFontSize), source: vm));
             label.SetBinding(Label.RotationProperty, nameof(BoardCellViewModel.PieceGlyphRotation));
 
@@ -173,24 +147,19 @@ public partial class GamePage : ContentPage
             square.SetBinding(BackgroundColorProperty, nameof(BoardCellViewModel.SquareBackground));
             square.Children.Add(label);
 
-            // Захватываем cell в локальную переменную, иначе все лямбды разделят ту же ссылку
-            // и в обработчик попадёт последняя клетка цикла (классический foreach-closure-bug).
             var capturedCell = cell;
             var tap = new TapGestureRecognizer();
             tap.Tapped += async (_, _) => await vm.OnCellTappedAsync(capturedCell);
             square.GestureRecognizers.Add(tap);
 
             _squares[cell.Row, cell.Col] = square;
-            // Сразу задаём ячейку сетки; иначе по умолчанию все дети попадают в (0,0) до первого
-            // ApplyOrientation — на WinUI при повторном появлении страницы это даёт «одна клетка».
+
             Grid.SetRow(square, cell.Row);
             Grid.SetColumn(square, cell.Col);
             BoardGrid.Children.Add(square);
         }
     }
 
-    // Подписи рангов (8..1) и файлов (a..h) вокруг доски. Цифры по левому краю, буквы внизу.
-    // Размер шрифта тоже берём из VM, чтобы он подстраивался под размер доски.
     private void BuildCoordinateLabels(GameViewModel vm)
     {
         var coordColor = Color.FromArgb("#444");
@@ -225,9 +194,6 @@ public partial class GamePage : ContentPage
         }
     }
 
-    // Перевешивает существующие View-элементы по строкам/колонкам Grid в зависимости от
-    // ориентации доски. flipped=true — чёрные снизу, белые сверху (для второго игрока).
-    // Сама доска использует Grid 8x8, координаты лежат в "обрамляющем" Grid с лишней колонкой/рядом.
     private void ApplyOrientation(bool flipped)
     {
         for (var r = 0; r < 8; r++)
@@ -253,7 +219,6 @@ public partial class GamePage : ContentPage
                 continue;
             }
 
-            // Цифры всегда в колонке 0 (слева от доски), а строка соответствует ряду.
             Grid.SetColumn(label, 0);
             Grid.SetRow(label, flipped ? 7 - r : r);
         }
@@ -266,7 +231,6 @@ public partial class GamePage : ContentPage
                 continue;
             }
 
-            // Буквы всегда в строке 8 (под доской), колонка = файл + 1 (т. к. колонка 0 у цифр).
             Grid.SetRow(label, 8);
             Grid.SetColumn(label, (flipped ? 7 - c : c) + 1);
         }
