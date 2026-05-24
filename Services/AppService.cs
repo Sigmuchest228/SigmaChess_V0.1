@@ -199,8 +199,6 @@ public class AppService
 
     public async Task PerformFullLogoutAsync(CancellationToken cancellationToken = default)
     {
-        UserAvatarLocalStore.ClearPendingLocalAvatarPath();
-
         await MainThread.InvokeOnMainThreadAsync(() => { GameViewModel.ResetSessionForLogout(); }).WaitAsync(cancellationToken)
             .ConfigureAwait(false);
 

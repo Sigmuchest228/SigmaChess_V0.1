@@ -2,9 +2,8 @@ using System.Text;
 
 namespace SigmaChess.Engine;
 
-public partial class Game
+public class Game
 {
-
     private readonly Dictionary<string, int> _positionCounts = new(64);
 
     public Board Board { get; } = new();
@@ -25,8 +24,9 @@ public partial class Game
     public IReadOnlyDictionary<string, int> PositionCounts => _positionCounts;
 
     public Game()
-        : this(emptyForFen: false)
     {
+        Board.Initialize();
+        CountCurrentPosition();
     }
 
     public bool MakeMove(Move move)

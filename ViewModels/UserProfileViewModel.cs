@@ -244,7 +244,7 @@ public class UserProfileViewModel : ViewModelBase
                 : await _firebaseSync.GetUserByUidAsync(profileUid, cancellationToken).ConfigureAwait(false);
 
             var src = await UserAvatarPreview
-                .LoadAsync(profileUid, profile?.AvatarUrl, cancellationToken, IsOwnProfile)
+                .LoadAsync(profileUid, cancellationToken, preferLocalStore: true)
                 .ConfigureAwait(false);
 
             var displayName = string.IsNullOrWhiteSpace(profile?.UserName)
@@ -377,25 +377,8 @@ public class UserProfileViewModel : ViewModelBase
             }
 
             var uid = _appService.CurrentUserId!;
-            var cachePath = Path.Combine(FileSystem.CacheDirectory, $"avatar_local_{uid}.jpg");
-            await using (var fs = File.Create(cachePath))
-            {
-                await stream.CopyToAsync(fs).ConfigureAwait(false);
-            }
-
-            string fullPickPath;
-            try
-            {
-                fullPickPath = Path.GetFullPath(cachePath);
-            }
-            catch
-            {
-                fullPickPath = cachePath;
-            }
-
-            UserAvatarLocalStore.SetPendingLocalAvatarPath(fullPickPath);
-
-            await _firebaseSync.PatchUserFieldsAsync(new Dictionary<string, object?> { ["AvatarUrl"] = null })
+            var fullPickPath = await UserAvatarLocalStore
+                .SaveLocalAvatarAsync(uid, stream, CancellationToken.None)
                 .ConfigureAwait(false);
 
             await MainThread.InvokeOnMainThreadAsync(() => ProfileAvatarSource = ImageSource.FromFile(fullPickPath))

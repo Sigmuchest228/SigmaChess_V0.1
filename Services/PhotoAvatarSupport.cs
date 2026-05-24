@@ -185,68 +185,104 @@ public static class PhotoMediaService
 
 #endregion
 
-#region Локальный pending-аватар (Preferences)
+#region Локальный аватар на устройстве (Preferences + AppData)
 
 public static class UserAvatarLocalStore
 {
-    internal const string PendingLocalAvatarPathKey = "AvatarPendingLocalPath";
+    private static string KeyForUser(string userId) => $"AvatarLocalPath_{userId}";
 
-    public static void SetPendingLocalAvatarPath(string absolutePath) =>
-        Preferences.Set(PendingLocalAvatarPathKey, absolutePath);
+    public static void SetLocalAvatarPath(string userId, string absolutePath) =>
+        Preferences.Set(KeyForUser(userId), absolutePath);
 
-    public static void ClearPendingLocalAvatarPath() =>
-        Preferences.Remove(PendingLocalAvatarPathKey);
+    public static string? GetLocalAvatarPath(string? userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return null;
+        }
 
-    public static string? GetPendingLocalAvatarPath() =>
-        Preferences.Get(PendingLocalAvatarPathKey, string.Empty)?.Trim();
+        var path = Preferences.Get(KeyForUser(userId), string.Empty)?.Trim();
+        return string.IsNullOrWhiteSpace(path) ? null : path;
+    }
+
+    public static void ClearLocalAvatarPath(string userId) =>
+        Preferences.Remove(KeyForUser(userId));
+
+    public static async Task<string> SaveLocalAvatarAsync(string userId, Stream photoStream,
+        CancellationToken cancellationToken = default)
+    {
+        var avatarsDir = Path.Combine(FileSystem.AppDataDirectory, "avatars");
+        Directory.CreateDirectory(avatarsDir);
+
+        var fileName = $"avatar_{userId}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.jpg";
+        var savePath = Path.Combine(avatarsDir, fileName);
+
+        await using (var fs = File.Create(savePath))
+        {
+            await photoStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+        }
+
+        string fullPath;
+        try
+        {
+            fullPath = Path.GetFullPath(savePath);
+        }
+        catch
+        {
+            fullPath = savePath;
+        }
+
+        DeleteStoredFileIfExists(GetLocalAvatarPath(userId));
+        SetLocalAvatarPath(userId, fullPath);
+        return fullPath;
+    }
+
+    private static void DeleteStoredFileIfExists(string? absolutePath)
+    {
+        if (string.IsNullOrWhiteSpace(absolutePath))
+        {
+            return;
+        }
+
+        try
+        {
+            var fp = Path.GetFullPath(absolutePath.Trim());
+            if (File.Exists(fp))
+            {
+                File.Delete(fp);
+            }
+        }
+        catch
+        {
+
+        }
+    }
 }
 
 #endregion
 
-#region Превью аватара (pending → URL → дефолт)
+#region Превью аватара (локальный файл → дефолт)
 
 public static class UserAvatarPreview
 {
-
-    public static async Task<ImageSource> LoadAsync(string? userId, string? avatarUrl,
-        CancellationToken cancellationToken, bool allowLocalPending = true)
+    public static Task<ImageSource> LoadAsync(string? userId,
+        CancellationToken cancellationToken, bool preferLocalStore = true)
     {
-        if (allowLocalPending)
+        if (preferLocalStore && !string.IsNullOrWhiteSpace(userId))
         {
-            var pendingRaw = UserAvatarLocalStore.GetPendingLocalAvatarPath();
-            if (!string.IsNullOrWhiteSpace(pendingRaw))
+            var localPath = UserAvatarLocalStore.GetLocalAvatarPath(userId);
+            if (!string.IsNullOrWhiteSpace(localPath))
             {
-                if (TryNormalizeExistingFilePath(pendingRaw, out var pendNorm))
+                if (TryNormalizeExistingFilePath(localPath, out var normalized))
                 {
-                    return ImageSource.FromFile(pendNorm);
+                    return Task.FromResult(ImageSource.FromFile(normalized));
                 }
 
-                UserAvatarLocalStore.ClearPendingLocalAvatarPath();
+                UserAvatarLocalStore.ClearLocalAvatarPath(userId);
             }
         }
 
-        if (string.IsNullOrWhiteSpace(avatarUrl))
-        {
-            return ImageSource.FromFile("defaultsigma.jpg");
-        }
-
-        var uid = userId ?? "anon";
-        var cachePath = Path.Combine(FileSystem.CacheDirectory, $"avatar_{uid}.jpg");
-
-        try
-        {
-            using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(1) };
-            await using var remote =
-                await client.GetStreamAsync(avatarUrl, cancellationToken).ConfigureAwait(false);
-            await using var fs = File.Create(cachePath);
-            await remote.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
-
-            return ImageSource.FromFile(cachePath);
-        }
-        catch
-        {
-            return ImageSource.FromFile("defaultsigma.jpg");
-        }
+        return Task.FromResult(ImageSource.FromFile("defaultsigma.jpg"));
     }
 
     private static bool TryNormalizeExistingFilePath(string absolutePath, out string normalizedFullPath)

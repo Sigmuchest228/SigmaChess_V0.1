@@ -131,7 +131,7 @@ public class RespectsPageViewModel : ViewModelBase
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var avatar = await UserAvatarPreview
-                    .LoadAsync(s.Uid, s.AvatarUrl, cancellationToken, allowLocalPending: false).ConfigureAwait(false);
+                    .LoadAsync(s.Uid, cancellationToken, preferLocalStore: true).ConfigureAwait(false);
                 var uidLocal = s.Uid;
                 var row = new RespectRowViewModel(
                     s.Uid,
@@ -200,7 +200,7 @@ public class RespectsPageViewModel : ViewModelBase
                     !isRespected && !isSelf,
                     () => OpenProfileAsync(uidLocal));
                 row.Avatar = await UserAvatarPreview
-                    .LoadAsync(s.Uid, s.AvatarUrl, cancellationToken, allowLocalPending: false).ConfigureAwait(false);
+                    .LoadAsync(s.Uid, cancellationToken, preferLocalStore: true).ConfigureAwait(false);
                 rows.Add(row);
             }
 

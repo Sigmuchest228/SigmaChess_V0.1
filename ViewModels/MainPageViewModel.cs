@@ -1,5 +1,4 @@
 using System.Windows.Input;
-using SigmaChess.Models;
 using SigmaChess.Services;
 using SigmaChess.Views;
 
@@ -153,24 +152,22 @@ public class MainPageViewModel : ViewModelBase
             return;
         }
 
-        User? profile = null;
         try
         {
             await _firebaseSync.EnsureUserAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            profile = await _firebaseSync.GetUserAsync(cancellationToken).ConfigureAwait(false);
         }
         catch
         {
 
         }
 
-        await RefreshAvatarSourceAsync(profile?.AvatarUrl, cancellationToken).ConfigureAwait(false);
+        await RefreshAvatarSourceAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task RefreshAvatarSourceAsync(string? avatarUrl, CancellationToken cancellationToken)
+    private async Task RefreshAvatarSourceAsync(CancellationToken cancellationToken)
     {
         var src =
-            await UserAvatarPreview.LoadAsync(_appService.CurrentUserId, avatarUrl, cancellationToken)
+            await UserAvatarPreview.LoadAsync(_appService.CurrentUserId, cancellationToken)
                 .ConfigureAwait(false);
         await MainThread.InvokeOnMainThreadAsync(() => ProfileAvatarSource = src).WaitAsync(cancellationToken)
             .ConfigureAwait(false);

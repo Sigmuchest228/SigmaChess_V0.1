@@ -21,20 +21,6 @@ public class GameController
         ClearSelection();
     }
 
-    public bool TryLoadFromFen(string fen)
-    {
-        var loaded = Game.TryFromFen(fen);
-        if (loaded is null)
-        {
-            return false;
-        }
-
-        _game = loaded;
-        _lastMove = null;
-        ClearSelection();
-        return true;
-    }
-
     public Board GetBoard() => _game.Board;
 
     public IReadOnlyList<Move> GetPlayedMoves() => _game.History;
