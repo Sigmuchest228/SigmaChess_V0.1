@@ -13,12 +13,21 @@ using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
 
+// Главная ViewModel экрана игры (страница GamePage). Связывает движок (через
+// GameController) с интерфейсом: держит 64 клетки доски (Cells), список ходов
+// (MoveRows), часы каждой стороны, настройки (автопереворот доски, авто-ферзь,
+// подсветка последнего хода), режим раскладки и сохранение завершённой партии в
+// Firebase. Реагирует на тапы по клеткам, ведёт перемотку ходов и показывает попап
+// окончания игры. Сами правила шахмат тут не реализованы — за ними идём в движок.
 public class GameViewModel : ViewModelBase
 {
+    // Зависимости: контроллер движка, сервис расчёта размеров доски, общий сервис
+    // приложения (пользователь и т.п.) и репозиторий синхронизации с Firebase.
     private readonly global::SigmaChess.Engine.GameController _controller;
     private readonly BoardLayoutService _layoutService;
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
+    // Ходы текущей партии в виде для сохранения в облако и секундомер времени на ход.
     private readonly List<SavedMove> _moveHistory = [];
     private readonly Stopwatch _moveStopwatch = new();
     private bool _gameSaved;
@@ -62,33 +71,44 @@ public class GameViewModel : ViewModelBase
 
     private const double CoordStrip = 28;
 
+    // Коллекция из 64 клеток доски, к которой привязан интерфейс.
     public ObservableCollection<BoardCellViewModel> Cells { get; } = [];
 
+    // Строки таблицы ходов (по паре белые/чёрные в строке).
     public ObservableCollection<MoveHistoryRow> MoveRows { get; } = [];
 
+    // Команда тапа по клетке доски (доступна, только когда игра не заблокирована).
     public Command<BoardCellViewModel> CellTappedCommand { get; }
 
+    // Команда «назад в меню».
     public ICommand BackToMenuCommand { get; }
 
+    // Команды перемотки на ход назад/вперёд при просмотре партии.
     public Command StepBackwardCommand { get; }
 
     public Command StepForwardCommand { get; }
 
+    // Подпись «чей ход» для интерфейса.
     public string CurrentTurnText =>
         _controller.GetCurrentTurn() == PieceColor.White ? "White to move" : "Black to move";
 
+    // Короткий статус (например «Check») и текст результата партии.
     public string GameStatusText => _gameStatusText;
 
     public string GameResultText => _gameResultText;
 
+    // Текст часов белых и чёрных («—» если без лимита времени).
     public string WhiteClockText { get; private set; } = "—";
 
     public string BlackClockText { get; private set; } = "—";
 
+    // Можно ли перематывать назад/вперёд (зависит от позиции в истории ходов).
     public bool CanStepBackward => _replayPliesApplied > 0;
 
     public bool CanStepForward => _replayPliesApplied < _controller.GetPlayedMoves().Count;
 
+    // Размер доски в пикселях. При изменении пересчитывает зависимые размеры (сетка,
+    // шрифт фигур, шрифт координат).
     public double BoardExtent
     {
         get => _boardExtent;
@@ -107,12 +127,15 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Производные размеры для интерфейса: общий размер сетки с полоской координат,
+    // размер шрифта фигур и размер шрифта подписей координат.
     public double BoardGridSize => BoardExtent + CoordStrip;
 
     public double PieceFontSize => Math.Clamp(BoardExtent / 8.0 * 0.62, 14, 44);
 
     public double CoordFontSize => Math.Clamp(BoardExtent * 0.045, 10, 15);
 
+    // Настройка: автоматически переворачивать доску к стороне, чей ход.
     public bool AutoFlipEnabled
     {
         get => _autoFlipEnabled;
@@ -128,6 +151,8 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Настройка: подсвечивать клетки последнего сделанного хода. При смене
+    // перерисовывает доску.
     public bool HighlightLastMoveEnabled
     {
         get => _highlightLastMoveEnabled;
@@ -144,6 +169,7 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Настройка: при превращении пешки автоматически ставить ферзя, не спрашивая.
     public bool AutoQueenEnabled
     {
         get => _autoQueenEnabled;
@@ -159,6 +185,7 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Перевёрнута ли сейчас доска (чёрными вниз). Меняется автопереворотом.
     public bool IsBoardFlipped
     {
         get => _isBoardFlipped;
@@ -174,6 +201,8 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Режим раскладки (обычный или «лицом к лицу»). При смене обновляет производные
+    // флаги и пересчитывает размер доски.
     public GameLayoutMode LayoutMode
     {
         get => _layoutMode;
@@ -192,10 +221,13 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Удобные флаги текущего режима раскладки для привязки в интерфейсе.
     public bool IsFaceToFaceLayout => _layoutMode == GameLayoutMode.FaceToFace;
 
     public bool IsCasualLayout => _layoutMode == GameLayoutMode.Casual;
 
+    // Конструктор: получает зависимости, создаёт команды (тап по клетке, в меню,
+    // перемотка) и подписывается на изменение размеров экрана.
     public GameViewModel(
         global::SigmaChess.Engine.GameController controller,
         BoardLayoutService layoutService,
@@ -217,6 +249,9 @@ public class GameViewModel : ViewModelBase
         DeviceDisplay.MainDisplayInfoChanged += OnDisplayInfoChanged;
     }
 
+    // Однократная инициализация экрана: считает размер доски, создаёт клетки, и если
+    // партия уже идёт (есть ходы) — восстанавливает таблицу ходов и часы. Повторные
+    // вызовы только обновляют размер доски.
     public Task EnsureInitializedAsync()
     {
         if (_isInitialized)
@@ -245,6 +280,8 @@ public class GameViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
+    // Один раз подписывается на событие навигации Shell, чтобы поймать уход с экрана
+    // игры на главный экран и корректно сбросить партию.
     private void TryRegisterShellHomeNavigationHandler()
     {
         if (_shellHomeNavRegistered || Shell.Current is null)
@@ -256,6 +293,8 @@ public class GameViewModel : ViewModelBase
         _shellHomeNavRegistered = true;
     }
 
+    // Обработчик навигации: если ушли именно с GamePage на MainPage — останавливает
+    // часы и сбрасывает состояние партии (в главном потоке).
     private void OnShellNavigatedForHomeFromGame(object? sender, ShellNavigatedEventArgs e)
     {
         var prev = e.Previous?.Location?.OriginalString ?? string.Empty;
@@ -278,9 +317,13 @@ public class GameViewModel : ViewModelBase
         });
     }
 
+    // Нужно ли при открытии экрана предложить настроить время: да, если партия ещё не
+    // начата и попап настройки ещё не показывали.
     public bool ShouldOfferTimeSetupOnAppear() =>
         _controller.GetPlayedMoves().Count == 0 && NeedsInitialTimePopup;
 
+    // Полный сброс состояния при возврате на главный экран: новая партия, обычная
+    // раскладка, время по умолчанию (без лимита, 5 минут), обновление интерфейса.
     private void ResetGameStateWhenNavigatingHome()
     {
         InternalResetGameState();
@@ -297,6 +340,8 @@ public class GameViewModel : ViewModelBase
         StepForwardCommand.ChangeCanExecute();
     }
 
+    // Сброс при выходе из аккаунта: останавливает часы и приводит партию и настройки
+    // к стартовому состоянию (чтобы новый пользователь не увидел чужую партию).
     public void ResetSessionForLogout()
     {
         StopClockTimer();
@@ -314,6 +359,8 @@ public class GameViewModel : ViewModelBase
         StepForwardCommand.ChangeCanExecute();
     }
 
+    // Применяет выбор из диалога новой игры: лимит времени, минуты сторон (с
+    // ограничением 1..180), режим раскладки; затем сбрасывает и показывает часы.
     public void ApplyTimeControl(NewGameSetupResult result)
     {
         _unlimitedTime = result.Unlimited;
@@ -324,6 +371,8 @@ public class GameViewModel : ViewModelBase
         NotifyClocks();
     }
 
+    // Старт новой партии после диалога настройки: сброс состояния, прячет попап
+    // настройки, перерисовывает доску и запускает часы.
     public void StartNewGameAfterSetup()
     {
         InternalResetGameState();
@@ -333,6 +382,9 @@ public class GameViewModel : ViewModelBase
         OnPropertyChanged(nameof(CurrentTurnText));
     }
 
+    // Внутренний сброс именно партии: новая игра в движке, доска не перевёрнута,
+    // обнуление облачного трекинга, перемотки, флагов таймаута и попапа, очистка
+    // таблицы ходов и обновление статуса/команд.
     private void InternalResetGameState()
     {
         _controller.InitializeGame();
@@ -347,6 +399,8 @@ public class GameViewModel : ViewModelBase
         NotifyReplayCommands();
     }
 
+    // Сбрасывает часы по текущим настройкам времени: либо «—» без лимита, либо
+    // заданные минуты для белых и чёрных. Обновляет тексты часов в интерфейсе.
     private void ResetClocksFromTimeControl()
     {
         if (_unlimitedTime)
@@ -368,6 +422,7 @@ public class GameViewModel : ViewModelBase
         OnPropertyChanged(nameof(BlackClockText));
     }
 
+    // Форматирует время в строку «минуты:секунды» (отрицательное считает за ноль).
     private static string FormatClock(TimeSpan t)
     {
         if (t < TimeSpan.Zero)
@@ -379,12 +434,15 @@ public class GameViewModel : ViewModelBase
         return $"{total}:{t.Seconds:D2}";
     }
 
+    // Уведомляет интерфейс, что тексты часов могли измениться.
     private void NotifyClocks()
     {
         OnPropertyChanged(nameof(WhiteClockText));
         OnPropertyChanged(nameof(BlackClockText));
     }
 
+    // (Пере)запускает таймер часов для текущей партии. Ничего не делает, если время
+    // без лимита или партия уже завершена. Тикает каждые 300 мс.
     private void RestartClockForCurrentGame()
     {
         StopClockTimer();
@@ -406,6 +464,7 @@ public class GameViewModel : ViewModelBase
         _clockTimer.Start();
     }
 
+    // Останавливает и убирает таймер часов (отписывается от тика).
     private void StopClockTimer()
     {
         if (_clockTimer is not null)
@@ -416,6 +475,11 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Тик часов (каждые 300 мс). Пропускает тик при отсутствии лимита, в режиме
+    // перемотки, после таймаута или конца партии. Иначе вычитает прошедшее время у
+    // стороны, чей ход. Если время кончилось — фиксирует поражение по времени,
+    // останавливает часы, сохраняет партию и показывает попап. Скачок > 2 c (телефон
+    // «засыпал») считает за 0.5 c, чтобы не списать лишнего.
     private void OnClockTimerTick(object? sender, EventArgs e)
     {
         if (_unlimitedTime
@@ -476,17 +540,21 @@ public class GameViewModel : ViewModelBase
         OnPropertyChanged(nameof(BlackClockText));
     }
 
+    // Вызывается, когда экран игры показан: подписывается на навигацию и запускает часы.
     public void OnGamePageAppeared()
     {
         TryRegisterShellHomeNavigationHandler();
         RestartClockForCurrentGame();
     }
 
+    // Вызывается, когда экран игры скрыт: останавливает часы.
     public void OnGamePageDisappeared()
     {
         StopClockTimer();
     }
 
+    // Завершилась ли партия по правилам движка (мат/пат/любая ничья). Таймаут сюда не
+    // входит — он считается отдельно.
     private static bool IsEngineTerminal(GameResult r) =>
         r is GameResult.Checkmate
             or GameResult.Stalemate
@@ -494,11 +562,14 @@ public class GameViewModel : ViewModelBase
             or GameResult.DrawRepetition
             or GameResult.DrawInsufficientMaterial;
 
+    // Заблокирована ли игра для ходов: при просмотре истории (перемотке), после
+    // таймаута или после конца партии.
     private bool IsPlayLocked() =>
         _controller.GetPlayedMoves().Count != _replayPliesApplied
         || _timeoutLoser is not null
         || IsEngineTerminal(_controller.GetGameResult());
 
+    // Начинает новую партию с текущими настройками времени: сброс, перерисовка, часы.
     public void StartNewGame()
     {
         InternalResetGameState();
@@ -506,6 +577,8 @@ public class GameViewModel : ViewModelBase
         RestartClockForCurrentGame();
     }
 
+    // Сбрасывает данные для сохранения партии в облако: очищает ходы, снимает флаг
+    // «сохранено», перезапускает секундомер времени на ход.
     private void ResetCloudGameTracking()
     {
         _moveHistory.Clear();
@@ -513,6 +586,8 @@ public class GameViewModel : ViewModelBase
         _moveStopwatch.Restart();
     }
 
+    // Переход на главный экран: останавливает часы, открывает MainPage и сбрасывает
+    // состояние партии. Ошибки навигации показывает попапом. Всё в главном потоке.
     public async Task NavigateToMainPageAsync()
     {
         try
@@ -547,6 +622,8 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Возврат в меню с подтверждением: спрашивает «выйти?», и только при согласии
+    // уходит на главный экран (чтобы случайно не потерять партию).
     private async Task GoBackToMenuAsync()
     {
         var goHome = await ConfirmPopup.ShowAsync(
@@ -563,8 +640,11 @@ public class GameViewModel : ViewModelBase
         await NavigateToMainPageAsync();
     }
 
+    // Публичная обёртка для запроса «выйти в меню?» (зовётся из интерфейса).
     public Task ConfirmLeaveGameAndGoHomeAsync() => GoBackToMenuAsync();
 
+    // Показывает диалог настройки новой игры (время/раскладка), и если игрок подтвердил
+    // — применяет настройки и начинает новую партию.
     public async Task StartNewGameWithTimeSetupAsync()
     {
         var page = Shell.Current?.CurrentPage as ContentPage
@@ -587,6 +667,8 @@ public class GameViewModel : ViewModelBase
         StartNewGame();
     }
 
+    // Перемотка на ход назад: уменьшает число показанных полуходов, останавливает
+    // часы (мы смотрим прошлое) и перерисовывает доску.
     private void StepBackward()
     {
         if (_replayPliesApplied <= 0)
@@ -600,6 +682,8 @@ public class GameViewModel : ViewModelBase
         NotifyReplayCommands();
     }
 
+    // Перемотка на ход вперёд: увеличивает число показанных полуходов; если догнали
+    // текущую позицию — снова запускает часы.
     private void StepForward()
     {
         var n = _controller.GetPlayedMoves().Count;
@@ -617,6 +701,7 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Сообщает интерфейсу, что доступность кнопок перемотки и тапа могла измениться.
     private void NotifyReplayCommands()
     {
         OnPropertyChanged(nameof(CanStepBackward));
@@ -626,11 +711,14 @@ public class GameViewModel : ViewModelBase
         CellTappedCommand.ChangeCanExecute();
     }
 
+    // Реакция на изменение параметров экрана (поворот/размер): пересчитать размер доски.
     private void OnDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
     {
         UpdateBoardExtent();
     }
 
+    // Пересчитывает размер доски через сервис раскладки с учётом текущего режима
+    // (обычный или «лицом к лицу»).
     private void UpdateBoardExtent()
     {
         BoardExtent = _layoutService.CalculateBoardExtentForGamePage(
@@ -640,6 +728,7 @@ public class GameViewModel : ViewModelBase
                 : GamePageBoardExtentMode.CasualBottomMoveStrip);
     }
 
+    // Создаёт 64 клетки доски один раз (если их ещё нет).
     private void EnsureCellsCreated()
     {
         if (Cells.Count == 64)
@@ -657,6 +746,8 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Перестраивает таблицу ходов из истории партии: берёт ходы парами (белые/чёрные),
+    // переводит каждый в короткую нотацию (AlgebraicNotation) и добавляет строку.
     private void RebuildMoveRowsFromHistory()
     {
         MoveRows.Clear();
@@ -674,6 +765,12 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Главный обработчик тапа по клетке. Если игра не заблокирована: проверяет, не
+    // завершает ли тап ход выбранной фигуры. Если нет — это выбор фигуры (подсветить
+    // ходы). Если да — при превращении пешки спрашивает фигуру (или ставит ферзя при
+    // авто-ферзе), выполняет ход через движок, пишет ход для облака, перестраивает
+    // таблицу ходов, при необходимости переворачивает доску, обновляет состояние и
+    // проверяет конец партии (сохранение и попап).
     public async Task OnCellTappedAsync(BoardCellViewModel? cell)
     {
         if (cell is null || IsPlayLocked())
@@ -746,9 +843,12 @@ public class GameViewModel : ViewModelBase
         await TryShowGameOverPopupIfNeededAsync();
     }
 
+    // Закончилась ли партия в любом смысле: по времени (таймаут) или по правилам движка.
     private bool IsOverallTerminal() =>
         _timeoutLoser is not null || IsEngineTerminal(_controller.GetGameResult());
 
+    // Текст для попапа окончания: при таймауте — текст таймаута, иначе — текст
+    // результата партии.
     private string GetGameOverSummaryText()
     {
         if (!string.IsNullOrEmpty(_timeoutResultText))
@@ -759,6 +859,9 @@ public class GameViewModel : ViewModelBase
         return _gameResultText;
     }
 
+    // Показывает попап окончания партии один раз, если партия завершилась и есть текст
+    // результата. Работает в главном потоке; при сбоях снимает флаг показа, чтобы можно
+    // было попробовать снова.
     private async Task TryShowGameOverPopupIfNeededAsync()
     {
         if (_gameOverPopupShown || !IsOverallTerminal())
@@ -803,6 +906,9 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Сохраняет завершённую партию в Firebase один раз. Определяет победителя и причину
+    // окончания (таймаут или результат движка), пропускает, если партия не закончена,
+    // пользователь не вошёл или ходов нет. Ошибки сохранения молча проглатываются.
     private async Task TrySaveCompletedGameIfTerminalAsync()
     {
         if (_gameSaved)
@@ -856,6 +962,10 @@ public class GameViewModel : ViewModelBase
         }
     }
 
+    // Перерисовывает всю доску: обновляет фигуру, подсветку и состояние каждой из 64
+    // клеток. Работает в двух режимах: «живая» позиция (показываем выбор фигуры,
+    // доступные ходы, последний ход) или «перемотка» (показываем доску из прошлого без
+    // интерактива). В конце обновляет подписи статуса и доступность команд.
     public void RefreshBoard()
     {
         var history = _controller.GetPlayedMoves();
@@ -929,12 +1039,17 @@ public class GameViewModel : ViewModelBase
         CellTappedCommand.ChangeCanExecute();
     }
 
+    // Помощник: входит ли клетка (row, col) в последний ход (его начало или конец) —
+    // для подсветки.
     private static bool IsLastMoveSquare(Move move, int row, int col)
     {
         var pos = new Position(row, col);
         return move.From == pos || move.To == pos;
     }
 
+    // Обновляет подписи статуса и результата. При таймауте показывает текст таймаута.
+    // Иначе по результату движка формирует текст: кто победил (мат), вид ничьей, или
+    // «Check» для шаха. Уведомляет интерфейс.
     private void RefreshStatusLabels()
     {
         if (!string.IsNullOrEmpty(_timeoutResultText))

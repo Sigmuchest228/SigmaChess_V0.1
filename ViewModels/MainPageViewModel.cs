@@ -4,11 +4,17 @@ using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
 
+// ViewModel главного экрана (страница MainPage). Отсюда игрок открывает игру, список
+// «уважения», профиль, сыгранные партии, а гость — вход/регистрацию. Знает, вошёл ли
+// пользователь (IsGuest), показывает аватар или кнопки гостя и аккуратно обрабатывает
+// навигацию (включая запрет разделов для гостя). Использует AppService (пользователь)
+// и FirebaseSyncRepository (профиль, respect).
 public class MainPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
 
+    // Маршруты, которые являются «корнями» Shell (к ним переходят с префиксом //).
     private static readonly HashSet<string> ShellRootRoutes =
     [
         nameof(AuthPage),
@@ -17,6 +23,7 @@ public class MainPageViewModel : ViewModelBase
         nameof(RespectsPage),
     ];
 
+    // Разделы, недоступные гостю — при попытке открыть предложим войти.
     private static readonly HashSet<string> GuestRestrictedRoutes =
     [
         nameof(RespectsPage),
@@ -31,11 +38,15 @@ public class MainPageViewModel : ViewModelBase
 
     private bool _isGuest = true;
 
+    // Конструктор без параметров (для интерфейса): берёт сервисы из общего AppService.
     public MainPageViewModel()
         : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
     {
     }
 
+    // Основной конструктор: сохраняет сервисы, создаёт команды открытия разделов
+    // (вход, регистрация, профиль, игра на одном устройстве, respect, сыгранные партии)
+    // и сразу определяет, гость это или вошедший пользователь.
     public MainPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
         _appService = appService;
@@ -52,8 +63,11 @@ public class MainPageViewModel : ViewModelBase
         RefreshAuthState();
     }
 
+    // Показывать ли ссылку на сыгранные партии (только для вошедших).
     public bool ShowPlayedGamesLink => !IsGuest;
 
+    // Гость ли текущий пользователь (не выполнен вход). При смене обновляет все
+    // зависимые от этого элементы интерфейса (аватар, кнопки гостя, ссылки).
     public bool IsGuest
     {
         get => _isGuest;
@@ -72,10 +86,12 @@ public class MainPageViewModel : ViewModelBase
         }
     }
 
+    // Показывать аватар (вошедшему) или кнопки входа/регистрации (гостю).
     public bool ShowProfileAvatar => !IsGuest;
 
     public bool ShowGuestAuthButtons => IsGuest;
 
+    // Картинка аватара профиля для главного экрана.
     public ImageSource? ProfileAvatarSource
     {
         get => _profileAvatarSource;
@@ -95,8 +111,10 @@ public class MainPageViewModel : ViewModelBase
 
     private string _respectsSummaryText = string.Empty;
 
+    // Заголовок игрового раздела.
     public string GameSectionTitle => "SIGMA CHESS";
 
+    // Краткий текст-сводка про respect-лист (сколько игроков / приглашение войти).
     public string RespectsSummaryText
     {
         get => _respectsSummaryText;
@@ -112,8 +130,11 @@ public class MainPageViewModel : ViewModelBase
         }
     }
 
+    // Команда открытия профиля пользователя.
     public ICommand OpenProfileCommand { get; }
 
+    // Обновляет текст-сводку respect-листа: для гостя — приглашение войти, иначе тянет
+    // количество из Firebase и формирует фразу. Обновление текста — в главном потоке.
     public async Task RefreshRespectsSummaryAsync(CancellationToken cancellationToken = default)
     {
         if (IsGuest)
@@ -140,11 +161,14 @@ public class MainPageViewModel : ViewModelBase
         }
     }
 
+    // Определяет, гость ли сейчас, по типу текущего Shell (гостевой или авторизованный).
     public void RefreshAuthState()
     {
         IsGuest = Shell.Current is AppShellNotAuth;
     }
 
+    // Если пользователь вошёл — создаёт/обновляет его профиль в Firebase и обновляет
+    // аватар. Ошибки синхронизации молча игнорируются.
     public async Task SyncFirebaseProfileIfNeededAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_appService.CurrentUserId))
@@ -164,6 +188,8 @@ public class MainPageViewModel : ViewModelBase
         await RefreshAvatarSourceAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    // Загружает аватар текущего пользователя и выставляет его в свойство (в главном
+    // потоке).
     private async Task RefreshAvatarSourceAsync(CancellationToken cancellationToken)
     {
         var src =
@@ -173,6 +199,9 @@ public class MainPageViewModel : ViewModelBase
             .ConfigureAwait(false);
     }
 
+    // Общая навигация по разделам. Особые случаи: переход на главный с префиксом //;
+    // для гостя на закрытый раздел — попап с предложением войти; иначе нормализует
+    // маршрут и переходит, показывая попап при ошибке.
     private async Task NavigateAsync(string route)
     {
         if (Shell.Current is null)
@@ -219,6 +248,8 @@ public class MainPageViewModel : ViewModelBase
         }
     }
 
+    // Достаёт «базовое» имя маршрута без префикса // и без параметров после ? (например
+    // из «AuthPage?mode=register» получится «AuthPage»).
     private static string GetRouteBase(string route)
     {
         var s = route.Trim();
@@ -230,6 +261,8 @@ public class MainPageViewModel : ViewModelBase
         return s.Split('?', 2)[0].TrimStart('/');
     }
 
+    // Приводит маршрут к виду для Shell: корневым маршрутам добавляет префикс //,
+    // остальные оставляет как есть (переход в стек поверх).
     private static string NormalizeShellRoute(string route)
     {
         if (route.StartsWith("//", StringComparison.Ordinal))
@@ -246,6 +279,8 @@ public class MainPageViewModel : ViewModelBase
         return route;
     }
 
+    // Команды кнопок главного экрана: вход, регистрация, игра на одном устройстве,
+    // список respect, сыгранные партии.
     public ICommand OpenLoginCommand { get; }
 
     public ICommand OpenSignupCommand { get; }

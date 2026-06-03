@@ -6,6 +6,11 @@ using SigmaChess.Views;
 
 namespace SigmaChess.ViewModels;
 
+// ViewModel экрана профиля (страница UserProfilePage). Показывает данные пользователя:
+// аватар, имя, дату регистрации, сколько «уважения» получено и последние сыгранные
+// партии. Может показывать как свой профиль (тогда доступна смена аватара и настройки),
+// так и чужой (id приходит через навигацию). Данные берёт из Firebase, фото — через
+// IPhotoSourcePicker.
 public class UserProfileViewModel : ViewModelBase
 {
     private readonly AppService _appService;
@@ -24,6 +29,7 @@ public class UserProfileViewModel : ViewModelBase
 
     private string _respectFromSigmasText = string.Empty;
 
+    // Конструктор без параметров (для интерфейса): берёт сервисы из общего AppService.
     public UserProfileViewModel()
         : this(
             AppService.GetInstance(),
@@ -32,6 +38,8 @@ public class UserProfileViewModel : ViewModelBase
     {
     }
 
+    // Основной конструктор: сохраняет сервисы, создаёт коллекции (статистика, партии) и
+    // команды (настройки, назад, сменить аватар, все партии, открыть реплей).
     public UserProfileViewModel(
         AppService appService,
         FirebaseSyncRepository firebaseSync,
@@ -79,6 +87,9 @@ public class UserProfileViewModel : ViewModelBase
             });
     }
 
+    // Принимает параметры навигации: если передан UserId — показываем профиль этого
+    // пользователя (иначе свой). Обновляет зависимые свойства (свой ли профиль,
+    // заголовок).
     public void ApplyNavigationQuery(IDictionary<string, object> query)
     {
         if (!query.TryGetValue("UserId", out var raw))
@@ -97,6 +108,7 @@ public class UserProfileViewModel : ViewModelBase
         OnPropertyChanged(nameof(PageTitle));
     }
 
+    // Текст «получил уважение от N сигм».
     public string RespectFromSigmasText
     {
         get => _respectFromSigmasText;
@@ -112,30 +124,39 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Свой ли это профиль: да, если id для просмотра не задан или совпадает с текущим
+    // пользователем. От этого зависят заголовок и доступность смены аватара.
     public bool IsOwnProfile =>
         string.IsNullOrWhiteSpace(_viewingUserId)
         || (_appService.CurrentUserId is not null
             && string.Equals(_viewingUserId, _appService.CurrentUserId, StringComparison.Ordinal));
 
+    // Заголовок экрана: «Profile» для своего, «Player» для чужого.
     public string PageTitle => IsOwnProfile ? "Profile" : "Player";
 
+    // Коллекции для интерфейса: строки статистики и последние сыгранные партии.
     public ObservableCollection<ProfileStatRowViewModel> ProfileStats { get; }
 
     public ObservableCollection<PlayedGameRowViewModel> PlayedGames { get; }
 
+    // Id профиля, который реально показываем (чужой или текущий пользователь).
     public string? ActiveProfileUid =>
         string.IsNullOrWhiteSpace(_viewingUserId) ? _appService.CurrentUserId : _viewingUserId;
 
+    // Флаги для блока партий: есть ли партии, показывать ли «пусто», показывать ли
+    // ссылку «все партии». Учитывают, загрузились ли партии (_playedGamesLoaded).
     public bool HasPlayedGames => PlayedGames.Count > 0;
 
     public bool ShowPlayedGamesEmpty => _playedGamesLoaded && PlayedGames.Count == 0;
 
     public bool ShowSeeAllPlayedGames => _playedGamesLoaded && HasPlayedGames;
 
+    // Команды: открыть полный список партий и открыть реплей выбранной партии.
     public ICommand OpenFullPlayedGamesCommand { get; }
 
     public ICommand OpenReplayCommand { get; }
 
+    // Картинка аватара профиля.
     public ImageSource? ProfileAvatarSource
     {
         get => _profileAvatarSource;
@@ -151,12 +172,14 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Команды: открыть настройки, назад, сменить аватар.
     public ICommand OpenSettingsCommand { get; }
 
     public ICommand GoBackCommand { get; }
 
     public ICommand ChangeAvatarCommand { get; }
 
+    // Имя пользователя в профиле.
     public string ProfileUserName
     {
         get => _profileUserName;
@@ -172,6 +195,7 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Текст даты регистрации («участник с ...»).
     public string MemberSinceDateText
     {
         get => _memberSinceDateText;
@@ -187,6 +211,8 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Форматирует дату регистрации (хранится как Unix-время в секундах) в читаемую
+    // строку. Если даты нет или она некорректна — возвращает «—».
     private static string FormatRegisterDateForDisplay(int? registerDateUnix)
     {
         if (registerDateUnix is null or < 1)
@@ -206,6 +232,10 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Загружает данные профиля при открытии экрана. Определяет, чей профиль показывать,
+    // тянет из Firebase профиль, аватар, имя и количество полученного уважения, затем
+    // загружает раздел сыгранных партий. Если профиля нет или произошла ошибка —
+    // показывает значения по умолчанию. Обновление интерфейса — в главном потоке.
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         var profileUid = string.IsNullOrWhiteSpace(_viewingUserId)
@@ -294,6 +324,8 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Загружает раздел сыгранных партий профиля (до 25 последних) и наполняет список.
+    // При ошибке оставляет список пустым. Обновление — в главном потоке.
     private async Task LoadPlayedGamesSectionAsync(string profileUid, CancellationToken cancellationToken)
     {
         try
@@ -324,6 +356,7 @@ public class UserProfileViewModel : ViewModelBase
         }
     }
 
+    // Сообщает интерфейсу, что флаги блока сыгранных партий могли измениться.
     private void NotifyPlayedGamesUi()
     {
         OnPropertyChanged(nameof(HasPlayedGames));
@@ -331,6 +364,7 @@ public class UserProfileViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowSeeAllPlayedGames));
     }
 
+    // Открывает полный список сыгранных партий этого профиля (переход на PlayedGamesPage).
     private async Task OpenFullPlayedGamesAsync()
     {
         var uid = ActiveProfileUid;
@@ -342,6 +376,9 @@ public class UserProfileViewModel : ViewModelBase
         await Shell.Current.GoToAsync($"PlayedGamesPage?UserId={Uri.EscapeDataString(uid)}");
     }
 
+    // Смена аватара (только в своём профиле). Проверяет, что пользователь вошёл,
+    // спрашивает источник (галерея/камера), получает фото, сохраняет его локально и
+    // показывает. Ошибки выводит попапом, поток фото в конце закрывается.
     private async Task ChangeAvatarAsync()
     {
         if (!IsOwnProfile)

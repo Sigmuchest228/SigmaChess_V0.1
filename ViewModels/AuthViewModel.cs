@@ -4,6 +4,12 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
+// ViewModel экрана входа/регистрации (страница AuthPage). Одна и та же форма работает
+// в двух режимах: вход и регистрация (переключается флагом IsRegisterMode). Хранит
+// поля формы (email, имя, пароль), сообщение об ошибке и команды (гость, вход,
+// регистрация, смена режима). За сам вход/регистрацию отвечает AppService, за профиль
+// пользователя — FirebaseSyncRepository. IQueryAttributable позволяет открыть экран
+// сразу в нужном режиме через параметр навигации.
 public class AuthViewModel : ViewModelBase, IQueryAttributable
 {
     private readonly AppService _appService;
@@ -15,11 +21,14 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
     private string _confirmPassword = string.Empty;
     private string _errorMessage = string.Empty;
 
+    // Конструктор без параметров (для интерфейса): берёт сервисы из общего AppService.
     public AuthViewModel()
         : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
     {
     }
 
+    // Основной конструктор: сохраняет сервисы и создаёт команды формы (вход гостем,
+    // вход, регистрация, переключение между режимами входа и регистрации).
     public AuthViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
         _appService = appService;
@@ -31,6 +40,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         ShowRegisterModeCommand = new Command(() => IsRegisterMode = true);
     }
 
+    // Режим формы: true — регистрация, false — вход. При смене чистит ошибку, в режиме
+    // входа очищает имя пользователя и обновляет зависимые свойства (заголовок и т.д.).
     public bool IsRegisterMode
     {
         get => _isRegisterMode;
@@ -54,10 +65,12 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
+    // Удобный обратный флаг и заголовок экрана в зависимости от режима.
     public bool IsLoginMode => !IsRegisterMode;
 
     public string PageTitle => IsRegisterMode ? "Create Account" : "Login";
 
+    // Поля формы. Каждое при изменении уведомляет интерфейс.
     public string Email
     {
         get => _email;
@@ -108,12 +121,16 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
+    // Команды формы: войти гостем, войти, зарегистрироваться, показать режим входа,
+    // показать режим регистрации.
     public ICommand GuestCommand { get; }
     public ICommand LoginCommand { get; }
     public ICommand RegisterCommand { get; }
     public ICommand ShowLoginModeCommand { get; }
     public ICommand ShowRegisterModeCommand { get; }
 
+    // Принимает параметры навигации: если передан mode=register — открывает форму
+    // сразу в режиме регистрации.
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (!query.TryGetValue("mode", out var modeObj))
@@ -125,6 +142,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         IsRegisterMode = string.Equals(mode, "register", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Вход гостем (анонимно): входит, создаёт профиль при необходимости и уходит на
+    // главный экран.
     private async Task LoginAsGuestAsync()
     {
         await RunBusyAsync(async () =>
@@ -141,6 +160,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         });
     }
 
+    // Вход по email/паролю: проверяет поля, пробует войти, при успехе создаёт профиль и
+    // переключает приложение на «авторизованный» Shell. Иначе показывает ошибку.
     private async Task LoginAsync()
     {
         if (!ValidateEmailAndPassword(requireConfirmPassword: false))
@@ -162,6 +183,9 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         });
     }
 
+    // Регистрация: проверяет поля, создаёт аккаунт, затем сразу входит, создаёт профиль
+    // с выбранным именем и переключает на «авторизованный» Shell. На ошибках показывает
+    // сообщение или возвращает в режим входа.
     private async Task RegisterAsync()
     {
         if (!ValidateRegistrationFields())
@@ -193,6 +217,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         });
     }
 
+    // Помощник: выполняет работу, выставив IsBusy=true на время (для индикатора и
+    // блокировки кнопок) и гарантированно сняв его в конце.
     private async Task RunBusyAsync(Func<Task> work)
     {
         IsBusy = true;
@@ -206,6 +232,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
+    // Создаёт/обновляет профиль пользователя в Firebase (с необязательным желаемым
+    // именем). Ошибки молча игнорируются, чтобы не мешать входу.
     private async Task TryEnsureUserProfileAsync(string? preferredUserName = null)
     {
         try
@@ -218,6 +246,7 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         }
     }
 
+    // Переключает приложение на «авторизованный» Shell (главное меню после входа).
     private static Task NavigateToAuthenticatedShellAsync() =>
         MainThread.InvokeOnMainThreadAsync(() =>
         {
@@ -227,6 +256,8 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
             }
         });
 
+    // Проверяет поля регистрации: сначала email и пароль (с подтверждением), затем имя
+    // (длина 2..24 и допустимые символы). При ошибке заполняет ErrorMessage.
     private bool ValidateRegistrationFields()
     {
         if (!ValidateEmailAndPassword(requireConfirmPassword: true))
@@ -256,6 +287,9 @@ public class AuthViewModel : ViewModelBase, IQueryAttributable
         return true;
     }
 
+    // Проверяет email (есть @ и точка) и пароль (минимум 8 символов), а при
+    // requireConfirmPassword — совпадение с подтверждением. При ошибке заполняет
+    // ErrorMessage и возвращает false.
     private bool ValidateEmailAndPassword(bool requireConfirmPassword)
     {
         if (string.IsNullOrWhiteSpace(Email) || !Email.Contains('@') || !Email.Contains('.'))

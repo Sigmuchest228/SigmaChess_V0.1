@@ -4,21 +4,31 @@ using SigmaChess.Services;
 
 namespace SigmaChess.ViewModels;
 
+// ViewModel экрана «уважение» (страница RespectsPage). Показывает список игроков, кого
+// пользователь уважает, и поиск других игроков по имени. Позволяет добавлять/удалять
+// игроков из respect-листа и открывать их профили. Данные берёт из Firebase, текущего
+// пользователя — из AppService.
 public class RespectsPageViewModel : ViewModelBase
 {
     private readonly AppService _appService;
     private readonly FirebaseSyncRepository _firebaseSync;
 
+    // Текущий текст поиска, флаг «поиск уже выполняется», флаг «показывать блок
+    // результатов», и набор id уже уважаемых игроков (чтобы не предлагать добавить их).
     private string _searchQuery = string.Empty;
     private bool _searchRunning;
     private bool _showSearchOutcome;
     private HashSet<string> _respectUids = [];
 
+    // Конструктор без параметров (для интерфейса): берёт сервисы из общего AppService.
     public RespectsPageViewModel()
         : this(AppService.GetInstance(), AppService.GetInstance().FirebaseSync)
     {
     }
 
+    // Основной конструктор: сохраняет сервисы, создаёт коллекции списка и результатов
+    // поиска и команды (обновить список, искать, очистить поиск, добавить/убрать
+    // уважение).
     public RespectsPageViewModel(AppService appService, FirebaseSyncRepository firebaseSync)
     {
         _appService = appService;
@@ -41,10 +51,12 @@ public class RespectsPageViewModel : ViewModelBase
         RemoveRespectCommand = new Command<string>(async uid => await RemoveRespectAndRefreshAsync(uid));
     }
 
+    // Список уважаемых игроков и список результатов поиска.
     public ObservableCollection<RespectRowViewModel> RespectList { get; }
 
     public ObservableCollection<SearchUserRowViewModel> SearchResults { get; }
 
+    // Готовые тексты для интерфейса (заголовок, подсказки, сообщения о пустоте).
     public string Title => "Respect";
 
     public string EmptyRespectListMessage => "Your respect list is empty.";
@@ -53,6 +65,9 @@ public class RespectsPageViewModel : ViewModelBase
 
     public string NoSearchHitsMessage => "No players match that search.";
 
+    // Флаги видимости блоков: показывать ли панель результатов и сообщение «ничего не
+    // найдено», есть ли уважаемые, показывать ли «список пуст», их количество, есть ли
+    // результаты поиска.
     public bool ShowSearchPanel => _showSearchOutcome;
 
     public bool ShowNoSearchHits => _showSearchOutcome && !HasSearchResults;
@@ -65,6 +80,7 @@ public class RespectsPageViewModel : ViewModelBase
 
     public bool HasSearchResults => SearchResults.Count > 0;
 
+    // Текст в поле поиска (уведомляет интерфейс при изменении).
     public string SearchQuery
     {
         get => _searchQuery;
@@ -80,6 +96,8 @@ public class RespectsPageViewModel : ViewModelBase
         }
     }
 
+    // Команды экрана: обновить список, искать, очистить поиск, добавить/убрать
+    // уважение (по id игрока).
     public ICommand RefreshRespectsCommand { get; }
 
     public Command SearchUsersCommand { get; }
@@ -90,8 +108,10 @@ public class RespectsPageViewModel : ViewModelBase
 
     public Command<string> RemoveRespectCommand { get; }
 
+    // Точка входа при открытии экрана: загружает respect-лист.
     public Task LoadAsync(CancellationToken cancellationToken = default) => RefreshRespectsAsync(cancellationToken);
 
+    // Меняет флаг показа блока результатов поиска и уведомляет интерфейс.
     private void SetShowSearchOutcome(bool value)
     {
         if (_showSearchOutcome == value)
@@ -104,6 +124,9 @@ public class RespectsPageViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowNoSearchHits));
     }
 
+    // Загружает respect-лист текущего пользователя из Firebase: тянет сводки, грузит их
+    // аватары и строит строки списка. Если пользователь не вошёл — очищает список.
+    // Обновление коллекции — в главном потоке. IsBusy показывает индикатор загрузки.
     private async Task RefreshRespectsAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_appService.CurrentUserId))
@@ -160,6 +183,9 @@ public class RespectsPageViewModel : ViewModelBase
         }
     }
 
+    // Выполняет поиск игроков по началу имени. Защищён от повторного запуска и требует
+    // минимум 2 символа. Для каждого найденного решает, показывать ли кнопку «уважать»
+    // (не себя и ещё не в списке), грузит аватар и строит строку результата.
     private async Task ExecuteSearchAsync(CancellationToken cancellationToken = default)
     {
         if (_searchRunning)
@@ -222,6 +248,7 @@ public class RespectsPageViewModel : ViewModelBase
         }
     }
 
+    // Добавляет игрока в respect-лист и обновляет список и результаты поиска.
     private async Task AddRespectAndRefreshAsync(string? targetUid)
     {
         if (string.IsNullOrWhiteSpace(targetUid) || IsBusy)
@@ -242,6 +269,7 @@ public class RespectsPageViewModel : ViewModelBase
         }
     }
 
+    // Убирает игрока из respect-листа и обновляет список и результаты поиска.
     private async Task RemoveRespectAndRefreshAsync(string? targetUid)
     {
         if (string.IsNullOrWhiteSpace(targetUid) || IsBusy)
@@ -262,6 +290,7 @@ public class RespectsPageViewModel : ViewModelBase
         }
     }
 
+    // Открывает профиль игрока по его id (переход на UserProfilePage с параметром).
     private static async Task OpenProfileAsync(string uid)
     {
         if (Shell.Current is null || string.IsNullOrWhiteSpace(uid))

@@ -3,6 +3,8 @@ using SigmaChess.Engine;
 
 namespace SigmaChess.ViewModels;
 
+// Как подсвечивать клетку-цель хода: никак (None), как ход на пустую клетку
+// (ToEmpty) или как взятие (Capture). Влияет на цвет подсветки клетки.
 public enum MoveTargetHighlight
 {
     None,
@@ -10,6 +12,10 @@ public enum MoveTargetHighlight
     Capture
 }
 
+// ViewModel одной клетки доски (одна из 64). Хранит, какая фигура на ней стоит и в
+// каком она визуальном состоянии: выбрана, подсвечена, цель хода. Сама считает свой
+// цвет фона и символ фигуры, чтобы интерфейс просто «привязался» к этим свойствам.
+// Список из 64 таких клеток держит GameViewModel и обновляет их при каждом ходе.
 public class BoardCellViewModel : ViewModelBase
 {
     private Piece? _piece;
@@ -21,6 +27,8 @@ public class BoardCellViewModel : ViewModelBase
 
     public int Col { get; }
 
+    // Фигура на этой клетке (или null). При смене уведомляет интерфейс и обновляет
+    // символ фигуры и цвет фона.
     public Piece? Piece
     {
         get => _piece;
@@ -34,6 +42,7 @@ public class BoardCellViewModel : ViewModelBase
         }
     }
 
+    // Подсветка клетки как цели хода (пусто/ход/взятие). При смене перекрашивает фон.
     public MoveTargetHighlight MoveTarget
     {
         get => _moveTarget;
@@ -50,6 +59,7 @@ public class BoardCellViewModel : ViewModelBase
         }
     }
 
+    // Выбрана ли эта клетка игроком (с неё собираются ходить). При смене перекрашивает фон.
     public bool IsSelected
     {
         get => _isSelected;
@@ -66,6 +76,7 @@ public class BoardCellViewModel : ViewModelBase
         }
     }
 
+    // Подсвечена ли клетка (например как часть последнего хода). При смене перекрашивает фон.
     public bool IsHighlighted
     {
         get => _isHighlighted;
@@ -82,8 +93,12 @@ public class BoardCellViewModel : ViewModelBase
         }
     }
 
+    // Светлая ли это клетка доски. Вычисляется по чётности суммы координат (как
+    // чёрно-белый узор шахматной доски).
     public bool IsWhiteSquare => (Row + Col) % 2 == 0;
 
+    // Поворот символа фигуры в градусах. Нужен для режима «лицом к лицу», где фигуры
+    // одной стороны разворачивают на 180°. При смене уведомляет интерфейс.
     public double PieceGlyphRotation
     {
         get => _pieceGlyphRotation;
@@ -101,10 +116,15 @@ public class BoardCellViewModel : ViewModelBase
 
     private double _pieceGlyphRotation;
 
+    // Символ фигуры для отображения (шахматный юникод-символ) или пустая строка, если
+    // клетка пуста.
     public string PieceSymbol => GetPieceSymbol(Piece);
 
+    // Текущий цвет фона клетки. Пересчитывается в RefreshSquareBackground в зависимости
+    // от состояния (выбор/подсветка/обычный цвет).
     public Color SquareBackground { get; private set; } = Colors.Transparent;
 
+    // Конструктор: запоминает координаты клетки и сразу задаёт её базовый цвет фона.
     public BoardCellViewModel(int row, int col)
     {
         Row = row;
@@ -122,6 +142,9 @@ public class BoardCellViewModel : ViewModelBase
     private static readonly Color SelectedOnLight = Color.FromArgb("#FFE082");
     private static readonly Color SelectedOnDark = Color.FromArgb("#F0A040");
 
+    // Пересчитывает цвет фона клетки по приоритету: выбранная клетка > взятие >
+    // ход/подсветка > обычный цвет доски. Для каждого случая берёт свой оттенок для
+    // светлой и тёмной клетки, затем уведомляет интерфейс.
     private void RefreshSquareBackground()
     {
         var isLight = IsWhiteSquare;
@@ -148,6 +171,8 @@ public class BoardCellViewModel : ViewModelBase
         OnPropertyChanged(nameof(SquareBackground));
     }
 
+    // Превращает фигуру в её шахматный символ (♙♘♗♖♕♔ для белых, ♟♞♝♜♛♚ для чёрных).
+    // Если фигуры нет — пустая строка.
     private static string GetPieceSymbol(Piece? piece)
     {
         if (piece is null)

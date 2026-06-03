@@ -1,5 +1,8 @@
 namespace SigmaChess.Engine;
 
+// Возможные состояния партии, которые возвращает GetGameResult:
+// Ongoing — игра идёт; Check — шах; Checkmate — мат; Stalemate — пат;
+// и три вида ничьей: правило 50 ходов, троекратное повторение, недостаток материала.
 public enum GameResult
 {
 
@@ -18,15 +21,24 @@ public enum GameResult
     DrawInsufficientMaterial,
 }
 
+// Класс правил игры. Отвечает на главные вопросы: какие ходы реально легальны (с
+// учётом шаха), стоит ли король под шахом, и чем закончилась партия (мат/пат/ничья).
+// Сам доску не меняет — только смотрит и считает на копиях. Использует MoveGenerator
+// для «сырых» ходов, а потом отсеивает плохие. Создаётся в GameController.
 public class GameRules
 {
     private readonly MoveGenerator _moveGenerator;
 
+    // Конструктор: получает генератор ходов, которым будет пользоваться.
     public GameRules(MoveGenerator moveGenerator)
     {
         _moveGenerator = moveGenerator;
     }
 
+    // Возвращает все легальные ходы одной фигуры с клетки from. Берёт псевдо-легальные
+    // ходы из MoveGenerator, отсеивает те, после которых свой король под шахом
+    // (IsMoveLegal), а для короля добавляет рокировки. Это то, что подсвечивается в
+    // интерфейсе при выборе фигуры.
     public IReadOnlyList<Move> GetLegalMovesFrom(Board board, Position from, Game game)
     {
         var piece = board.GetPiece(from);
@@ -52,6 +64,9 @@ public class GameRules
         return legal;
     }
 
+    // Возвращает все легальные ходы целой стороны (всех её фигур на доске). Проходит
+    // по всем 64 клеткам, для своих фигур берёт легальные ходы и добавляет рокировки.
+    // Нужно, чтобы понять, есть ли вообще ходы (мат/пат), и для записи нотации.
     public List<Move> GetAllLegalMoves(Board board, PieceColor side, Game game)
     {
         var result = new List<Move>();
@@ -80,6 +95,8 @@ public class GameRules
         return result;
     }
 
+    // Проверяет, стоит ли король указанного цвета под шахом: находит короля и
+    // спрашивает, бьётся ли его клетка фигурами соперника.
     public bool IsKingInCheck(Board board, PieceColor color)
     {
         var king = FindKing(board, color);
@@ -93,6 +110,9 @@ public class GameRules
         return IsSquareAttacked(board, king.Value, attacker);
     }
 
+    // Ключевая проверка легальности хода. Делает копию доски, проигрывает на ней ход
+    // и смотрит: остался ли свой король под шахом. Если да — ход нелегален. Так
+    // отсеиваются ходы, которые «подставляют» короля. Реальную доску не трогает.
     public bool IsMoveLegal(Board board, Move move, Position? epTarget)
     {
         var moving = board.GetPiece(move.From);
@@ -106,6 +126,10 @@ public class GameRules
         return !IsKingInCheck(clone, moving.Color);
     }
 
+    // Определяет текущее состояние партии для стороны side. Логика по шагам: если у
+    // стороны нет легальных ходов — это мат (под шахом) или пат (не под шахом). Иначе
+    // проверяет ничьи: 50 ходов без событий, троекратное повторение позиции,
+    // недостаток материала. Если ничего из этого — Check (если шах) или Ongoing.
     public GameResult GetGameResult(Board board, PieceColor side, Game game)
     {
         var legal = GetAllLegalMoves(board, side, game);
@@ -137,6 +161,10 @@ public class GameRules
         return inCheck ? GameResult.Check : GameResult.Ongoing;
     }
 
+    // Считает доступные рокировки для стороны. Проверяет всё, что требуют правила:
+    // король и нужная ладья на местах, между ними пусто, есть права на рокировку
+    // (флаги в Game), король сейчас не под шахом и не проходит через битые поля.
+    // Ход рокировки кодируется как ход короля на 2 клетки.
     private List<Move> GetCastlingMovesFor(Board board, PieceColor color, Game game)
     {
         var moves = new List<Move>();
@@ -183,9 +211,14 @@ public class GameRules
         return moves;
     }
 
+    // Помощник: проверяет, что на клетке pos стоит ладья нужного цвета (нужно для
+    // рокировки).
     private static bool IsRookAt(Board board, Position pos, PieceColor color) =>
         board.GetPiece(pos) is { Type: PieceType.Rook } r && r.Color == color;
 
+    // Помощник для рокировки: ставит короля на клетку kingTo (на копии доски) и
+    // проверяет, не будет ли он там под боем. Так проверяется, что король не проходит
+    // через атакованное поле.
     private bool KingSquareAttackedAfterMove(Board board, PieceColor color, Position kingFrom, Position kingTo)
     {
         var clone = CloneBoard(board);
@@ -196,6 +229,10 @@ public class GameRules
         return IsSquareAttacked(clone, kingTo, enemy);
     }
 
+    // Проверяет, бьётся ли клетка square фигурами стороны byAttacker. Сначала
+    // отдельно смотрит пешечные взятия (пешки бьют не так, как ходят), затем перебирает
+    // все остальные фигуры соперника и спрашивает у MoveGenerator, может ли какая-то
+    // из них пойти на эту клетку. Основа для определения шаха.
     private bool IsSquareAttacked(Board board, Position square, PieceColor byAttacker)
     {
 
@@ -235,6 +272,10 @@ public class GameRules
         return false;
     }
 
+    // Проверяет ничью из-за недостатка материала (заматовать невозможно). Если есть
+    // хоть пешка/ладья/ферзь — материала достаточно, не ничья. Иначе считает лёгкие
+    // фигуры: голые короли, король с одним слоном или конём, или два короля с двумя
+    // слонами на полях одного цвета — это ничья.
     private static bool IsInsufficientMaterial(Board board)
     {
         var whiteMinors = new List<(PieceType T, int SquareColor)>();
@@ -279,6 +320,8 @@ public class GameRules
         return false;
     }
 
+    // Делает полную копию доски (новый Board с теми же фигурами). Нужно для пробных
+    // ходов: на копии можно проиграть ход и проверить шах, не портя реальную партию.
     private static Board CloneBoard(Board source)
     {
         var board = new Board();
@@ -298,6 +341,8 @@ public class GameRules
         return board;
     }
 
+    // Ищет на доске короля нужного цвета и возвращает его клетку (или null, если не
+    // найден). Используется при проверке шаха.
     private static Position? FindKing(Board board, PieceColor color)
     {
         for (var r = 0; r < 8; r++)
