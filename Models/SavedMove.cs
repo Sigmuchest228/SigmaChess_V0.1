@@ -2,6 +2,12 @@ using Newtonsoft.Json;
 
 namespace SigmaChess.Models;
 
+// Модель одного хода так, как он сохраняется в Firebase. Хранит начальную и конечную
+// клетки в виде строк (FromPos, ToPos, например «e2» и «e4»), номер хода (MoveNumber),
+// id сходившего игрока (User), сколько секунд занял ход (TimePerMove) и пометку мата
+// (IsCheckmate). Заметь: тип превращения пешки тут не хранится — он восстанавливается
+// при реплее перебором (GameReplayMoveResolver). Атрибуты [JsonProperty] задают имена
+// полей в базе.
 public class SavedMove
 {
     [JsonProperty("FromPos")]

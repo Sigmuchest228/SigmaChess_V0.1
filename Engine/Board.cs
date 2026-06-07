@@ -1,5 +1,5 @@
 namespace SigmaChess.Engine;
-
+// ClearAllPieces — обнуляет все клетки на доске.
 // Класс который хранит шахматную доску. Это «память» доски: что и где стоит. Правил
 // игры тут нет, они в Game и GameRules. Используется так: Game создаёт Board,
 // GameController отдаёт её наружу, интерфейс читает клетки через контроллер.
@@ -7,18 +7,15 @@ namespace SigmaChess.Engine;
 // Initialize — стартовая позиция. GetPiece и SetPiece — чтение и запись по Position
 // с проверкой границ. MovePiece — перенос фигуры с From на To без правил.
 // IsInsideBoard и EnsureInsideBoard — проверка, что клетка внутри доски.
-// SetupPawns и SetupBackRank — помощники для расстановки. ClearAllPieces — обнулить
-// все клетки.
+// SetupPawns и SetupBackRank — помощники для расстановки.
 public class Board
 {
 
     // Сама доска: массив 8x8. В каждой ячейке либо фигура Piece, либо null (пусто).
     public Piece?[,] Squares { get; } = new Piece?[8, 8];
 
-    // Функция которая создаёт стартовую позицию. Сначала чистит все клетки в null,
-    // потом ставит чёрных: ряд 0 фигуры, ряд 1 пешки; и белых: ряд 6 пешки, ряд 7
-    // фигуры. Вызывается из конструктора Game при новой партии.
-    public void Initialize()
+  // Очищает всю доску — ставит null во все 64 клетки.
+    public void ClearAllPieces()
     {
         for (var row = 0; row < 8; row++)
         {
@@ -27,7 +24,15 @@ public class Board
                 Squares[row, col] = null;
             }
         }
+    }
 
+    // Функция которая создаёт стартовую позицию. Сначала чистит все клетки в null,
+    // потом ставит чёрных: ряд 0 фигуры, ряд 1 пешки; и белых: ряд 6 пешки, ряд 7
+    // фигуры. Вызывается из конструктора Game при новой партии.
+    public void Initialize()
+    {
+        ClearAllPieces();
+        
         SetupBackRank(0, PieceColor.Black);
         SetupPawns(1, PieceColor.Black);
 
@@ -103,19 +108,7 @@ public class Board
         Squares[row, 7] = new Piece(PieceType.Rook, color);
     }
 
-    // Очищает всю доску — ставит null во все 64 клетки.
-    public void ClearAllPieces()
-    {
-        for (var row = 0; row < 8; row++)
-        {
-            for (var col = 0; col < 8; col++)
-            {
-                Squares[row, col] = null;
-            }
-        }
-    }
-
-    // Внутренняя проверка границ: если клетка вне доски — бросает исключение.
+      // Внутренняя проверка границ: если клетка вне доски — бросает исключение.
     // Защищает GetPiece/SetPiece/MovePiece от обращения за пределы массива.
     private void EnsureInsideBoard(Position position)
     {

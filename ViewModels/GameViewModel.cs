@@ -249,9 +249,10 @@ public class GameViewModel : ViewModelBase
         DeviceDisplay.MainDisplayInfoChanged += OnDisplayInfoChanged;
     }
 
-    // Однократная инициализация экрана: считает размер доски, создаёт клетки, и если
-    // партия уже идёт (есть ходы) — восстанавливает таблицу ходов и часы. Повторные
-    // вызовы только обновляют размер доски.
+    // Однократная инициализация экрана: считает размер доски и создаёт 64 клетки.
+    // Повторные вызовы только обновляют размер доски. Партия здесь не восстанавливается
+    // — при каждом новом заходе на экран сначала показывается попап настройки (см.
+    // ShouldOfferTimeSetupOnAppear и PrepareForSetupPopup).
     public Task EnsureInitializedAsync()
     {
         if (_isInitialized)
@@ -263,18 +264,6 @@ public class GameViewModel : ViewModelBase
 
         UpdateBoardExtent();
         EnsureCellsCreated();
-
-        if (_controller.GetPlayedMoves().Count > 0)
-        {
-            NeedsInitialTimePopup = false;
-            _replayPliesApplied = _controller.GetPlayedMoves().Count;
-            RebuildMoveRowsFromHistory();
-            WhiteClockText = _unlimitedTime ? "—" : FormatClock(_whiteRemaining);
-            BlackClockText = _unlimitedTime ? "—" : FormatClock(_blackRemaining);
-            OnPropertyChanged(nameof(WhiteClockText));
-            OnPropertyChanged(nameof(BlackClockText));
-            RestartClockForCurrentGame();
-        }
 
         _isInitialized = true;
         return Task.CompletedTask;
@@ -317,13 +306,24 @@ public class GameViewModel : ViewModelBase
         });
     }
 
-    // Нужно ли при открытии экрана предложить настроить время: да, если партия ещё не
-    // начата и попап настройки ещё не показывали.
-    public bool ShouldOfferTimeSetupOnAppear() =>
-        _controller.GetPlayedMoves().Count == 0 && NeedsInitialTimePopup;
+    // Нужно ли при открытии экрана показать попап настройки новой партии. Да, пока
+    // NeedsInitialTimePopup = true (после ухода на главный экран или первого захода).
+    // После подтверждения настройки флаг сбрасывается — при повторном OnAppearing в той
+    // же сессии игры попап не мешает. Число ходов не проверяем: состояние не
+    // восстанавливается после выхода.
+    public bool ShouldOfferTimeSetupOnAppear() => NeedsInitialTimePopup;
 
-    // Полный сброс состояния при возврате на главный экран: новая партия, обычная
-    // раскладка, время по умолчанию (без лимита, 5 минут), обновление интерфейса.
+    // Сбрасывает движок и UI партии перед попапом настройки, чтобы на доске не осталось
+    // ходов от прошлой сессии. Флаг NeedsInitialTimePopup и настройки времени не трогает.
+    public void PrepareForSetupPopup()
+    {
+        InternalResetGameState();
+        RefreshBoard();
+    }
+
+    // Полный сброс при возврате на главный экран: партия не сохраняется между заходами.
+    // Обнуляет движок, ставит NeedsInitialTimePopup = true (при следующем открытии
+    // GamePage снова будет попап настройки), сбрасывает раскладку и время по умолчанию.
     private void ResetGameStateWhenNavigatingHome()
     {
         InternalResetGameState();

@@ -8,6 +8,12 @@ namespace SigmaChess.Services;
 
 #region Алгебраическая нотация полей и короткая запись хода
 
+// Помощник для шахматной нотации. ToSquare превращает координату Position в строку
+// вида «e4», TryParseSquare делает обратное (разбирает «e4» в Position). Главное —
+// MoveToShortNotation: строит короткую запись хода (SAN), например «Nf3», «exd5», «O-O»,
+// «e8=Q», добавляя «+» при шахе и «#» при мате. Для этого проигрывает партию заново до
+// нужного хода через движок, чтобы понять контекст (взятие, рокировка, неоднозначность
+// фигур, превращение). Если что-то не сходится — откатывается к простой записи «e2-e4».
 public static class AlgebraicNotation
 {
     public static string ToSquare(SigmaChess.Engine.Position pos) =>
@@ -224,6 +230,10 @@ public static class AlgebraicNotation
 
 #region Цвета и подписи исхода партии
 
+// Помощник для отображения исхода партии. NormalizeWinner приводит строку победителя к
+// одному из значений White/Black/Draw (или пусто). Остальные методы по этому значению
+// дают цвет текста и подписи для разных мест интерфейса: заголовок в списке партий и
+// подпись на экране повтора.
 public static class ChessOutcomePalette
 {
     public static string NormalizeWinner(string? winner)
@@ -283,6 +293,12 @@ public static class ChessOutcomePalette
 
 #region Разбор цепочки ходов реплея из записей Firebase
 
+// Восстанавливает список ходов движка из сохранённых записей (SavedMove хранит только
+// поля «откуда» и «куда», без типа превращения). TryResolve перебором с возвратом (DFS)
+// подбирает для каждой записи легальный ход с нужными координатами, проигрывая партию
+// заново через движок. Когда есть неоднозначность (например, превращение пешки),
+// OrderCandidates задаёт порядок проверки: сначала обычные ходы, затем превращения в
+// ферзя, ладью, слона, коня. Нужен для корректного повтора партии.
 public static class GameReplayMoveResolver
 {
     public static bool TryResolve(IReadOnlyList<SavedMove> orderedMoves, out List<Move> resolved)

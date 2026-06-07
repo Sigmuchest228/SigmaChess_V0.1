@@ -2,6 +2,10 @@ using Newtonsoft.Json;
 
 namespace SigmaChess.Models;
 
+// Модель завершённой партии в Firebase. Хранит id игроков белыми и чёрными (WhiteUid,
+// BlackUid), победителя (Winner), причину окончания (EndReason), дату (DateTime) и все
+// ходы партии (Moves — словарь, ключ задаёт порядок хода). По этим данным строится
+// просмотр партии (реплей). Атрибуты [JsonProperty] задают имена полей в базе.
 public class SavedGame
 {
     [JsonProperty("WhiteUid")]

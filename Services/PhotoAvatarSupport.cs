@@ -6,11 +6,15 @@ namespace SigmaChess.Services;
 
 #region Интерфейс и результат выбора (Gallery / Camera)
 
+// Интерфейс для выбора источника фото. Спрашивает у пользователя, откуда брать
+// картинку, и возвращает его решение. Вынесен в интерфейс, чтобы при необходимости
+// подменять реализацию (например, в тестах).
 public interface IPhotoSourcePicker
 {
     Task<PickPhotoSource> PickSourceAsync(CancellationToken cancellationToken = default);
 }
 
+// Что выбрал пользователь в окне выбора источника фото: отмена, галерея или камера.
 public enum PickPhotoSource
 {
     Cancel,
@@ -18,6 +22,8 @@ public enum PickPhotoSource
     Camera,
 }
 
+// Реальная реализация выбора источника: показывает всплывающее окно и возвращает выбор
+// пользователя.
 public class PhotoSourcePicker : IPhotoSourcePicker
 {
     public Task<PickPhotoSource> PickSourceAsync(CancellationToken cancellationToken = default) =>
@@ -28,6 +34,11 @@ public class PhotoSourcePicker : IPhotoSourcePicker
 
 #region Разрешения и открытие потока фото
 
+// Сервис работы с фото на уровне устройства. Запрашивает разрешения (доступ к фото и
+// камере) и открывает поток выбранного/снятого изображения. TryOpenGalleryPhotoAsync
+// берёт фото из галереи, TryOpenCameraPhotoAsync делает снимок камерой. Учитывает
+// различия платформ (отдельные ветки для Windows), а при отказе в доступе или
+// отсутствии камеры показывает понятное сообщение.
 public static class PhotoMediaService
 {
     public static Task<bool> EnsurePhotosPermissionAsync() =>
@@ -187,6 +198,10 @@ public static class PhotoMediaService
 
 #region Локальный аватар на устройстве (Preferences + AppData)
 
+// Локальное хранилище аватара пользователя на самом устройстве. Путь к файлу аватара
+// хранится в Preferences (по ключу с id пользователя), а сам файл — в папке данных
+// приложения. Умеет сохранить новый аватар из потока (с удалением старого файла),
+// прочитать путь и очистить его.
 public static class UserAvatarLocalStore
 {
     private static string KeyForUser(string userId) => $"AvatarLocalPath_{userId}";
@@ -263,6 +278,9 @@ public static class UserAvatarLocalStore
 
 #region Превью аватара (локальный файл → дефолт)
 
+// Даёт картинку аватара для показа в интерфейсе. Сначала пробует локально сохранённый
+// файл пользователя (через UserAvatarLocalStore), проверяя, что файл действительно
+// существует; если файла нет — возвращает изображение по умолчанию (defaultsigma.jpg).
 public static class UserAvatarPreview
 {
     public static Task<ImageSource> LoadAsync(string? userId,

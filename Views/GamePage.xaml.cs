@@ -29,8 +29,10 @@ public partial class GamePage : ContentPage
 
         await vm.EnsureInitializedAsync();
 
+        // Новый заход на экран: попап настройки, без восстановления старой партии.
         if (vm.ShouldOfferTimeSetupOnAppear())
         {
+            vm.PrepareForSetupPopup();
             var popup = new NewGameSetupPopup();
             await this.ShowPopupAsync(popup);
             var result = await popup.WaitForResultAsync();

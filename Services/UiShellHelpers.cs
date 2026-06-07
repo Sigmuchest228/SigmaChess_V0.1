@@ -10,6 +10,8 @@ namespace SigmaChess.Services;
 
 #region BoardLayoutService
 
+// Режим раскладки игровой страницы: колонка ходов сбоку, полоска ходов снизу
+// (обычная игра) или режим «лицом к лицу» (двое за одним устройством).
 public enum GamePageBoardExtentMode
 {
 
@@ -20,6 +22,11 @@ public enum GamePageBoardExtentMode
     FaceToFace,
 }
 
+// Сервис, который считает размер (сторону) шахматной доски под конкретный экран.
+// Берёт размеры экрана и плотность пикселей, вычитает поля, координатную полоску и
+// зарезервированное место под другие элементы, и возвращает сторону доски, ограниченную
+// разумным минимумом и максимумом. CalculateBoardExtentForGamePage учитывает выбранный
+// режим раскладки игровой страницы.
 public class BoardLayoutService
 {
 
@@ -84,6 +91,7 @@ public class BoardLayoutService
 
 #region BottomNavigationCoordinator
 
+// Раздел нижнего меню, который сейчас активен: ничего, «Домой» или «Уважение».
 public enum BottomNavSection
 {
     None,
@@ -91,6 +99,11 @@ public enum BottomNavSection
     Respect,
 }
 
+// Координатор нижней панели навигации. Хранит команды переходов (Домой, Уважение,
+// Настройки) и отслеживает, какой раздел сейчас выбран, чтобы интерфейс подсвечивал
+// активную кнопку. SyncFromShell определяет раздел по текущей странице оболочки.
+// Переходы в защищённые разделы сначала проверяют, что пользователь вошёл в аккаунт;
+// уход с игровой страницы домой требует подтверждения через GameViewModel.
 public class BottomNavigationCoordinator : INotifyPropertyChanged
 {
     private readonly GameViewModel _game;
