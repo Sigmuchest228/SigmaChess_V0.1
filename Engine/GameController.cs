@@ -166,22 +166,6 @@ public class GameController
         return true;
     }
 
-    // Упрощённая обработка клика «в один метод»: если клик завершает обычный ход (без
-    // превращения) — делает его; иначе трактует клик как выбор фигуры. Превращение
-    // тут не обрабатывается, потому что для него интерфейсу нужно спросить игрока,
-    // в кого превращать.
-    public void HandleCellClick(int row, int col)
-    {
-        var pending = GetPendingMove(row, col);
-        if (pending is not null && pending.Promotion is null)
-        {
-            ExecutePlannedMove(pending);
-            return;
-        }
-
-        HandleSelection(row, col);
-    }
-
     // Сбрасывает текущий выбор фигуры (публичная обёртка для интерфейса).
     public void ClearMoveSelection() => ClearSelection();
 
